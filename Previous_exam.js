@@ -8,7 +8,7 @@ function hideButtons() {
     console.log("문항 유형:", type);
 
 
-    if(school == "select" ||count == "select" ||type == "select")
+    if(school == "select" || count == "select" || type == "select")
     {
         alert("모든 항목을 선택해주세요.");s
     }
