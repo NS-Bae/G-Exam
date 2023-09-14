@@ -10,7 +10,36 @@ function hideButtons() {
 
     if(school == "select" || count == "select" || type == "select")
     {
-        alert("모든 항목을 선택해주세요.");s
+        alert("모든 항목을 선택해주세요.");
+    }
+    else if(school != "select" && count != "select" && type == "essay_question")
+    {
+        var sel_pro = document.querySelector(".select_problem");
+        sel_pro.style.display = "none";
+        var sector = document.querySelector(".container");
+        sector.style.display = "flex";
+        var multi = document.querySelector(".half_2");
+        multi.style.display = "none";
+        var essay = document.querySelector(".half_3");
+        essay.style.display = "flex";
+        var move_btn = document.querySelector(".pre_ne_space");
+        move_btn.style.display = "flex";
+        event.preventDefault();
+        
+    }   else if(school != "select" && count != "select" && type == "multiple_choice")
+    {
+        var sel_pro = document.querySelector(".select_problem");
+        sel_pro.style.display = "none";
+        var sector = document.querySelector(".container");
+        sector.style.display = "flex";
+        var multi = document.querySelector(".half_2");
+        multi.style.display = "flex";
+        var essay = document.querySelector(".half_3");
+        essay.style.display = "none";
+        var move_btn = document.querySelector(".pre_ne_space");
+        move_btn.style.display = "flex";
+        event.preventDefault();
+        
     }
     else
     {
@@ -47,6 +76,12 @@ function adjustFontSize() {
         cell.style.fontSize = fontSize + 'vh';
     });
 }
+
+function adjustTextareaHeight(textarea) {
+    textarea.style.height = "auto";
+    textarea.style.height = (textarea.scrollHeight) + "px";
+}
+
 window.onload = adjustFontSize;
 /*모바일인지 아니지 판독하기 */
 var userAgent = navigator.userAgent;

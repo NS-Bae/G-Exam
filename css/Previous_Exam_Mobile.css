@@ -44,12 +44,8 @@
     display : none;
     align-items: center;
     justify-content: space-around;
-    margin-top: 20px;
+    margin-top: 0;
     height: 50px;
-    /* @media screen and (min-height:700px)
-    {
-        margin-top: 45px;
-    } */
   }
   .move_btn
   {
@@ -127,7 +123,7 @@
     display: none;
     flex-direction: column;
     width: 100%;
-    height: 90%; /* 화면 전체 높이를 사용 */
+    height: 85%; /* 화면 전체 높이를 사용 */
 }
 .half {
     flex: 1; /* 반반으로 나뉘도록 유연한 크기 지정 */
@@ -141,6 +137,11 @@
     align-items: left;
     flex-direction: column;
 }
+h3{
+  margin-bottom: 5px;
+  font-size: 10px;
+  font-weight: normal;
+}
 .half img {
   max-height: 95%;
   width: auto;
@@ -149,26 +150,27 @@
   justify-content: center;
   align-items: center;
 }
+/*객관식*/
 .half_2 {
-  flex: 1; /* 반반으로 나뉘도록 유연한 크기 지정 */
+  flex: 1;
   border: 1px solid #ccc;
   border-top: 0;
   border-bottom: 0;
-  padding: 5px; /* 내용과 경계선 사이의 간격 설정 */
-  height: 40%;
+  padding: 0;
+  height: 35%;
+  width: 100%;
   display: flex;
-  justify-content: left;
-  align-items: center;
-}
-h3{
-  margin-bottom: 5px;
-  font-size: 10px;
-  font-weight: normal;
 }
 .choice
 {
+  display: flex;
   margin-left: 10px;
   font-size: 1rem;
+  flex-direction: column;
+}
+.radio-option {
+  display: flex;
+  align-items: center; 
 }
 h4
 {
@@ -178,7 +180,42 @@ h4
 }
 .choice label, input
 {
-  font-size: 1rem;
+  font-size: 0.8rem;
   margin-top: 5px;
   margin-bottom: 5px;
 }
+/*주관식*/
+.half_3 {
+  flex: 1; /* 반반으로 나뉘도록 유연한 크기 지정 */
+  border: 1px solid #ccc;
+  border-top: 0;
+  border-bottom: 0;
+  padding: 5px; /* 내용과 경계선 사이의 간격 설정 */
+  height: 40%;
+  width: 100%;
+  display: flex;/* 
+  justify-content: left;
+  align-items: center;
+  text-align: center; */
+}
+.essay_answer
+{
+  width: 100%;
+  height: 80%;
+  justify-content: center;
+  flex-direction: column;
+  align-items: center;
+}
+.essay_answer textarea
+{
+  width: 100%;
+  font-size: 2.5vh;
+  font-weight: bold;
+  height : 100%;
+  resize: none;
+  overflow: auto;
+  text-align: center;
+  align-items: center;
+  vertical-align: middle;
+}
+
