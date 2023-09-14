@@ -1,0 +1,159 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: "Noto Sans KR", sans-serif;
+  }
+  
+  a {
+    text-decoration: none;
+    color: black;
+    font-size: 16px;
+  }
+  
+  li {
+    list-style: none;
+  }
+  
+  .wrap {
+    width: 100%;
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.1);
+  }
+  
+  .login {
+    width: 60%;
+    height: 90vh;
+    background: white;
+    border-radius: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    @media screen and (max-width:420px)
+    {
+        width : 90%;
+    }
+    @media screen and (max-height:700px)
+    {
+      height: 100vh;
+    }
+  }
+  
+  h2 {
+    color: tomato;
+    font-size: 2em;
+    cursor : pointer;
+  }
+  h3
+  {
+    font-weight: 500;
+    margin-top: 10px;
+    margin-bottom: 10px;
+    font-size: 0.8em;
+    @media screen and (max-height:715px)
+    {
+      margin-top: 5px;
+      margin-bottom: 5px;
+    }
+  }
+  h4
+  {
+    font-size: 0.8em;
+  }
+  h5
+  {
+    font-size: 0.55em;
+  }
+
+  .select_position
+  {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding-bottom: 5px;
+  }
+  .select_position > form > select
+  {
+    display: inline-flex;
+    align-items: center;
+    border-radius: 20px;
+    border: 0;
+    outline: 0;
+  }
+  .select_position > form > input
+  {
+    display: inline-flex;
+    align-items: center;
+    border-radius: 0;
+    border: 0;
+    background-color: rgb(255, 255, 255);
+  }
+  
+  .login_id {/* 
+    display: flex;
+    flex-direction: row; */
+    margin-top: 10px;
+    width: 100%;
+  }
+  
+  .login_id input {
+    width: 100%;
+    height: 30px;
+    border-radius: 30px;
+    margin-top: 5px;
+    padding: 0px 20px;
+    border: 1px solid lightgray;
+    outline: none;
+    font-size: 0.8em;
+  }
+  
+  .login_pw {/* 
+    display: flex;
+    flex-direction: row; */
+    margin-top: 10px;
+    width:100%;
+  }
+  
+  .login_pw input {
+    width: 100%;
+    height: 30px;
+    border-radius: 30px;
+    margin-top: 5px;
+    padding: 0px 20px;
+    border: 1px solid lightgray;
+    outline: none;
+    font-size: 0.8em;
+  }
+  
+  .submit {
+    margin-top: 50px;
+    width: 100%;
+    align-items: center;
+    @media screen and (max-height:770px)
+    {
+        margin-top: 10px;
+    }
+  }
+  .submit input {
+    width: 100%;
+    height: 50px;
+    border: 0;
+    outline: none;
+    border-radius: 40px;
+    background: linear-gradient(to left, rgb(255, 77, 46), rgb(255, 155, 47));
+    color: white;
+    font-size: 1.2em;
+    letter-spacing: 2px;
+    cursor : pointer;
+  }
+  .infoInp
+  {
+    width: 80%;
+    display: none;
+    align-items: center;
+  }

@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="ko">
+    <head>
+        <meta charset = "UTF-8">
+        <meta http-equiv = "X-UA-Compatible" content = "IE=edge">
+        <meta name = "viewport" content="width = device-width, initial-scale = 1.0">
+        <title>G-PLAN에 어서오세요!!!</title>
+    </head>
+    <body>
+        <div class="wrap">
+            <div class="test_wrap">
+                <h2 onclick="location.href = 'Main_page.html'">G-PLAN</h2>
+                <form action="#" REQUIRED>
+                    <div class="select_problem">
+                        <div class="section">
+                            <h5>학교 : <br></h5>
+                            <select name="school" id="school" required >
+                                <option value="select">선택하세요</option>
+                                <option value="s1">충주중</option>
+                                <option value="s2">미덕중</option>
+                                <option value="s3">충일중</option>
+                                <option value="s4">예성여중</option>
+                                <option value="s5">충주여중</option>
+                                <option value="total">전체</option>
+                            </select>
+                        </div>
+                        <div class="section">
+                            <h5>문항 수 : <br></h5>
+                            <select name="count" id="count" required >
+                                <option value="select">선택하세요</option>
+                                <option value="10">10</option>
+                                <option value="20">20</option>
+                                <option value="30">30</option>
+                                <option value="40">40</option>
+                                <option value="50">50</option>
+                            </select>
+                        </div>
+                        <div class="section">
+                            <h5>문항 유형 : <br></h5>
+                            <select name="type" id="type" required >
+                                <option value="select">선택하세요</option>
+                                <option value="multiple_choice">객관식</option>
+                                <option value="essay_question">주관식</option>
+                            </select>
+                        </div>
+                        <input type="submit" value="시험 시작" onclick="hideButtons()">
+                    </div>
+                </form>
+                <div class="container">
+                    <div class="half">
+                        <h3>더미문제</h3>
+                        <img src="css\테스트_수학.png">
+                    </div>
+                    <div class="half_2">
+                        <div class="choice">
+                            <h4>다음 중 옳은것은?</h4>
+                            <input type="radio" id="answer1" name="answer" value="lion">
+                            <label for="answer1">372</label><br>
+                            <input type="radio" id="answer2" name="answer" value="elephant">
+                            <label for="answer2">377</label><br>
+                            <input type="radio" id="answer3" name="answer" value="giraffe">
+                            <label for="answer3">382</label><br>
+                            <input type="radio" id="answer4" name="answer" value="giraffe">
+                            <label for="answer3">387</label><br>
+                            <input type="radio" id="answer5" name="answer" value="giraffe">
+                            <label for="answer3">392</label><br>
+                        </div>
+                    </div>
+                </div>
+                <div class="pre_ne_space">
+                    <button class="move_btn" id="prev" onclick="go_Prev()">이전</button>
+                    <button class="move_btn" id="next" onclick="go_Next()">다음</button>
+                </div>
+            </div>
+        </div>
+        <script src="Previous_exam.js"></script>
+    </body>
+</html>
