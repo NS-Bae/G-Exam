@@ -24,22 +24,14 @@
   }
   
   .inside_wrap {
-    width: 60%;
-    height: 90vh;
+    width: 90%;
+    height: 95%;
     background: white;
     border-radius: 20px;
     display: flex;
     justify-content: center;
     align-items: center;
     flex-direction: column;
-    @media screen and (max-width:420px)
-    {
-        width : 90%;
-    }
-    @media screen and (max-height:525px)
-    {
-      height: 100vh;
-    }
   }
   
   h2 {
