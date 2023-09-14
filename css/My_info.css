@@ -24,7 +24,7 @@
   }
   
   .info_sheet {
-    width: 60%;
+    width: 70%;
     height: 90vh;
     background: white;
     border-radius: 20px;
@@ -116,9 +116,9 @@
   .btn_section
   {
     display: flex;
+    width: 100%;
     flex-direction: row;
     justify-content: space-between;
-    width: 80%;
     margin-top: 15px;
     @media screen and (max-width:670px)
     {

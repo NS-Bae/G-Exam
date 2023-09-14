@@ -11,8 +11,61 @@
         <div class="wrap">
             <div class="inside_wrap">
                 <h2 onclick="location.href = 'Main_page.html'">G-PLAN</h2>
-                
+                <div class="basic_info">
+                    <div class="insert_tag">
+                        <h3>학교</h3>
+                        <input type="text" name="" id="school" placeholder="학교">
+                    </div>
+                    <div class="insert_tag">
+                        <h3>학년</h3>
+                        <input type="text" name="" id="grade" placeholder="학년">
+                    </div>
+                    <div class="insert_tag">
+                        <h3>과목</h3>
+                        <input type="text" name="" id="major" placeholder="과목">
+                    </div>
+                    <div class="insert_tag">
+                        <h3>문제유형</h3>
+                        <input type="text" name="" id="q_type" placeholder="주관식/객관식">
+                    </div>
+                </div>
+                <div class="question_sub">
+                    <div class="paragraph_area">
+                        <h4>지문</h4>
+                        <textarea type="text" name="" id="paragraph" placeholder="지문"></textarea>
+                    </div>
+                    <div class="question_area">
+                        <div class="question_line">
+                            <h4>질문</h4>
+                            <textarea type="text" name="" id="question" placeholder="질문"></textarea>
+                        </div>
+                        <div class="choice">
+                            <h4>선택지1</h4>
+                            <textarea type="text" name="" id="choice1" placeholder="선택지1"></textarea>
+                        </div>
+                        <div class="choice">
+                            <h4>선택지2</h4>
+                            <textarea type="text" name="" id="choice2" placeholder="선택지2"></textarea>
+                        </div>
+                        <div class="choice">
+                            <h4>선택지3</h4>
+                            <textarea type="text" name="" id="choice3" placeholder="선택지3"></textarea>
+                        </div>
+                        <div class="choice">
+                            <h4>선택지4</h4>
+                            <textarea type="text" name="" id="choice4" placeholder="선택지4"></textarea>
+                        </div>
+                        <div class="choice">
+                            <h4>선택지5</h4>
+                            <textarea type="text" name="" id="choice5" placeholder="선택지5"></textarea>
+                        </div>
+                    </div>
+                </div>
+                <div class="submit" onclick="alert('문제를 등록 완료하였습니다.')" >
+                    <input type="submit" value="등록하기" onclick = "refresh_box()">
+                </div>
             </div>
         </div>
+        <script src="Register_test.js"></script>
     </body>
 </html>
