@@ -148,6 +148,7 @@
     font-size: 1em;
     font-weight: bold;
     cursor: pointer;
+    padding-bottom: 15px;
   }
   .exam_register:hover
   {

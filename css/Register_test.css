@@ -20,6 +20,11 @@
     justify-content: center;
     background: rgba(0, 0, 0, 0.1);
   }
+  h2 {
+    color: tomato;
+    font-size: 2em;
+    cursor : pointer;
+  }
   .inside_wrap {
     width: 98%;
     height: 95%;
@@ -30,13 +35,44 @@
     align-items: center;
     flex-direction: column;
   }
-  h2 {
-    color: tomato;
-    font-size: 2em;
-    cursor : pointer;
+
+  /*문제관리/등록 선택버튼*/
+
+  .btn_space
+  {
+    display: flex;
+    width: 80%;
+    height: auto;
+    justify-content: space-around;
+    margin-top: 20%;
+  }
+  .check_btn
+  {
+    width: 40%;
+    background-color: white;
+    border: 0;
+    font-size: 1.3rem;
+    font-weight: bold;
+  }
+  .check_btn:hover
+  {
+    color: #ffa600;
+    border-radius: 10px;
+    background-color: wheat;
+    cursor: pointer;
   }
 
   /*문제 기본정보 입력 폼*/
+  .inside_wrap1 {
+    width: 98%;
+    height: 95%;
+    background: white;
+    border-radius: 20px;
+    display: none;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+  }
   .basic_info
   {
     width: 100%;
@@ -153,4 +189,96 @@
   {
     background-color: wheat;
     cursor: pointer;
+  }
+
+  /*등록된 문제들 조회하기.*/
+  .inside_wrap2 
+  {
+    width: 98%;
+    height: 95%;
+    background: white;
+    border-radius: 20px;
+    display: none;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+  }
+  .inside_wrap2 > form
+  {
+    width: 100%;
+    height : 10%;
+  }
+  .basic_info2
+  {
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+    margin-top: 10px;
+    margin-bottom: 10px;
+  }
+  .sel_option
+  {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    white-space: pre;
+    margin: 5px;
+  }
+  .sel_option > select
+  {
+    width: 100%;
+    border-radius: 10px;
+    border: 0;
+  }
+  .basic_info2 > input
+  {
+    display: flex;
+    align-items: center;
+    border-radius: 10px;
+    border: 0;
+    background-color: rgb(255, 255, 255);
+    font-size: 1.4rem;
+    font-weight: bold;
+    color: #ffa600;
+  }
+  .basic_info2 > input:hover
+  {
+    color: #000000;
+    background-color: wheat;
+    cursor: pointer;
+  }
+  .question_list
+  {
+    width: 90%;
+    max-height: 40%;
+  }
+  h1
+  {
+    font-size: 1.4rem;
+    text-align: start;
+  }
+
+  /*삭제 수정 버튼*/
+  .choice_situation
+  {
+    width: 100%;
+    display: flex;
+    justify-content: space-around;
+    flex-direction: row;
+  }
+  .choice_btn
+  {
+    width: 30%;
+    border: 0;
+    border-radius: 10px;
+    background-color: white;
+    font-size: 1rem;
+    font-weight: bold;
+    color: #ffa600;
+  }
+  .choice_btn:hover
+  {
+    background-color: wheat;
+    
   }
