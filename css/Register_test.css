@@ -84,8 +84,10 @@
   }
   .insert_tag
   {
-    width: 24%;
+    width: 22%;
     text-align: center;
+    padding-left: 5px;
+    padding-right: 5px;
   }
   h3
   {
@@ -103,6 +105,22 @@
   .insert_tag input[type="text"]::placeholder 
   {
     text-align: center;
+  }
+  .move_ocr
+  {
+    border: 0;
+    border-radius: 10px;
+    font-size: 1rem;
+    font-weight: bold;
+    color: #ffa600;
+    background-color: white;
+    width: 50%;
+    margin-top: 10px;
+  }
+  .move_ocr:hover
+  {
+    cursor: pointer;
+    background-color: wheat;
   }
 
   /*지문 문제입력 폼*/

@@ -72,3 +72,7 @@ function situation()
         alert("에러발생. 새로고침하세요");
     }
 }
+function new_Tab()
+{
+    window.open('OCR_page.html');
+}
