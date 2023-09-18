@@ -30,7 +30,7 @@
   }
   .test_wrap {
     width: 95%;
-    height: 95vh;
+    height: 95%;
     background: white;
     border-radius: 20px;
     display: flex;
@@ -135,7 +135,7 @@
     display : none;
     align-items: center;
     justify-content: space-around;
-    margin-top: 20px;
+    margin-top: auto;
     height: 50px;
     /* @media screen and (min-height:700px)
     {
