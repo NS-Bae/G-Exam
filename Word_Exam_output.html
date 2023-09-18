@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="ko">
+    <head>
+        <meta charset = "UTF-8">
+        <meta http-equiv = "X-UA-Compatible" content = "IE=edge">
+        <meta name = "viewport" content="width = device-width, initial-scale = 1.0">
+        <title>G-PLAN에 어서오세요!!!</title>
+        <link rel = "stylesheet" href = "css\Word_output.css">
+    </head>
+    <body>
+        <div class="wrap">
+            <div class="inside_wrap">
+                <h1 onclick="location.href = 'Main_page.html'">G-PLAN</h1>
+                <div class="select_problem">
+                    <div class="section">
+                        <h3>영단어 레벨 : <br></h3>
+                        <select name="level" id="level" required >
+                            <option value="select">선택하세요</option>
+                            <option value="elementary">초등</option>
+                            <option value="middle">중등</option>
+                            <option value="high">고등</option>
+                            <option value="toeic">토익</option>
+                            <option value="total">전체</option>
+                        </select>
+                    </div>
+                    <div class="board">
+                        <label>
+                            시험 결과
+                        </label>
+                        <ul class="list">
+                            <li>선택된 문제1</li>
+                            <li>선택된 문제2</li>
+                            <li>선택된 문제3</li>
+                            <li>선택된 문제4</li>
+                            <li>선택된 문제5</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <script src="Word_exam_output.js"></script>
+    </body>
+</html>
