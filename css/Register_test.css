@@ -203,7 +203,24 @@
     background-color: white;
     width: 100%;
   }
+  .change
+  {
+    margin-top: 10px;
+    margin-bottom: 5px;
+    border: 0;
+    border-radius: 10px;
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #ffa600;
+    background-color: white;
+    width: 100%;
+  }
   .submit input:hover
+  {
+    background-color: wheat;
+    cursor: pointer;
+  }
+  .change:hover
   {
     background-color: wheat;
     cursor: pointer;
@@ -268,8 +285,21 @@
   }
   .question_list
   {
-    width: 90%;
+    width: 95%;
     max-height: 40%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+  }
+  .question_list > label
+  {
+    font-size: 1.2rem;
+    font-weight: bold;
+  }
+  .list
+  {
+    margin-top: 5px;
+    cursor: pointer;
   }
   h1
   {

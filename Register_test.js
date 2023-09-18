@@ -2,17 +2,38 @@ function refresh_box()
 {
     var questionSubDiv = document.querySelector(".question_sub");
     var inputElements = questionSubDiv.querySelectorAll("textarea");
-    
-    for (var i = 0; i < inputElements.length; i++) {
-        inputElements[i].value = "";
-    }
-
     var school = document.getElementById("school").value;
     var grade = document.getElementById("grade").value;
     var major = document.getElementById("major").value;
     var q_type = document.getElementById("q_type").value;
 
-    console.log("학교:", school, "학년 : ", grade, "과목 : ", major, "문제유형 : ", q_type, "의 출제를 완료하였습니다");
+    if(inputElements[1].value == "" || school == "" || grade == "" || major == "" || q_type == "")
+    {
+        alert("필수정보 혹은 지문이 등록되지 않았습니다. \n필수정보 혹은 지문을 등록해주세요.");
+    }
+    else
+    {
+        for (var i = 0; i < inputElements.length; i++) 
+        {
+            console.log("등록내용 : ", inputElements[i].value, "   ", i);
+            inputElements[i].value = "";
+        }
+
+        console.log("학교:", school, "학년 : ", grade, "과목 : ", major, "문제유형 : ", q_type, "의 출제를 완료하였습니다");
+        alert("문제를 등록 완료하였습니다.");
+    }
+}
+
+function change_view()
+{
+    var check_screen = document.querySelector(".inside_wrap");
+    var register_screen = document.querySelector(".inside_wrap1");
+    var management_screen = document.querySelector(".inside_wrap2");
+    
+    check_screen.style.display = "none";
+    register_screen.style.display = "none";
+    management_screen.style.display = "flex";
+    alert("문제수정으로 이동합니다.");
 }
 
 function check_register()
@@ -66,6 +87,17 @@ function situation()
     else if(con_btnId == "change")
     {
         alert("문제가 수정 되었습니다.");
+    }
+    else if(con_btnId == "regist")
+    {
+        alert("문제등록으로 이동합니다.");
+        var check_screen = document.querySelector(".inside_wrap");
+        var register_screen = document.querySelector(".inside_wrap1");
+        var management_screen = document.querySelector(".inside_wrap2");
+
+        check_screen.style.display = "none";
+        register_screen.style.display = "flex";
+        management_screen.style.display = "none";
     }
     else
     {
