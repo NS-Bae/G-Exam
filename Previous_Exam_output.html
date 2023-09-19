@@ -21,7 +21,6 @@
                             <option value="math">수학</option>
                             <option value="social">사회</option>
                             <option value="science">과학</option>
-                            <option value="total">전체</option>
                         </select>
                     </div>
                     <div class="board">
@@ -29,11 +28,44 @@
                             시험 결과
                         </label>
                         <ul class="list">
-                            <li>선택된 문제1</li>
-                            <li>선택된 문제2</li>
-                            <li>선택된 문제3</li>
-                            <li>선택된 문제4</li>
-                            <li>선택된 문제5</li>
+                            <li>선택된 시험1</li>
+                            <li>선택된 시험2</li>
+                            <li>선택된 시험3</li>
+                            <li>선택된 시험4</li>
+                            <li>선택된 시험5</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="T_container">
+                    <div class="C_container">
+                        <div class="box">
+                            <h4>이번 시험 정답률</h4>
+                            <div class="loading_container">
+                                <div class="loading-bar">
+                                    <div class="bar"></div>
+                                </div>
+                                <label class="percentage_text" id="per">0%</label>
+                            </div>
+                        </div>
+                        <div class="box">
+                            <h4>평균과 비교</h4>
+                            <div class="compare_form">
+                                <label id="total_rate" class="percentage_text1">0%</label>
+                                <label id="my_rate" class="percentage_text1">0%</label>
+                                <label id="explain" class="explain_text">당신은 평균 정답률보다</label>
+                                <label id="gap" class="gap_percent">000</label>
+                                <label id="explain1" class="explain_text">낮습니다.</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="C_container" id="wrong_section">
+                        <h4>틀린 문제</h4>
+                        <ul class="list1" id="wrong">
+                            <li>틀린 문제1</li>
+                            <li>틀린 문제2</li>
+                            <li>틀린 문제3</li>
+                            <li>틀린 문제4</li>
+                            <li>틀린 문제5</li>
                         </ul>
                     </div>
                 </div>
