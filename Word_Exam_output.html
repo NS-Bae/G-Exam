@@ -36,6 +36,40 @@
                         </ul>
                     </div>
                 </div>
+                <!-- 영단어 시험 결과 보여주기 -->
+                <div class="T_container">
+                    <div class="C_container">
+                        <div class="box">
+                            <h4>이번 시험 정답률</h4>
+                            <div class="loading_container">
+                                <div class="loading-bar">
+                                    <div class="bar"></div>
+                                </div>
+                                <label class="percentage_text" id="per">0%</label>
+                            </div>
+                        </div>
+                        <div class="box">
+                            <h4>평균과 비교</h4>
+                            <div class="compare_form">
+                                <label id="total_rate" class="percentage_text1">0%</label>
+                                <label id="my_rate" class="percentage_text1">0%</label>
+                                <label id="explain" class="explain_text">당신은 평균 정답률보다</label>
+                                <label id="gap" class="gap_percent">000</label>
+                                <label id="explain1" class="explain_text">낮습니다.</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="C_container">
+                        <h4>틀린 문제</h4>
+                        <ul class="list1" id="wrong">
+                            <li>틀린 문제1</li>
+                            <li>틀린 문제2</li>
+                            <li>틀린 문제3</li>
+                            <li>틀린 문제4</li>
+                            <li>틀린 문제5</li>
+                        </ul>
+                    </div>
+                </div>
             </div>
         </div>
         <script src="Word_exam_output.js"></script>
