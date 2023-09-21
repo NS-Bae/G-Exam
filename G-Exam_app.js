@@ -4,12 +4,13 @@ const path = require('path');
 const app = express();
 const port = 3000;
 
+
 // 정적 파일 제공 (HTML 파일을 포함한 다른 정적 파일을 서빙)
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(path.join(__dirname)));
 
 // 루트 경로에 접근할 때 index.html 파일을 표시
 app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'Main_page.html'));
+    res.sendFile(path.join(__dirname, 'Main_page.html'));
 });
 
 app.listen(port, () => {
