@@ -1,8 +1,16 @@
 const express = require('express');
 const path = require('path');
-
 const app = express();
 const port = 3000;
+
+const router = express.Router();
+
+router.post('/login', (req, res) => {
+
+});
+router.post('/join_membership', (req, res) => {
+
+});
 
 
 // 정적 파일 제공 (HTML 파일을 포함한 다른 정적 파일을 서빙)
