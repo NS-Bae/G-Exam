@@ -50,7 +50,7 @@
   
   .login_id {
     margin-top: 20px;
-    width: 80%;
+    width: 100%;
     @media screen and (max-height:475px)
     {
       margin-top: 5px;
@@ -73,7 +73,7 @@
   
   .login_pw {
     margin-top: 20px;
-    width: 80%;
+    width: 100%;
     @media screen and (max-height:475px)
     {
       margin-top: 5px;
@@ -97,7 +97,7 @@
   .login_etc {
     padding: 10px;
     margin-top: 10px;
-    width: 80%;
+    width: 100%;
     font-size: 14px; 
     display: flex;
     justify-content: space-between;
@@ -133,7 +133,7 @@
   
   .submit {
     margin-top: 50px;
-    width: 80%;
+    width: 100%;
     @media screen and (max-height:475px)
     {
       margin-top: 10px;
