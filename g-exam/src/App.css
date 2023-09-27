@@ -22,7 +22,7 @@
     align-items: center;
     flex-direction: column;
   }
-  h1 
+  h1
   {
     width : auto;
     height : auto;
@@ -34,22 +34,41 @@
     font-size: 2em;
     cursor : pointer;
   }
+  a
+  {
+    text-decoration: none;
+    color: inherit;
+    cursor: inherit;
+  }
+  li
+  {
+    list-style: none;
+  }
   .login_btn_space
   {
     width : 30%;
     height : auto;
     display: flex;
     align-items: center;
-    justify-content: space-around;
     margin-left: auto;
+  }
+  .login_btn_space ul
+  {
+    width : 100%;
+    height : auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
   }
   .login_btn
   {
     background-color: rgb(255, 255, 255);
     border: 0;
     text-decoration: underline;
+    font-size: 0.7rem;
   }
   .login_btn:hover
   {
     color: #ffa600;
+    cursor: pointer;
   }
