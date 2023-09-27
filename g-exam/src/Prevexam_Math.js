@@ -9,11 +9,11 @@ function Main()
   )
 }
 function MyApp() {
-    return (
+  return (
     <div className = "background">
       <div className = "wrap">
         <Main/>
-        
+        <h2>수학 기출문제 풀기</h2>
       </div>
     </div>
   );

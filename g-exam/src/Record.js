@@ -13,7 +13,7 @@ function MyApp() {
     <div className = "background">
       <div className = "wrap">
         <Main/>
-        
+        <h2>시험결과</h2>
       </div>
     </div>
   );

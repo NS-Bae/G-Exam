@@ -13,7 +13,7 @@ function MyApp() {
     <div className = "background">
       <div className = "wrap">
         <Main/>
-        
+        <h2>고등 영단어 시험</h2>
       </div>
     </div>
   );
