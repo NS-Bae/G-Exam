@@ -1,5 +1,5 @@
 import './App.css';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from "react-router-dom";
 
 function Main() {
@@ -7,7 +7,6 @@ function Main() {
     <h1><Link to='/'>G-PLAN</Link></h1>
   );
 }
-
 function LoginForm() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
@@ -56,72 +55,74 @@ function LoginForm() {
     </form>
   );
 }
+//자동로그인
+function AutoLoginCheck()
+{
+  const [isChecked, setIsChecked] = useState(false);
+
+  useEffect(() => {
+    localStorage.setItem('autologin', isChecked.toString());
+  }, [isChecked]);
+
+  const checkboxChange = () => {
+    setIsChecked(!isChecked);
+  };
+
+  useEffect(() => {
+    const storedAutoLogin = localStorage.getItem('autoLogin');
+    if (storedAutoLogin === 'true') {
+      setIsChecked(true);
+      // 여기에서 자동 로그인 처리를 수행하면 됩니다.
+      console.log('자동 로그인이 활성화되었습니다.');
+    }
+  }, []);
+  return (
+    <div>
+      <span>
+        <input
+          type="checkbox"
+          checked={isChecked}
+          onChange={checkboxChange}
+          style={{ textDecoration: 'none' }} 
+        />
+        자동 로그인
+      </span>
+    </div>
+  );
+}
+function ControlMemberLabel(props)
+{
+  const {labels} = props;
+  
+
+  return(
+    labels.map((item, index) => (
+      <Link to = {`/${item.id}`} key = {index}>
+        <label>{item.label}</label>
+      </Link>
+    ))
+  );
+}
 
 function MyApp() {
+  const labelData = [
+    {id : "reset_pw", label : '비밀번호 찾기'}, 
+    {id : "join_member", label : '회원가입'}
+  ];
+
   return (
     <div className="background">
       <div className="wrap">
         <Main />
-        <div className="login_place">
+        <div className="input_place">
           <LoginForm />
+        </div>
+        <div class="login_etc">
+          <AutoLoginCheck />
+          <ControlMemberLabel labels = {labelData}/>
         </div>
       </div>
     </div>
   );
 }
 export default MyApp;
-
-/* function MultiLabels(props)
-{
-  const {labels} = props;
-
-  return(
-    <div className='label_place'>
-      {labels.map((label, index) => (
-        <label key = {index}>{label}</label>
-      ))}
-    </div>
-  );
-}
-function InputField({type})
-{
-  let id, name, ph;
-
-  if(type === "id")
-  {
-    id = 'id';
-    name = 'id';
-    ph = 'ID';
-  }
-  else if(type === 'pw')
-  {
-    id = 'pw';
-    name = 'pw';
-    ph = 'PW';
-  }
-  return(
-    <input id={id} name={name} placeholder={ph} />
-  );
-}
-
-function MyApp() {
-  const labelData = ['ID', 'PASSWORD'];
-
-  return (
-    <div className = "background">
-      <div className = "wrap">
-        <Main/>
-        <div className='login_place'>
-          <MultiLabels labels = {labelData}/>
-          <div className='input_place'>
-            <InputField type = "id" />
-            <InputField type = "pw" />
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
- */
-
-

@@ -89,14 +89,14 @@
     font-size: 1.2em;
     font-weight: bolder;
     cursor : pointer;
-    margin-top: 5%;
+    margin-top: 10%;
   }
   .test_btn:hover
   {
     color: black;
   }
 
-  .login_place
+  .input_place
   {
     width: 100%;
     height: auto;
@@ -106,9 +106,14 @@
     align-items: center;
     margin-top: 10%;
   }
+  .input_place form
+  {
+    width: 80%;
+    height: auto;
+  }
   .input_place input
   {
-    width: 100%;
+    width: 70%;
     height: 50px;
     border-radius: 30px;
     margin-top: 10px;
@@ -120,14 +125,36 @@
   }
   .input_place label
   {
-    width: 100%;
+    width: 30%;
     height: auto;
     display: flex;
     margin-top: 10px;
-    text-align: left;
-    justify-content: left;
+    text-align: center;
+    justify-content: center;
     align-items: center;
     font-weight: bolder;
-    font-size: 1.2rem;
+    font-size: 1.4rem;
   }
-  
+  .login_etc 
+  {
+    margin-top: 8%;
+    width: 80%;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+  }
+  .login_etc label
+  {
+    font-size: 1.1rem;
+    font-weight: 450;
+    text-decoration: underline;
+  }
+  .login_etc label:hover, .login_etc span:hover
+  {
+    color: #ffa600;
+  }
+  .login_etc span
+  {
+    font-size: 1.1rem;
+    font-weight: 450;
+  }

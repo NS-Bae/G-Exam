@@ -39,7 +39,7 @@ function MyApp() {
     <div className = "background">
       <div className = "wrap">
         <Main/>
-        <h2>영단어 시험</h2><div className='btnsection'>
+        <div className='btnsection'>
           <TestBtn btntype = {wordtype} onChangeMode = {(id)=>{
             console.log(id);
           }}></TestBtn>
