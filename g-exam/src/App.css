@@ -96,7 +96,7 @@
     color: black;
   }
 
-  .input_place
+  .auth_container
   {
     width: 100%;
     height: auto;
@@ -104,12 +104,21 @@
     flex-direction: row;
     justify-content: center;
     align-items: center;
-    margin-top: 10%;
+    margin-top: 7%;
   }
-  .input_place form
+  .auth_container form
   {
     width: 80%;
     height: auto;
+  }
+  .input_place
+  {
+    width: 100%;
+    height: auto;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
   }
   .input_place input
   {
@@ -125,15 +134,15 @@
   }
   .input_place label
   {
-    width: 30%;
+    width: 70%;
     height: auto;
     display: flex;
     margin-top: 10px;
-    text-align: center;
-    justify-content: center;
-    align-items: center;
+    text-align: left;
+    justify-content: left;
+    align-items: left;
     font-weight: bolder;
-    font-size: 1.4rem;
+    font-size: 1.3rem;
   }
   .login_etc 
   {

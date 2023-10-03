@@ -2,11 +2,21 @@ import './App.css';
 import React, { useState, useEffect } from 'react';
 import { Link } from "react-router-dom";
 
+// AuthContent 컴포넌트 정의
+function AuthContent({ title, children }) {
+  return (
+    <div className="auth_container">
+      {children}
+    </div>
+  );
+}
+
 function Main() {
   return (
     <h1><Link to='/'>G-PLAN</Link></h1>
   );
 }
+
 function LoginForm() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
@@ -28,34 +38,36 @@ function LoginForm() {
   };
 
   return (
-    <form onSubmit={handleLogin}>
-      <div className="input_place">
-        <label>아이디</label>
-        <input
-          id='id'
-          type="text"
-          value={username}
-          placeholder='ID'
-          onChange={(e) => setUsername(e.target.value)}
-          required
-        />
-      </div>
-      <div className="input_place">
-        <label>비밀번호</label>
-        <input
-          id='pw'
-          type="password"
-          value={password}
-          placeholder='PASSWORD'
-          onChange={(e) => setPassword(e.target.value)}
-          required
-        />
-      </div>
-      <button className='test_btn' type="submit">로그인</button>
-    </form>
+    <AuthContent title="로그인"> {/* AuthContent로 감싸기 */}
+      <form onSubmit={handleLogin}>
+        <div className="input_place">
+          <label>ID</label>
+          <input
+              id='id'
+              type="text"
+              value={username}
+              placeholder='ID'
+              onChange={(e) => setUsername(e.target.value)}
+              required
+            />
+        </div>
+        <div className="input_place">
+          <label>PASSWORD</label>
+          <input
+            id='pw'
+            type="password"
+            value={password}
+            placeholder='PASSWORD'
+            onChange={(e) => setPassword(e.target.value)}
+            required
+          />
+        </div>
+        <button className='test_btn' type="submit">로그인</button>
+      </form>
+    </AuthContent>
   );
 }
-//자동로그인
+
 function AutoLoginCheck()
 {
   const [isChecked, setIsChecked] = useState(false);
@@ -90,6 +102,7 @@ function AutoLoginCheck()
     </div>
   );
 }
+
 function ControlMemberLabel(props)
 {
   const {labels} = props;
@@ -114,9 +127,7 @@ function MyApp() {
     <div className="background">
       <div className="wrap">
         <Main />
-        <div className="input_place">
-          <LoginForm />
-        </div>
+        <LoginForm />
         <div class="login_etc">
           <AutoLoginCheck />
           <ControlMemberLabel labels = {labelData}/>
