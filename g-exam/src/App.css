@@ -123,7 +123,7 @@
   .input_place input
   {
     width: 70%;
-    height: 50px;
+    height: 40px;
     border-radius: 30px;
     margin-top: 10px;
     padding: 0px 20px;
@@ -166,4 +166,33 @@
   {
     font-size: 1.1rem;
     font-weight: 450;
+  }
+  .radiobtn_place
+  {
+    width: 90%;
+    height: auto;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    text-align:  center;
+    margin-top: 1%;
+  }
+  .radiobtn_place label
+  {
+    width: 50%;
+    height: auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    font-size: 0.8rem;
+    margin-top: 0;
+  }
+  .radiobtn_place label input
+  {
+    width: 10%;
+    height: 100%;
+    margin: 0;
+    margin-right: 5%;
   }

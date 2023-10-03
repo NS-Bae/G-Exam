@@ -17,29 +17,49 @@ function Main() {
   );
 }
 
-function LoginForm() {
+function StudentJoinForm({ formType }) {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [school, setSchool] = useState('');
+  const [grade, setGrade] = useState('');
+  const [error, setError] = useState('');
 
   const usernamePattern = /^[a-zA-Z0-9]{4,12}$/;
   const passwordPattern = /^[a-zA-Z0-9]{8,20}$/;
 
-  const handleLogin = (e) => {
+  const handleJoin = (e) => {
     e.preventDefault();
+
     if (!usernamePattern.test(username) || !passwordPattern.test(password)) 
     {
       const errormessage = '사용자 이름과 비밀번호는 영문 대/소문자와 숫자만 허용하고 아이디의 길이는 4자에서 12자 사이, 비밀번호의 길이는 8자에서 20자 사이여야 합니다.';
       alert(errormessage);
+      setError('사용자 이름과 비밀번호는 영문 대/소문자와 숫자만 허용하고 아이디의 길이는 4자에서 12자 사이, 비밀번호의 길이는 8자에서 20자 사이여야 합니다.');
       return;
     }
-    // 여기에서 로그인 데이터(username, password)를 서버로 전송하거나 원하는 동작을 수행합니다.
-    console.log('로그인 시도:', username, password);
-    alert('로그인 시도:'+ username + password);
+    if (password !== confirmPassword) 
+    {
+      const errormessage = '비밀번호와 비밀번호 확인이 일치하지 않습니다.';
+      alert(errormessage);
+      setError('비밀번호와 비밀번호 확인이 일치하지 않습니다.');
+      return;
+    }
+
+    console.log('회원가입 시도:', username, password, school, grade, formType);
+/*     alert('회원가입 시도:'+ username + password + school + grade);
+ */
+    setUsername('');
+    setPassword('');
+    setConfirmPassword('');
+    setSchool('');
+    setGrade('');
+    setError('');
   };
 
   return (
-    <AuthContent title="로그인"> {/* AuthContent로 감싸기 */}
-      <form onSubmit={handleLogin}>
+    <AuthContent title="회원가입"> {/* AuthContent로 감싸기 */}
+      <form onSubmit={handleJoin}>
         <div className="input_place">
           <label>아이디</label>
           <input
@@ -65,22 +85,33 @@ function LoginForm() {
         <div className="input_place">
           <label>비밀번호 확인</label>
           <input
-            id='pw'
+            id='check_pw'
             type="password"
-            value={password}
+            value={confirmPassword}
             placeholder='PASSWORD'
-            onChange={(e) => setPassword(e.target.value)}
+            onChange={(e) => setConfirmPassword(e.target.value)}
             required
           />
         </div>
         <div className="input_place">
           <label>학교</label>
           <input
-            id='pw'
-            type="password"
-            value={password}
-            placeholder='PASSWORD'
-            onChange={(e) => setPassword(e.target.value)}
+            id='school'
+            type="text"
+            value={school}
+            placeholder='SCHOOL'
+            onChange={(e) => setSchool(e.target.value)}
+            required
+          />
+        </div>
+        <div className="input_place">
+          <label>학년</label>
+          <input
+            id='grade'
+            type="number"
+            value={grade}
+            placeholder='GRADE'
+            onChange={(e) => setGrade(e.target.value)}
             required
           />
         </div>
@@ -90,54 +121,146 @@ function LoginForm() {
   );
 }
 
-function AutoLoginCheck()
-{
-  const [isChecked, setIsChecked] = useState(false);
+function TeacherJoinForm({ formType }) {
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [subject, setSubject] = useState('');
+  const [error, setError] = useState('');
 
-  useEffect(() => {
-    localStorage.setItem('autologin', isChecked.toString());
-  }, [isChecked]);
+  const usernamePattern = /^[a-zA-Z0-9]{4,12}$/;
+  const passwordPattern = /^[a-zA-Z0-9]{8,20}$/;
 
-  const checkboxChange = () => {
-    setIsChecked(!isChecked);
+  const handleJoin = (e) => {
+    e.preventDefault();
+
+    if (!usernamePattern.test(username) || !passwordPattern.test(password)) 
+    {
+      const errormessage = '사용자 이름과 비밀번호는 영문 대/소문자와 숫자만 허용하고 아이디의 길이는 4자에서 12자 사이, 비밀번호의 길이는 8자에서 20자 사이여야 합니다.';
+      alert(errormessage);
+      setError('사용자 이름과 비밀번호는 영문 대/소문자와 숫자만 허용하고 아이디의 길이는 4자에서 12자 사이, 비밀번호의 길이는 8자에서 20자 사이여야 합니다.');
+      return;
+    }
+    if (password !== confirmPassword) 
+    {
+      const errormessage = '비밀번호와 비밀번호 확인이 일치하지 않습니다.';
+      alert(errormessage);
+      setError('비밀번호와 비밀번호 확인이 일치하지 않습니다.');
+      return;
+    }
+
+    console.log('회원가입 시도:', username, password, subject, formType);
+    /* alert('회원가입 시도:'+ username + password + subject); */
+
+    setUsername('');
+    setPassword('');
+    setConfirmPassword('');
+    setSubject('');
+    setError('');
   };
 
-  useEffect(() => {
-    const storedAutoLogin = localStorage.getItem('autoLogin');
-    if (storedAutoLogin === 'true') {
-      setIsChecked(true);
-      // 여기에서 자동 로그인 처리를 수행하면 됩니다.
-      console.log('자동 로그인이 활성화되었습니다.');
-    }
-  }, []);
   return (
-    <div>
-      <span>
-        <input
-          type="checkbox"
-          checked={isChecked}
-          onChange={checkboxChange}
-          style={{ textDecoration: 'none' }} 
-        />
-        자동 로그인
-      </span>
+    <AuthContent title="회원가입"> {/* AuthContent로 감싸기 */}
+      <form onSubmit={handleJoin}>
+        <div className="input_place">
+          <label>아이디</label>
+          <input
+            id='id'
+            type="text"
+            value={username}
+            placeholder='ID'
+            onChange={(e) => setUsername(e.target.value)}
+            required
+          />
+        </div>
+        <div className="input_place">
+          <label>비밀번호</label>
+          <input
+            id='pw'
+            type="password"
+            value={password}
+            placeholder='PASSWORD'
+            onChange={(e) => setPassword(e.target.value)}
+            required
+          />
+        </div>
+        <div className="input_place">
+          <label>비밀번호 확인</label>
+          <input
+            id='check_pw'
+            type="password"
+            value={confirmPassword}
+            placeholder='PASSWORD'
+            onChange={(e) => setConfirmPassword(e.target.value)}
+            required
+          />
+        </div>
+        <div className="input_place">
+          <label>과목</label>
+          <input
+            id='subject'
+            type="text"
+            value={subject}
+            placeholder='SUBJECT'
+            onChange={(e) => setSubject(e.target.value)}
+            required
+          />
+        </div>
+        <button className='test_btn' type="submit">회원가입</button>
+      </form>
+    </AuthContent>
+  );
+}
+
+function ChangoForm()
+{
+  const [formType, setFormType] = useState('');
+  const handleFormTypeChange = (e) => {
+    setFormType(e.target.value);
+  };
+
+  return (
+    <div className="input_place">
+      <div className="radiobtn_place">
+        <label>
+          <input
+            type="radio"
+            value="student"
+            checked={formType === 'student'}
+            onChange={handleFormTypeChange}
+          />
+          학생용 회원가입
+        </label>
+        <label>
+          <input
+            type="radio"
+            value="teacher"
+            checked={formType === 'teacher'}
+            onChange={handleFormTypeChange}
+          />
+          교사용 회원가입
+        </label>
+      </div>
+      <div className="input_place">
+        {formType === 'student' && (
+          <StudentJoinForm formType={formType} />
+        )}
+
+        {formType === 'teacher' && (
+          <TeacherJoinForm formType={formType} />
+        )}
+      </div>
     </div>
   );
 }
 
 function MyApp() {
-  const labelData = [
-    {id : "reset_pw", label : '비밀번호 찾기'}, 
-    {id : "join_member", label : '회원가입'}
-  ];
 
   return (
     <div className="background">
       <div className="wrap">
         <Main />
-        <div className="input_place">
-          <LoginForm />
-        </div>
+        <ChangoForm />
       </div>
     </div>
   );
