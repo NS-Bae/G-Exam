@@ -16,8 +16,8 @@ import ElementWord from "./WordExam_Element";
 import MiddleWord from "./WordExam_Middle";
 import HighWord from "./WordExam_High";
 import TOEICWord from "./WordExam_TOEIC";
-import Reset_pw from "./Reset_pw";
-import Join_member from "./Join_member.js";
+import ResetPw from "./ResetPw";
+import JoinMember from "./Join_member.js";
 
 
 const App = () => {
@@ -38,8 +38,8 @@ const App = () => {
         <Route path = "/wordtest/high" element = {<HighWord />} />
         <Route path = "/wordtest/toeic" element = {<TOEICWord />} />
       <Route path = "/record" element = {<Record />} />
-      <Route path = "/reset_pw" element = {<Reset_pw />} />
-      <Route path = "/join_member" element = {<Join_member />} />
+      <Route path = "/reset_pw" element = {<ResetPw />} />
+      <Route path = "/join_member" element = {<JoinMember />} />
     </Routes>
   );
 };
