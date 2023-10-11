@@ -1,5 +1,5 @@
 import './App.css';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from "react-router-dom";
 
 // AuthContent 컴포넌트 정의
@@ -46,7 +46,7 @@ function StudentJoinForm({ formType }) {
       return;
     }
 
-    console.log('회원가입 시도:', username, password, school, grade, formType);
+    console.log('회원가입 시도:', username, password, grade, formType);
 /*     alert('회원가입 시도:'+ username + password + school + grade);
  */
     setUsername('');
@@ -95,14 +95,17 @@ function StudentJoinForm({ formType }) {
         </div>
         <div className="input_place">
           <label>학교</label>
-          <input
-            id='school'
-            type="text"
-            value={school}
-            placeholder='SCHOOL'
-            onChange={(e) => setSchool(e.target.value)}
-            required
-          />
+          <div className='select_place'>
+            <select id='school_grade'>
+              <option value={''}>선택하세요</option>
+              <option value={'초등'}>초등학교</option>
+              <option value={'중등'}>중학교</option>
+              <option value={'고등'}>고등학교</option>
+            </select>
+            <select>
+              <option value={''}>선택하세요</option>
+            </select>
+          </div>
         </div>
         <div className="input_place">
           <label>학년</label>
@@ -160,7 +163,7 @@ function TeacherJoinForm({ formType }) {
   };
 
   return (
-    <AuthContent title="회원가입"> {/* AuthContent로 감싸기 */}
+    <AuthContent title="회원가입">
       <form onSubmit={handleJoin}>
         <div className="input_place">
           <label>아이디</label>
