@@ -32,7 +32,24 @@ function LoginForm() {
       alert(errormessage);
       return;
     }
-    // 여기에서 로그인 데이터(username, password)를 서버로 전송하거나 원하는 동작을 수행합니다.
+
+    fetch('/login', {
+      method : 'POST', 
+      headers : {
+        'Content-type' : 'application/json', 
+      }, 
+      body : JSON.stringify({username, password}), 
+    })
+      .then(response => response.json())
+      .then(data => {
+        console.log(data);
+        // 원하는 동작 수행
+      })
+      .catch(error => {
+        console.error('로그인 오류:', error);
+        // 오류 처리
+      });
+
     console.log('로그인 시도:', username, password);
     alert('로그인 시도:'+ username + password);
   };

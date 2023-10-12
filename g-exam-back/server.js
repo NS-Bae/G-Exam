@@ -1,11 +1,16 @@
 const express = require('express');
-const mysql = require('mysql');
+const cors = require('cors');
 const mysql2 = require('mysql2/promise');
 const path = require('path');
 const bodyParser = require('body-parser');
+const passport = require('passport');
+const session = require('express-session');
+const LocalStrategy = require('passport-local').Strategy;
 
 const app = express();
 const port = process.env.PORT || 4000;
+
+app.use(cors());
 
 const pool = mysql2.createPool({
     host : 'localhost', 
@@ -14,35 +19,65 @@ const pool = mysql2.createPool({
     database : 'g-exam', 
 });
 
+connection.connect();
+
+connection.query('SELECT school_name from school_list where (school_grade = "초등")', (error, rows, fields) => {
+  if (error) throw error;
+  console.log('User info is: ', rows);
+});
+
+connection.end(); 
+
 app.use(express.static(path.join(__dirname, '../g-exam-front/build')));
 
 app.get('*', function (req, res) {
   res.sendFile(path.join(__dirname, '../g-exam-front/build/index.html'));
 });
 
-app.post('/login', async(req, res) => {
-  const {username, password} = req.body;
+app.use(express.json());
+app.use(express.urlencoded({ extended: false }));
 
-  try
-  {
-    const connection = await pool.getConnection();
-    const [results] = await connection.execute('SELECT * FROM user_student where username = ? AND password = ?', [username, password]);
-    connection.release();
+// express-session 미들웨어 설정
+app.use(session({
+  secret: 'Alpha1020', // 세션 데이터 암호화에 사용될 키 (반드시 변경)
+  resave: false,
+  saveUninitialized: true
+}));
 
-    if(results.length > 0)
-    {
-      res.status(200).json({ message: '로그인 성공' });
-    }
-    else
-    {
-      res.status(401).json({ message: '로그인 실패' });
-    }
-  }
-  catch(error) 
+app.use(passport.initialize());
+app.use(passport.session());
+
+app.post('/login', passport.authenticate('local', {successRedirect : '/', failureRedirect : '/login'}));
+
+passport.use(new LocalStrategy(
   {
-    console.error(error);
-    res.status(500).json({ message: '서버 오류' });
+    usernameField : 'username', 
+    passwordField : 'password'
+  }, 
+  function(username, password, done)
+  {
+    User.findOne({username:username}, function (err, user) {
+      if(err) { return done(err);}
+      if(!user) {
+        return done(null, false, {message:"존재하지 않는 아이디입니다."});
+      }
+      if(!user.validPassword(password)) 
+      {
+        return done(null, false, {message:"비밀번호가 틀렸습니다."});
+      }
+      return done(null, user);
+    });
   }
+));
+
+passport.serializeUser(function(user, done) {
+  done(null, user.id);
+});
+
+passport.deserializeUser(function(id, done) {
+  User.findById(id, function(err, user) {
+    done(err, user);
+  });
 });
 
 app.listen(port, () => {
