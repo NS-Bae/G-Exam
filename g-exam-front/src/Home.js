@@ -66,13 +66,13 @@ function MyApp()
         <Main/>
         <div className = "login_btn_space">
           <ControlBtn btntype = {btntype} onChangeMode = {(id)=>{
-            console.log(id);
-          }}></ControlBtn>
+/*             console.log(id);
+ */          }}></ControlBtn>
         </div>
         <div className='btnsection'>
           <TestBtn btntype = {exambtntype} onChangeMode = {(id)=>{
-            console.log(id);
-          }}></TestBtn>
+/*             console.log(id);
+ */          }}></TestBtn>
         </div>
       </div>
     </div>

@@ -166,7 +166,7 @@ function MyApp() {
       <div className="wrap">
         <Main />
         <LoginForm />
-        <div class="login_etc">
+        <div className="login_etc">
           <AutoLoginCheck />
           <ControlMemberLabel labels = {labelData}/>
         </div>
