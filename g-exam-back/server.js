@@ -1,105 +1,122 @@
-const express = require('express');
-const cors = require('cors');
-const mysql2 = require('mysql2/promise');
+const express = require('express')
+const session = require('express-session')
 const path = require('path');
-const bodyParser = require('body-parser');
-const passport = require('passport');
-const session = require('express-session');
-const LocalStrategy = require('passport-local').Strategy;
+const app = express()
+const port = 4000
 
-const app = express();
-const port = process.env.PORT || 4000;
-
-app.use(cors());
-
-const pool = mysql2.createPool({
-    host : 'localhost', 
-    user : 'root', 
-    password : 'My19971108!', 
-    database : 'g-exam', 
-});
-
-connection.connect();
-
-connection.query('SELECT school_name from school_list where (school_grade = "초등")', (error, rows, fields) => {
-  if (error) throw error;
-  console.log('User info is: ', rows);
-});
-
-connection.end(); 
+const db = require('./db/db');
+const sessionOption = require('./db/sessionOption');
+const bodyParser = require("body-parser");
+const bcrypt = require('bcrypt');
 
 app.use(express.static(path.join(__dirname, '../g-exam-front/build')));
+app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.json());
 
-app.get('*', function (req, res) {
-  res.sendFile(path.join(__dirname, '../g-exam-front/build/index.html'));
-});
+var MySQLStore = require('express-mysql-session')(session);
+var sessionStore = new MySQLStore(sessionOption);
+app.use(session({  
+	key: 'session_cookie_name',
+    secret: '~',
+	store: sessionStore,
+	resave: false,
+	saveUninitialized: false
+}))
 
-app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
+app.get('/', (req, res) => {    
+    req.sendFile(path.join(__dirname, '../g-exam-front/build/index.html'));
+})
 
-// express-session 미들웨어 설정
-app.use(session({
-  secret: 'Alpha1020', // 세션 데이터 암호화에 사용될 키 (반드시 변경)
-  resave: false,
-  saveUninitialized: true
-}));
+app.get('/authcheck', (req, res) => {      
+    const sendData = { isLogin: "" };
+    if (req.session.is_logined) {
+        sendData.isLogin = "True"
+    } else {
+        sendData.isLogin = "False"
+    }
+    res.send(sendData);
+})
 
-app.use(passport.initialize());
-app.use(passport.session());
-
-app.post('/login', passport.authenticate('local', {successRedirect : '/', failureRedirect : '/login'}));
-
-passport.use(new LocalStrategy(
-  {
-    usernameField : 'username', 
-    passwordField : 'password'
-  }, 
-  function(username, password, done)
-  {
-    User.findOne({username:username}, function (err, user) {
-      if(err) { return done(err);}
-      if(!user) {
-        return done(null, false, {message:"존재하지 않는 아이디입니다."});
-      }
-      if(!user.validPassword(password)) 
-      {
-        return done(null, false, {message:"비밀번호가 틀렸습니다."});
-      }
-      return done(null, user);
+app.get('/logout', function (req, res) {
+    req.session.destroy(function (err) {
+        res.redirect('/');
     });
-  }
-));
-
-passport.serializeUser(function(user, done) {
-  done(null, user.id);
 });
 
-passport.deserializeUser(function(id, done) {
-  User.findById(id, function(err, user) {
-    done(err, user);
-  });
+app.post("/login", (req, res) => { // 데이터 받아서 결과 전송
+    const username = req.body.userId;
+    const password = req.body.userPassword;
+    const sendData = { isLogin: "" };
+
+    if (username && password) {             // id와 pw가 입력되었는지 확인
+        db.query('SELECT * FROM userTable WHERE username = ?', [username], function (error, results, fields) {
+            if (error) throw error;
+            if (results.length > 0) {       // db에서의 반환값이 있다 = 일치하는 아이디가 있다.      
+
+                bcrypt.compare(password , results[0].userchn, (err, result) => {    // 입력된 비밀번호가 해시된 저장값과 같은 값인지 비교
+
+                    if (result === true) {                  // 비밀번호가 일치하면
+                        req.session.is_logined = true;      // 세션 정보 갱신
+                        req.session.nickname = username;
+                        req.session.save(function () {
+                            sendData.isLogin = "True"
+                            res.send(sendData);
+                        });
+                        db.query(`INSERT INTO logTable (created, username, action, command, actiondetail) VALUES (NOW(), ?, 'login' , ?, ?)`
+                            , [req.session.nickname, '-', `React 로그인 테스트`], function (error, result) { });
+                    }
+                    else{                                   // 비밀번호가 다른 경우
+                        sendData.isLogin = "로그인 정보가 일치하지 않습니다."
+                        res.send(sendData);
+                    }
+                })                      
+            } else {    // db에 해당 아이디가 없는 경우
+                sendData.isLogin = "아이디 정보가 일치하지 않습니다."
+                res.send(sendData);
+            }
+        });
+    } else {            // 아이디, 비밀번호 중 입력되지 않은 값이 있는 경우
+        sendData.isLogin = "아이디와 비밀번호를 입력하세요!"
+        res.send(sendData);
+    }
 });
+
+app.post("/signin", (req, res) => {  // 데이터 받아서 결과 전송
+    const username = req.body.userId;
+    const password = req.body.userPassword;
+    const password2 = req.body.userPassword2;
+    
+    const sendData = { isSuccess: "" };
+
+    if (username && password && password2) {
+        db.query('SELECT * FROM userTable WHERE username = ?', [username], function(error, results, fields) { // DB에 같은 이름의 회원아이디가 있는지 확인
+            if (error) throw error;
+            if (results.length <= 0 && password == password2) {         // DB에 같은 이름의 회원아이디가 없고, 비밀번호가 올바르게 입력된 경우
+                const hasedPassword = bcrypt.hashSync(password, 10);    // 입력된 비밀번호를 해시한 값
+                db.query('INSERT INTO userTable (username, userchn) VALUES(?,?)', [username, hasedPassword], function (error, data) {
+                    if (error) throw error;
+                    req.session.save(function () {                        
+                        sendData.isSuccess = "True"
+                        res.send(sendData);
+                    });
+                });
+            } else if (password != password2) {                     // 비밀번호가 올바르게 입력되지 않은 경우                  
+                sendData.isSuccess = "입력된 비밀번호가 서로 다릅니다."
+                res.send(sendData);
+            }
+            else {                                                  // DB에 같은 이름의 회원아이디가 있는 경우            
+                sendData.isSuccess = "이미 존재하는 아이디 입니다!"
+                res.send(sendData);  
+            }            
+        });        
+    } else {
+        sendData.isSuccess = "아이디와 비밀번호를 입력하세요!"
+        res.send(sendData);  
+    }
+    
+});
+
 
 app.listen(port, () => {
-  console.log('서버가 ${port}포트에서 실행 중입니다');
-});
-
-/* app.use((req, res, next) => {
-  res.status(404).send('NOT FOUND');
-}); */
-
-/* const connection = mysql.createConnection({
-    host : 'localhost', 
-    user : 'root', 
-    password : 'My19971108!', 
-    database : 'g-exam'
-});
-
-connection.connect();
-
-connection.query('SELECT school_name from school_list where (school_grade = "초등")', (error, rows, fields) => {
-    if (error) throw error;
-    console.log('User info is: ', rows);
-  });
-  
-  connection.end(); */
+    console.log(`Example app listening at http://localhost:${port}`)
+})

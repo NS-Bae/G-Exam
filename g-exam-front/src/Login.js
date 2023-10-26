@@ -17,8 +17,8 @@ function Main() {
   );
 }
 
-function LoginForm() {
-  const [username, setUsername] = useState('');
+function LoginForm(props) {
+  const [id, setId] = useState('');
   const [password, setPassword] = useState('');
 
   const usernamePattern = /^[a-zA-Z0-9]{4,12}$/;
@@ -26,7 +26,7 @@ function LoginForm() {
 
   const handleLogin = (e) => {
     e.preventDefault();
-    if (!usernamePattern.test(username) || !passwordPattern.test(password)) 
+    if (!usernamePattern.test(id) || !passwordPattern.test(password)) 
     {
       const errormessage = '사용자 이름과 비밀번호는 영문 대/소문자와 숫자만 허용하고 아이디의 길이는 4자에서 12자 사이, 비밀번호의 길이는 8자에서 20자 사이여야 합니다.';
       alert(errormessage);
@@ -38,7 +38,7 @@ function LoginForm() {
       headers : {
         'Content-type' : 'application/json', 
       }, 
-      body : JSON.stringify({username, password}), 
+      body : JSON.stringify({id, password}), 
     })
       .then(response => response.json())
       .then(data => {
@@ -49,22 +49,22 @@ function LoginForm() {
         console.error('로그인 오류:', error);
         // 오류 처리
       });
-
+/* 
     console.log('로그인 시도:', username, password);
-    alert('로그인 시도:'+ username + password);
+    alert('로그인 시도:'+ username + password); */
   };
 
   return (
-    <AuthContent title="로그인"> {/* AuthContent로 감싸기 */}
+    <AuthContent title="로그인"> 
       <form onSubmit={handleLogin}>
         <div className="input_place">
           <label>ID</label>
           <input
               id='id'
               type="text"
-              value={username}
+              value={id}
               placeholder='ID'
-              onChange={(e) => setUsername(e.target.value)}
+              onChange={(e) => setId(e.target.value)}
               required
             />
         </div>
@@ -79,7 +79,28 @@ function LoginForm() {
             required
           />
         </div>
-        <button className='test_btn' type="submit">로그인</button>
+        <button className='test_btn' type="submit" onClick={() =>{
+          const userData = {
+            userId: id,
+            userPassword: password,
+          };
+          fetch("http://localhost:4000/login", { //auth 주소에서 받을 예정
+            method: "post", // method :통신방법
+            headers: {      // headers: API 응답에 대한 정보를 담음
+              "content-type": "application/json",
+            },
+            body: JSON.stringify(userData), //userData라는 객체를 보냄
+          })
+            .then((res) => res.json())
+            .then((json) => {            
+              if(json.isLogin==="True"){
+                props.setMode("WELCOME");
+              }
+              else {
+                alert(json.isLogin)
+              }
+            });
+        }}>로그인</button>
       </form>
     </AuthContent>
   );
