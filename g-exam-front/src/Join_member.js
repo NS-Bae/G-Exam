@@ -1,5 +1,5 @@
 import './App.css';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from "react-router-dom";
 
 // AuthContent 컴포넌트 정의
@@ -18,27 +18,44 @@ function Main() {
 }
 
 function StudentJoinForm({ formType }) {
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
+  const [id, setUsername] = useState('');
+  const [pw, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [school, setSchool] = useState('');
   const [grade, setGrade] = useState('');
+  const [name, setName] = useState('');
   const [error, setError] = useState('');
+
+  const[schoolsList, setSchoolsList] = useState([]);
 
   const usernamePattern = /^[a-zA-Z0-9]{4,12}$/;
   const passwordPattern = /^[a-zA-Z0-9]{8,20}$/;
 
-  const handleJoin = (e) => {
+  const handleSchoolTypeChange = (e) => {
+    const selectedSchool = e.target.value;
+  
+    // 백엔드로 선택한 학교 유형을 보냅니다
+    fetch(`/get_school_details?school=${selectedSchool}`)
+      .then((response) => response.json())
+      .then((data) => {
+        if (data && data.schoolDetails) {
+          setSchoolsList(data.schoolDetails);
+        }
+      })
+      .catch((error) => console.error('학교 목록 불러오기 오류:', error));
+  };
+
+  const handleJoin = async (e) => {
     e.preventDefault();
 
-    if (!usernamePattern.test(username) || !passwordPattern.test(password)) 
+    if (!usernamePattern.test(id) || !passwordPattern.test(pw)) 
     {
       const errormessage = '사용자 이름과 비밀번호는 영문 대/소문자와 숫자만 허용하고 아이디의 길이는 4자에서 12자 사이, 비밀번호의 길이는 8자에서 20자 사이여야 합니다.';
       alert(errormessage);
       setError('사용자 이름과 비밀번호는 영문 대/소문자와 숫자만 허용하고 아이디의 길이는 4자에서 12자 사이, 비밀번호의 길이는 8자에서 20자 사이여야 합니다.');
       return;
     }
-    if (password !== confirmPassword) 
+    if (pw !== confirmPassword) 
     {
       const errormessage = '비밀번호와 비밀번호 확인이 일치하지 않습니다.';
       alert(errormessage);
@@ -46,16 +63,50 @@ function StudentJoinForm({ formType }) {
       return;
     }
 
-    console.log('회원가입 시도:', username, password, grade, formType);
-/*     alert('회원가입 시도:'+ username + password + school + grade);
- */
+    const formData = {
+      id,
+      pw,
+      grade,
+      name,
+      formType,
+      school, 
+      school_details: document.getElementById('school_details').value, // 학생 또는 교사 여부를 백엔드로 전달
+    };
+    try {
+      const response = await fetch('/join_member', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+      });
+  
+      if (response.ok) {
+        // 회원가입이 성공하면 처리
+        console.log('회원가입 성공');
+      } else {
+        // 회원가입 실패 또는 오류 처리
+        console.error('회원가입 실패');
+      }
+    } catch (error) {
+      console.error('네트워크 오류:', error);
+    }
+
+    console.log('회원가입 시도:', id, pw, grade, formType, school);
+
     setUsername('');
     setPassword('');
     setConfirmPassword('');
     setSchool('');
     setGrade('');
+    setName('');
     setError('');
   };
+
+  /* const handleSecondSelectChange = (e) => {
+    const selectedValue = e.target.value;
+    console.log('두 번째 select 값:', selectedValue);
+  }; */
 
   return (
     <AuthContent title="회원가입"> {/* AuthContent로 감싸기 */}
@@ -65,7 +116,7 @@ function StudentJoinForm({ formType }) {
           <input
             id='id'
             type="text"
-            value={username}
+            value={id}
             placeholder='ID'
             onChange={(e) => setUsername(e.target.value)}
             required
@@ -76,7 +127,7 @@ function StudentJoinForm({ formType }) {
           <input
             id='pw'
             type="password"
-            value={password}
+            value={pw}
             placeholder='PASSWORD'
             onChange={(e) => setPassword(e.target.value)}
             required
@@ -94,16 +145,32 @@ function StudentJoinForm({ formType }) {
           />
         </div>
         <div className="input_place">
+          <label>이름</label>
+          <input
+            id='name'
+            type="name"
+            value={name}
+            placeholder='name'
+            onChange={(e) => setName(e.target.value)}
+            required
+          />
+        </div>
+        <div className="input_place">
           <label>학교</label>
           <div className='select_place'>
-            <select id='school_grade'>
+            <select id='school_grade' onChange={handleSchoolTypeChange}>
               <option value={''}>선택하세요</option>
               <option value={'초등'}>초등학교</option>
               <option value={'중등'}>중학교</option>
               <option value={'고등'}>고등학교</option>
             </select>
-            <select>
+            <select id="school_details">
               <option value={''}>선택하세요</option>
+              {schoolsList.map((schoolOption, index) => (
+                <option key={index} value={schoolOption.school_name}>
+                  {schoolOption.school_name}
+                </option>
+              ))}
             </select>
           </div>
         </div>
@@ -129,6 +196,7 @@ function TeacherJoinForm({ formType }) {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [subject, setSubject] = useState('');
+  const [name, setName] = useState('');
   const [error, setError] = useState('');
 
   const usernamePattern = /^[a-zA-Z0-9]{4,12}$/;
@@ -159,6 +227,7 @@ function TeacherJoinForm({ formType }) {
     setPassword('');
     setConfirmPassword('');
     setSubject('');
+    setName('');
     setError('');
   };
 
@@ -195,6 +264,17 @@ function TeacherJoinForm({ formType }) {
             value={confirmPassword}
             placeholder='PASSWORD'
             onChange={(e) => setConfirmPassword(e.target.value)}
+            required
+          />
+        </div>
+        <div className="input_place">
+          <label>이름</label>
+          <input
+            id='name'
+            type="name"
+            value={name}
+            placeholder='name'
+            onChange={(e) => setName(e.target.value)}
             required
           />
         </div>

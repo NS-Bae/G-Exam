@@ -19,14 +19,14 @@ function Main() {
 
 function LoginForm(props) {
   const [id, setId] = useState('');
-  const [password, setPassword] = useState('');
+  const [pw, setPW] = useState('');
 
   const usernamePattern = /^[a-zA-Z0-9]{4,12}$/;
   const passwordPattern = /^[a-zA-Z0-9]{8,20}$/;
 
   const handleLogin = (e) => {
     e.preventDefault();
-    if (!usernamePattern.test(id) || !passwordPattern.test(password)) 
+    if (!usernamePattern.test(id) || !passwordPattern.test(pw)) 
     {
       const errormessage = '사용자 이름과 비밀번호는 영문 대/소문자와 숫자만 허용하고 아이디의 길이는 4자에서 12자 사이, 비밀번호의 길이는 8자에서 20자 사이여야 합니다.';
       alert(errormessage);
@@ -38,7 +38,7 @@ function LoginForm(props) {
       headers : {
         'Content-type' : 'application/json', 
       }, 
-      body : JSON.stringify({id, password}), 
+      body : JSON.stringify({id, pw}), 
     })
       .then(response => response.json())
       .then(data => {
@@ -49,18 +49,19 @@ function LoginForm(props) {
         console.error('로그인 오류:', error);
         // 오류 처리
       });
-/* 
-    console.log('로그인 시도:', username, password);
-    alert('로그인 시도:'+ username + password); */
+
+    console.log('로그인 시도:', id, pw);
+    alert('로그인 시도:'+ id + pw);
   };
 
   return (
     <AuthContent title="로그인"> 
-      <form onSubmit={handleLogin}>
+      <form action='/login' onSubmit={handleLogin}>
         <div className="input_place">
           <label>ID</label>
           <input
               id='id'
+              name='id'
               type="text"
               value={id}
               placeholder='ID'
@@ -72,19 +73,20 @@ function LoginForm(props) {
           <label>PASSWORD</label>
           <input
             id='pw'
+            name='pw'
             type="password"
-            value={password}
+            value={pw}
             placeholder='PASSWORD'
-            onChange={(e) => setPassword(e.target.value)}
+            onChange={(e) => setPW(e.target.value)}
             required
           />
         </div>
-        <button className='test_btn' type="submit" onClick={() =>{
+        <button className='test_btn' type="submit" value="로그인" onClick={() =>{
           const userData = {
             userId: id,
-            userPassword: password,
+            userPassword: pw,
           };
-          fetch("http://localhost:4000/login", { //auth 주소에서 받을 예정
+          fetch("http://localhost:3000/login", { //auth 주소에서 받을 예정
             method: "post", // method :통신방법
             headers: {      // headers: API 응답에 대한 정보를 담음
               "content-type": "application/json",
@@ -144,8 +146,6 @@ function AutoLoginCheck()
 function ControlMemberLabel(props)
 {
   const {labels} = props;
-  
-
   return(
     labels.map((item, index) => (
       <Link to = {`/${item.id}`} key = {index}>
