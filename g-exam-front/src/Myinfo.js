@@ -10,16 +10,22 @@ function Main()
   )
 }
 function MyInformation() {
-  const [userData, setUserData] = useState([]);
+  const [user, setUser] = useState([]);
 
   useEffect(() => {
-    fetch('/myinformation')
-      .then(response => response.json())
-      .then(data => {
-        setUserData(data); // 서버에서 받은 데이터를 상태에 저장
+    // `/profile` 엔드포인트로 GET 요청을 보내 세션 정보를 가져옵니다.
+    fetch('/profile')
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error('HTTP 오류 ' + response.status);
+        }
+        return response.json();
       })
-      .catch(error => {
-        console.error('데이터 가져오기 중 오류 발생:', error);
+      .then((data) => {
+        setUser(data.user);
+      })
+      .catch((error) => {
+        console.error('세션 정보를 가져오는 중 오류 발생:', error);
       });
   }, []);
 
@@ -28,13 +34,14 @@ function MyInformation() {
       <div className="wrap">
         <Main />
         <h2>User Information</h2>
-        <ul>
-          {userData.map(user => (
-            <li key={user.id}>
-              ID: {user.id}, Name: {user.name}, School: {user.school}, Grade: {user.grade}
-            </li>
-          ))}
-        </ul>
+        {user ? (
+        <div>
+          <p>사용자 이름: {user.id}</p>
+          {/* 다른 사용자 정보를 여기에 추가하세요 */}
+        </div>
+      ) : (
+        <p>로그인되지 않았습니다.</p>
+      )}
       </div>
     </div>
   );

@@ -4,79 +4,64 @@ const db = require('./db/db');
 const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
 const session = require('express-session');
-const passport = require('passport')
-  , LocalStrategy = require('passport-local').Strategy;
+const passport = require('passport');
 const flash = require('connect-flash');
 const mysql = require('mysql2/promise');
+const morgan = require('morgan');
 
 router.use(bodyParser.urlencoded({ extended: false }));
 router.use(bodyParser.json());
-router.use(cookieParser('keyboard cat'));
-router.use(session({secret: 'keyboard cat'}));
 router.use(passport.initialize());
 router.use(passport.session());
 router.use(flash());
 router.use(express.json());
 
-router.use(session({
-  resave: false, 
-  saveUninitialized: false, 
-  secret: process.env.COOKIS_SECRET, 
-  cookie:{
-    httpOnly:true,
-    secure:false,
+router.get('/profile', (req, res) => {
+  if (req.isAuthenticated()) {
+    // 세션 정보가 있는 경우 세션 정보를 클라이언트로 보냅니다.
+    res.json({ user: req.user });
+  } else {
+    res.status(401).json({ message: '로그인되지 않았습니다.' });
   }
-}));
-
-passport.serializeUser(function(user, done) { done(null, id); }); 
-passport.deserializeUser(function(id, done) {
-  user_id.findById(id, function(err, user) 
-  { done(err, user); }); 
 });
 
-passport.use(new LocalStrategy({
-  usernameField:'id', 
-  passwordField:'pw',
-},async function(id, pw, done)
+router.post('/login', function(req, res, next)
 {
-  var sql='select id, pw from user_student where id like?;';
-  var params=[id]; 
-  db.query(sql, params, function(err, rows)
-  {
-    if(err) return done(err);
-    if(rows.length === 0)
-    {
-      console.log("등록되지 않은 사용자입니다.");
-      return done(null, false, { message: 'Incorrect' });
+  passport.authenticate('local', function(err, user, info) {
+    if (err) {
+      console.log('에러 발생: ', err);
+      return res.status(500).json({ error: '에러 발생' });
     }
-    if(rows[0].pw!==pw) 
-    { 
-      console.log('비밀번호가 일치하지 않습니다.');
-      return done(null, false, { message: "pw not found" });
+    if (!user) {
+      console.log('사용자 인증 실패');
+      return res.status(401).json({ error: '사용자 인증 실패' });
     }
-    if(rows[0].pw===pw)
-    {
-      console.log('비밀번호가 일치합니다.');
-      var user= rows[0];
-      return done(null, user); 
-    }
-  })
-}));
+    
+    req.session.user = user;
 
-router.post('/login', async function(req, res, next)
-{
-  passport.authenticate('local',(authError,user,info)=>{//로컬전략에따른 로그인시도 응답작성
-    if(authError)
-    {
-      return res.json('user pw not found');
-    }
-    if(!user)
-    {
-      return res.json('user id not found');
-    }
-    return res.json('check');
-  })
-  (req,res,next);
+    req.login(user, function(loginErr) {
+      if (loginErr) {
+        console.log('로그인 실패: ', loginErr);
+        return res.status(500).json({ error: '로그인 실패' });
+      }
+      
+      console.log('로그인 성공');
+      return res.json({ message: '로그인 성공' });
+    });
+    
+  })(req, res, next);
+});
+
+router.get('/profile', (req, res) => {
+  if (req.isAuthenticated()) {
+    // Check if the user is authenticated based on your authentication mechanism
+    // If using Passport.js, you can use req.isAuthenticated() or req.user
+    const user = req.session.user; // Access user information from the session
+
+    res.json({ user: user });
+  } else {
+    res.status(401).json({ message: '로그인되지 않았습니다.' });
+  }
 });
 //변경 불필요. 학교리스트 조회 가능.
 router.get('/get_school_details', async (req, res) => {

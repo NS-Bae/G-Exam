@@ -1,7 +1,6 @@
 import './App.css';
 import React, { useState, useEffect } from 'react';
 import { Link } from "react-router-dom";
-
 // AuthContent 컴포넌트 정의
 function AuthContent({ title, children }) {
   return (
@@ -24,32 +23,39 @@ function LoginForm(props) {
   const usernamePattern = /^[a-zA-Z0-9]{4,12}$/;
   const passwordPattern = /^[a-zA-Z0-9]{8,20}$/;
 
-  const handleLogin = (e) => {
+  async function handleLogin(e) {
     e.preventDefault();
-    if (!usernamePattern.test(id) || !passwordPattern.test(pw)) 
-    {
+    if (!usernamePattern.test(id) || !passwordPattern.test(pw)) {
       const errormessage = '사용자 이름과 비밀번호는 영문 대/소문자와 숫자만 허용하고 아이디의 길이는 4자에서 12자 사이, 비밀번호의 길이는 8자에서 20자 사이여야 합니다.';
       alert(errormessage);
       return;
     }
-
-    fetch('/login', {
-      method : 'POST', 
-      headers : {
-        'Content-type' : 'application/json', 
-      }, 
-      body : JSON.stringify({id, pw}), 
-    })
-      .then(response => response.json())
-      .then(data => {
-        console.log(data);
-        // 원하는 동작 수행
-      })
-      .catch(error => {
-        console.error('로그인 오류:', error);
-        // 오류 처리
+  
+    try {
+      const response = await fetch('/login', {
+        method: 'POST',
+        headers: {
+          'Content-type': 'application/json',
+        },
+        body: JSON.stringify({ id, pw }),
       });
-  };
+  
+      if (response.ok) 
+      {
+        const data = await response.json();
+        console.log(data);
+        window.location.href = '/';
+      } 
+      else 
+      {
+        console.error('로그인 실패:', response.status);
+      }
+    } 
+    catch (error) 
+    {
+      console.error('로그인 오류:', error);
+    }
+  }
 
   return (
     <AuthContent title="로그인"> 
@@ -78,28 +84,7 @@ function LoginForm(props) {
             required
           />
         </div>
-        <button className='test_btn' type="submit" value="로그인" onClick={() =>{
-          const userData = {
-            userId: id,
-            userPassword: pw,
-          };
-          fetch("http://localhost:3000/login", { //auth 주소에서 받을 예정
-            method: "post", // method :통신방법
-            headers: {      // headers: API 응답에 대한 정보를 담음
-              "content-type": "application/json",
-            },
-            body: JSON.stringify(userData), //userData라는 객체를 보냄
-          })
-            .then((res) => res.json())
-            .then((json) => {            
-              if(json.isLogin==="True"){
-                props.setMode("WELCOME");
-              }
-              else {
-                console.log(json.isLogin);
-              }
-            });
-        }}>로그인</button>
+        <button className='test_btn' type="submit" value="로그인">로그인</button>
       </form>
     </AuthContent>
   );
