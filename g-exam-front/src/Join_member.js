@@ -2,7 +2,6 @@ import './App.css';
 import React, { useState } from 'react';
 import { Link } from "react-router-dom";
 
-// AuthContent 컴포넌트 정의
 function AuthContent({ title, children }) {
   return (
     <div className="auth_container">
@@ -24,6 +23,7 @@ function StudentJoinForm({ formType }) {
   const [school, setSchool] = useState('');
   const [grade, setGrade] = useState('');
   const [name, setName] = useState('');
+  // eslint-disable-next-line no-unused-vars
   const [error, setError] = useState('');
 
   const[schoolsList, setSchoolsList] = useState([]);
@@ -72,25 +72,31 @@ function StudentJoinForm({ formType }) {
       school, 
       school_details: document.getElementById('school_details').value, // 학생 또는 교사 여부를 백엔드로 전달
     };
-    try {
-      const response = await fetch('/join_member', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formData),
+    
+    fetch('/join_member', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(formData),
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        if (data.message) 
+        {
+          // 회원가입이 성공한 경우
+          alert(data.message); 
+          window.location.href = '/login';
+        } 
+        else if (data.error) 
+        {
+          // 오류가 있는 경우
+          alert(data.error);
+        }
+      })
+      .catch((error) => {
+        console.error('네트워크 오류:', error);
       });
-  
-      if (response.ok) {
-        // 회원가입이 성공하면 처리
-        console.log('회원가입 성공');
-      } else {
-        // 회원가입 실패 또는 오류 처리
-        console.error('회원가입 실패');
-      }
-    } catch (error) {
-      console.error('네트워크 오류:', error);
-    }
 
     console.log('회원가입 시도:', id, pw, grade, formType, school);
 
@@ -192,6 +198,7 @@ function TeacherJoinForm({ formType }) {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [subject, setSubject] = useState('');
   const [name, setName] = useState('');
+  // eslint-disable-next-line no-unused-vars
   const [error, setError] = useState('');
 
   const usernamePattern = /^[a-zA-Z0-9]{4,12}$/;
@@ -222,25 +229,30 @@ function TeacherJoinForm({ formType }) {
       subject,
       formType,
     };
-    try {
-      const response = await fetch('/join_member', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formData),
+    fetch('/join_member', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(formData),
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        if (data.message) 
+        {
+          // 회원가입이 성공한 경우
+          alert(data.message); 
+          window.location.href = '/login';
+        } 
+        else if (data.error) 
+        {
+          // 오류가 있는 경우
+          alert(data.error);
+        }
+      })
+      .catch((error) => {
+        console.error('네트워크 오류:', error);
       });
-  
-      if (response.ok) {
-        // 회원가입이 성공하면 처리
-        console.log('회원가입 성공');
-      } else {
-        // 회원가입 실패 또는 오류 처리
-        console.error('회원가입 실패');
-      }
-    } catch (error) {
-      console.error('네트워크 오류:', error);
-    }
 
     console.log('회원가입 시도:', id, pw, subject, formType);
     /* alert('회원가입 시도:'+ username + password + subject); */

@@ -46,7 +46,7 @@ passport.use(new LocalStrategy({
     if(err) return done(err);
     if(rows.length === 0)
     {
-      console.log("결과 없음");
+      console.log("등록되지 않은 사용자입니다.");
       return done(null, false, { message: 'Incorrect' });
     }
     if(rows[0].pw!==pw) 
@@ -145,7 +145,7 @@ router.post('/join_member', function(req, res) {
   else
   {
     console.log("formType이 잘못되었습니다.");
-    alert("formType이 잘못되었습니다.");
+    res.status(400).json({ error: 'formType이 잘못되었습니다.' });
   }
 });
 //세션 및 쿠키유지 개발 후 변경 필요.

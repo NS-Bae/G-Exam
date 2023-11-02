@@ -49,9 +49,6 @@ function LoginForm(props) {
         console.error('로그인 오류:', error);
         // 오류 처리
       });
-
-    console.log('로그인 시도:', id, pw);
-    alert('로그인 시도:'+ id + pw);
   };
 
   return (
@@ -99,7 +96,7 @@ function LoginForm(props) {
                 props.setMode("WELCOME");
               }
               else {
-                alert(json.isLogin)
+                console.log(json.isLogin);
               }
             });
         }}>로그인</button>
