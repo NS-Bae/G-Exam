@@ -31,10 +31,7 @@ router.use(session({
 passport.serializeUser(function(user, done) { done(null, id); }); 
 passport.deserializeUser(function(id, done) {
   user_id.findById(id, function(err, user) 
-  
   { done(err, user); }); 
-
-
 });
 
 passport.use(new LocalStrategy({
@@ -46,7 +43,6 @@ passport.use(new LocalStrategy({
   var params=[id]; 
   db.query(sql, params, function(err, rows)
   {
-    console.log(rows[0]);
     if(err) return done(err);
     if(rows.length === 0)
     {
@@ -55,12 +51,12 @@ passport.use(new LocalStrategy({
     }
     if(rows[0].pw!==pw) 
     { 
-      console.log('비버니틀려용');
+      console.log('비밀번호가 일치하지 않습니다.');
       return done(null, false, { message: "pw not found" });
     }
     if(rows[0].pw===pw)
     {
-      console.log('비번이마자용');
+      console.log('비밀번호가 일치합니다.');
       var user= rows[0];
       return done(null, user); 
     }
@@ -69,11 +65,10 @@ passport.use(new LocalStrategy({
 
 router.post('/login', async function(req, res, next)
 {
-  console.log(`Request received for ${req.url}`);
   passport.authenticate('local',(authError,user,info)=>{//로컬전략에따른 로그인시도 응답작성
     if(authError)
     {
-      return res.json('user pww not found');
+      return res.json('user pw not found');
     }
     if(!user)
     {
@@ -81,9 +76,9 @@ router.post('/login', async function(req, res, next)
     }
     return res.json('check');
   })
-  (req,res,next);//미들웨어실행
+  (req,res,next);
 });
-
+//변경 불필요. 학교리스트 조회 가능.
 router.get('/get_school_details', async (req, res) => {
   const schoolType = req.query.school;
   try {
@@ -101,32 +96,59 @@ router.get('/get_school_details', async (req, res) => {
     res.status(500).json({ error: 'An error occurred while fetching schools.' });
   }
 });
-
+//변경 불필요. 회원가입 완료
 router.post('/join_member', function(req, res) {
-  const user_id = req.body.id;
-  const user_pw = req.body.pw;
-  const name = req.body.name;
-  const school = req.body.school_details;
-  const grade = req.body.grade;
+  const formType = req.body.formType;
+  if(formType === 'student')
+  {
+    const user_id = req.body.id;
+    const user_pw = req.body.pw;
+    const name = req.body.name;
+    const school = req.body.school_details;
+    const grade = req.body.grade;
 
-  // 여기에서 유효성 검사 및 에러 처리를 수행할 수 있습니다.
+    const sql = 'INSERT INTO user_student VALUES (?, ?, ?, ?, ?, 0)';
+    const params = [user_id, user_pw, name, school, grade];
 
-  // 데이터베이스에 데이터 삽입
-  const sql = 'INSERT INTO user_student VALUES (?, ?, ?, ?, ?, 0)';
-  const params = [user_id, user_pw, name, school, grade];
+    console.log(user_id, user_pw, name, school, grade);
+    
+    db.query(sql, params, function(err, result) {
+      if (err) {
+        console.log(err);
+        res.status(500).json({ error: '데이터베이스에 저장 중 오류가 발생했습니다.' });
+      } else {
+        res.status(200).json({ message: '회원가입이 성공적으로 완료되었습니다.' });
+      }
+    });
+  }
+  else if (formType === 'teacher')
+  {
+    const user_id = req.body.id;
+    const user_pw = req.body.pw;
+    const name = req.body.name;
+    const subject = req.body.subject;
 
-  console.log(user_id, user_pw, name, school, grade);
-  
-  db.query(sql, params, function(err, result) {
-    if (err) {
-      console.log(err);
-      res.status(500).json({ error: '데이터베이스에 저장 중 오류가 발생했습니다.' });
-    } else {
-      res.status(200).json({ message: '회원가입이 성공적으로 완료되었습니다.' });
-    }
-  });
+    const sql = 'INSERT INTO user_teacher VALUES (?, ?, ?, ?)';
+    const params = [user_id, user_pw, name, subject];
+
+    console.log(user_id, user_pw, name, subject);
+    
+    db.query(sql, params, function(err, result) {
+      if (err) {
+        console.log(err);
+        res.status(500).json({ error: '데이터베이스에 저장 중 오류가 발생했습니다.' });
+      } else {
+        res.status(200).json({ message: '회원가입이 성공적으로 완료되었습니다.' });
+      }
+    });
+  }
+  else
+  {
+    console.log("formType이 잘못되었습니다.");
+    alert("formType이 잘못되었습니다.");
+  }
 });
-
+//세션 및 쿠키유지 개발 후 변경 필요.
 router.get('/myinformation', (req, res) => {
   console.log(`Request received for ${req.url}`);
   db.query('SELECT * FROM user_student WHERE ready = false', function (error, results, fields) {

@@ -1,5 +1,5 @@
 import './App.css';
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Link } from "react-router-dom";
 
 // AuthContent 컴포넌트 정의
@@ -103,13 +103,8 @@ function StudentJoinForm({ formType }) {
     setError('');
   };
 
-  /* const handleSecondSelectChange = (e) => {
-    const selectedValue = e.target.value;
-    console.log('두 번째 select 값:', selectedValue);
-  }; */
-
   return (
-    <AuthContent title="회원가입"> {/* AuthContent로 감싸기 */}
+    <AuthContent title="회원가입">
       <form onSubmit={handleJoin}>
         <div className="input_place">
           <label>아이디</label>
@@ -192,8 +187,8 @@ function StudentJoinForm({ formType }) {
 }
 
 function TeacherJoinForm({ formType }) {
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
+  const [id, setId] = useState('');
+  const [pw, setPw] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [subject, setSubject] = useState('');
   const [name, setName] = useState('');
@@ -202,17 +197,17 @@ function TeacherJoinForm({ formType }) {
   const usernamePattern = /^[a-zA-Z0-9]{4,12}$/;
   const passwordPattern = /^[a-zA-Z0-9]{8,20}$/;
 
-  const handleJoin = (e) => {
+  const handleJoin = async (e) => {
     e.preventDefault();
 
-    if (!usernamePattern.test(username) || !passwordPattern.test(password)) 
+    if (!usernamePattern.test(id) || !passwordPattern.test(pw)) 
     {
       const errormessage = '사용자 이름과 비밀번호는 영문 대/소문자와 숫자만 허용하고 아이디의 길이는 4자에서 12자 사이, 비밀번호의 길이는 8자에서 20자 사이여야 합니다.';
       alert(errormessage);
       setError('사용자 이름과 비밀번호는 영문 대/소문자와 숫자만 허용하고 아이디의 길이는 4자에서 12자 사이, 비밀번호의 길이는 8자에서 20자 사이여야 합니다.');
       return;
     }
-    if (password !== confirmPassword) 
+    if (pw !== confirmPassword) 
     {
       const errormessage = '비밀번호와 비밀번호 확인이 일치하지 않습니다.';
       alert(errormessage);
@@ -220,11 +215,38 @@ function TeacherJoinForm({ formType }) {
       return;
     }
 
-    console.log('회원가입 시도:', username, password, subject, formType);
+    const formData = {
+      id,
+      pw,
+      name,
+      subject,
+      formType,
+    };
+    try {
+      const response = await fetch('/join_member', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+      });
+  
+      if (response.ok) {
+        // 회원가입이 성공하면 처리
+        console.log('회원가입 성공');
+      } else {
+        // 회원가입 실패 또는 오류 처리
+        console.error('회원가입 실패');
+      }
+    } catch (error) {
+      console.error('네트워크 오류:', error);
+    }
+
+    console.log('회원가입 시도:', id, pw, subject, formType);
     /* alert('회원가입 시도:'+ username + password + subject); */
 
-    setUsername('');
-    setPassword('');
+    setId('');
+    setPw('');
     setConfirmPassword('');
     setSubject('');
     setName('');
@@ -239,9 +261,9 @@ function TeacherJoinForm({ formType }) {
           <input
             id='id'
             type="text"
-            value={username}
+            value={id}
             placeholder='ID'
-            onChange={(e) => setUsername(e.target.value)}
+            onChange={(e) => setId(e.target.value)}
             required
           />
         </div>
@@ -250,9 +272,9 @@ function TeacherJoinForm({ formType }) {
           <input
             id='pw'
             type="password"
-            value={password}
+            value={pw}
             placeholder='PASSWORD'
-            onChange={(e) => setPassword(e.target.value)}
+            onChange={(e) => setPw(e.target.value)}
             required
           />
         </div>
