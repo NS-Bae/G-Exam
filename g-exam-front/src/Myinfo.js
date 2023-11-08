@@ -13,7 +13,6 @@ function MyInformation() {
   const [user, setUser] = useState([]);
 
   useEffect(() => {
-    // `/profile` 엔드포인트로 GET 요청을 보내 세션 정보를 가져옵니다.
     fetch('/profile')
       .then((response) => {
         if (!response.ok) {
@@ -36,8 +35,10 @@ function MyInformation() {
         <h2>User Information</h2>
         {user ? (
         <div>
-          <p>사용자 이름: {user.id}</p>
-          {/* 다른 사용자 정보를 여기에 추가하세요 */}
+          <p>사용자 ID: {user.id}</p>
+          <p>사용자 이름: {user.name}</p>
+          <p>사용자 학교: {user.school}</p>
+          <p>사용자 학년: {user.grade}</p>
         </div>
       ) : (
         <p>로그인되지 않았습니다.</p>

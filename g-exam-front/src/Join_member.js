@@ -254,9 +254,6 @@ function TeacherJoinForm({ formType }) {
         console.error('네트워크 오류:', error);
       });
 
-    console.log('회원가입 시도:', id, pw, subject, formType);
-    /* alert('회원가입 시도:'+ username + password + subject); */
-
     setId('');
     setPw('');
     setConfirmPassword('');

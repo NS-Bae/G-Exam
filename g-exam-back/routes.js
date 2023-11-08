@@ -16,6 +16,17 @@ router.use(passport.session());
 router.use(flash());
 router.use(express.json());
 
+router.get('/checksession', (req, res) => {
+  if(req.session && req.session.passport && req.session.passport.user) 
+  {
+    res.json({isLoggedIn : true});
+  }
+  else
+  {
+    res.json({isLoggedIn : false});
+  }
+});
+
 router.get('/profile', (req, res) => {
   if (req.isAuthenticated()) {
     // 세션 정보가 있는 경우 세션 정보를 클라이언트로 보냅니다.
@@ -51,17 +62,18 @@ router.post('/login', function(req, res, next)
     
   })(req, res, next);
 });
-
-router.get('/profile', (req, res) => {
-  if (req.isAuthenticated()) {
-    // Check if the user is authenticated based on your authentication mechanism
-    // If using Passport.js, you can use req.isAuthenticated() or req.user
-    const user = req.session.user; // Access user information from the session
-
-    res.json({ user: user });
-  } else {
-    res.status(401).json({ message: '로그인되지 않았습니다.' });
-  }
+router.post('/logout', function (req, res) {
+  // 세션 파괴를 시도합니다.
+  req.session.destroy(function (err) {
+    if (err) {
+      // 세션 파괴에 실패한 경우, 오류를 처리합니다.
+      console.error('세션 파괴 중 오류 발생:', err);
+      res.status(500).json({ error: '로그아웃 중 오류가 발생했습니다.' });
+    } else {
+      // 세션 파괴에 성공한 경우, 홈페이지로 리디렉션합니다.
+      res.json({ success: true });
+    }
+  });
 });
 //변경 불필요. 학교리스트 조회 가능.
 router.get('/get_school_details', async (req, res) => {
