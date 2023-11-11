@@ -39,7 +39,7 @@ passport.serializeUser(function(user, done) {
   });
   
 passport.deserializeUser(function(id, done) {
-    db.query('SELECT * FROM user_student WHERE id = ?', [id], function (err, results) {
+    db.query('SELECT * FROM users WHERE id = ?', [id], function (err, results) {
         if (err || results.length === 0) {
         return done(err, null);
         }
@@ -52,7 +52,7 @@ passport.use(new LocalStrategy({
     passwordField:'pw',
   },async function(id, pw, done)
   {
-    var sql='select id, pw from user_student where id like?;';
+    var sql='select id, pw from users where id like?;';
     var params=[id]; 
     db.query(sql, params, function(err, rows)
     {

@@ -104,7 +104,7 @@ router.post('/join_member', function(req, res) {
     const school = req.body.school_details;
     const grade = req.body.grade;
 
-    const sql = 'INSERT INTO user_student VALUES (?, ?, ?, ?, ?, 0)';
+    const sql = 'INSERT INTO users VALUES (?, ?, ?, "학생", 0, ?, ?, null)';
     const params = [user_id, user_pw, name, school, grade];
 
     console.log(user_id, user_pw, name, school, grade);
@@ -125,7 +125,7 @@ router.post('/join_member', function(req, res) {
     const name = req.body.name;
     const subject = req.body.subject;
 
-    const sql = 'INSERT INTO user_teacher VALUES (?, ?, ?, ?)';
+    const sql = 'INSERT INTO users VALUES (?, ?, ?, "선생", 0, null, null, ?)';
     const params = [user_id, user_pw, name, subject];
 
     console.log(user_id, user_pw, name, subject);
@@ -144,21 +144,6 @@ router.post('/join_member', function(req, res) {
     console.log("formType이 잘못되었습니다.");
     res.status(400).json({ error: 'formType이 잘못되었습니다.' });
   }
-});
-//세션 및 쿠키유지 개발 후 변경 필요.
-router.get('/myinformation', (req, res) => {
-  console.log(`Request received for ${req.url}`);
-  db.query('SELECT * FROM user_student WHERE ready = false', function (error, results, fields) {
-    if (error) 
-    {
-      console.error(error);
-      res.status(500).send('Error retrieving data');
-    } 
-    else 
-    {
-      res.json(results);
-    }
-  });
 });
 
 module.exports = router;

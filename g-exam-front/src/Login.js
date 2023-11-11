@@ -9,7 +9,6 @@ function AuthContent({ title, children }) {
     </div>
   );
 }
-
 function Main() {
   return (
     <h1><Link to='/'>G-PLAN</Link></h1>

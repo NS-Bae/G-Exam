@@ -226,3 +226,29 @@
     margin: 0;
     margin-right: 5%;
   }
+  .btn_section
+  {
+    display: flex;
+    width: 100%;
+    flex-direction: row;
+    justify-content: space-around;
+    margin-top: 15px;
+  }
+  .control_info:hover
+  {
+    color: #ffa600;
+  }
+  .exam_register
+  {
+    background-color: white;
+    border: 0;
+    text-align: center;
+    font-size: 1em;
+    font-weight: bold;
+    cursor: pointer;
+    padding-bottom: 15px;
+  }
+  .exam_register:hover
+  {
+    color: #ffa600;
+  }
