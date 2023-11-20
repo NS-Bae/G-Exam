@@ -19,43 +19,31 @@ function LoginForm(props) {
   const [id, setId] = useState('');
   const [pw, setPW] = useState('');
 
-  const usernamePattern = /^[a-zA-Z0-9]{4,12}$/;
-  const passwordPattern = /^[a-zA-Z0-9]{8,20}$/;
-
   async function handleLogin(e) {
     e.preventDefault();
-    if (!usernamePattern.test(id) || !passwordPattern.test(pw)) {
-      const errormessage = '사용자 이름과 비밀번호는 영문 대/소문자와 숫자만 허용하고 아이디의 길이는 4자에서 12자 사이, 비밀번호의 길이는 8자에서 20자 사이여야 합니다.';
-      alert(errormessage);
-      return;
-    }
-  
-    try {
-      const response = await fetch('/login', {
-        method: 'POST',
-        headers: {
-          'Content-type': 'application/json',
-        },
-        body: JSON.stringify({ id, pw }),
-      });
-  
-      if (response.ok) 
-      {
-        const data = await response.json();
-        console.log(data);
-        window.location.href = '/';
-      } 
-      else 
-      {
-        console.error('로그인 실패:', response.status);
-      }
-    } 
-    catch (error) 
-    {
-      console.error('로그인 오류:', error);
-    }
-  }
 
+    fetch('/login', {
+      method: 'POST',
+      headers: {
+        'Content-type': 'application/json',
+      },
+      body: JSON.stringify({ id, pw }),
+    })
+    .then((response) => {
+      if (response.ok) {
+        // 로그인 성공
+        window.location.href = '/';
+      } else {
+        // 로그인 실패
+        response.json().then((data) => {
+          alert(data.error); // Passport에서 전달한 메시지 출력
+        });
+      }
+    })
+    .catch((error) => {
+      console.error('로그인 오류:', error);
+    });
+  }
   return (
     <AuthContent title="로그인"> 
       <form action='/login' onSubmit={handleLogin}>
@@ -88,6 +76,7 @@ function LoginForm(props) {
     </AuthContent>
   );
 }
+
 
 function AutoLoginCheck()
 {

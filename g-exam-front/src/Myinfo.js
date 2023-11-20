@@ -9,11 +9,72 @@ function Main()
     <h1><Link to ='/'>G-PLAN</Link></h1>
   )
 }
-/* function InfoTable()
-{
+const UserInfoTable = ({ user }) => {
+  if(user.user_type === '학생')
+  {
+    return (
+      <table className='info_table'>
+        <tbody>
+          <tr>
+            <td>사용자 ID</td>
+            <td> : </td>
+            <td>{user.id}</td>
+          </tr>
+          <tr>
+            <td>사용자 이름</td>
+            <td> : </td>
+            <td>{user.name}</td>
+          </tr>
+          <tr>
+            <td>사용자 분류</td>
+            <td> : </td>
+            <td>{user.user_type}</td>
+          </tr>
+          <tr>
+            <td>사용자 학교</td>
+            <td> : </td>
+            <td>{user.school}</td>
+          </tr>
+          <tr>
+            <td>사용자 학년</td>
+            <td> : </td>
+            <td>{user.grade}</td>
+          </tr>
+        </tbody>
+      </table>
+    );
+  }
+  else if(user.user_type === '선생')
+  {
+    return (
+      <table className='info_table'>
+        <tbody>
+          <tr>
+            <td>사용자 ID</td>
+            <td> : </td>
+            <td>{user.id}</td>
+          </tr>
+          <tr>
+            <td>사용자 이름</td>
+            <td> : </td>
+            <td>{user.name}</td>
+          </tr>
+          <tr>
+            <td>사용자 분류</td>
+            <td> : </td>
+            <td>{user.user_type}</td>
+          </tr>
+          <tr>
+            <td>강의 과목</td>
+            <td> : </td>
+            <td>{user.major}</td>
+          </tr>
+        </tbody>
+      </table>
+    );
+  }
+};
 
-}
- */
 function TeacherBtn()
 {
   return(
@@ -35,10 +96,10 @@ function StudentBtn()
   return(
     <div className='btn_section'>
       <button className="exam_register">
-        기출시험 결과보기
+        <Link to = '/record'>기출시험 결과보기</Link>
       </button>
       <button className="exam_register">
-        영단어시험 결과보기
+        <Link to = '/record'>영단어시험 결과보기</Link>
       </button>
     </div>
   )
@@ -69,14 +130,7 @@ function MyInformation() {
       <div className="background">
         <div className="wrap">
           <Main />
-          <h2>나의 정보</h2>
-          <div>
-            <p>사용자 ID  : {user.id}</p>
-            <p>사용자 분류: {user.user_type}</p>
-            <p>사용자 이름: {user.name}</p>
-            <p>사용자 학교: {user.school}</p>
-            <p>사용자 학년: {user.grade}</p>
-          </div>
+          <UserInfoTable user={user}/>
           <StudentBtn/>
         </div>
       </div>
@@ -88,13 +142,7 @@ function MyInformation() {
       <div className="background">
         <div className="wrap">
           <Main />
-          <h2>나의 정보</h2>
-          <div>
-            <p>사용자 ID  : {user.id}</p>
-            <p>사용자 분류: {user.user_type}</p>
-            <p>사용자 이름: {user.name}</p>
-            <p>강의 과목: {user.major}</p>
-          </div>
+          <UserInfoTable user={user}/>
           <TeacherBtn/>
         </div>
       </div>

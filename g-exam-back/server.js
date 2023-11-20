@@ -52,8 +52,16 @@ passport.use(new LocalStrategy({
     passwordField:'pw',
   },async function(id, pw, done)
   {
+    const usernamePattern = /^[a-zA-Z0-9]{4,12}$/;
+    const passwordPattern = /^[a-zA-Z0-9]{8,20}$/;
+    
+    if (!usernamePattern.test(id) || !passwordPattern.test(pw)) {
+      return done(null, false, { message: '잘못된 형식의 ID 또는 비밀번호입니다.' });
+    }
+
     var sql='select id, pw from users where id like?;';
     var params=[id]; 
+    
     db.query(sql, params, function(err, rows)
     {
       if(err) return done(err);
