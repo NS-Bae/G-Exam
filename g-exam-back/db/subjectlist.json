@@ -1,0 +1,26 @@
+[
+  {
+    "major_name": "국어",
+    "major_id": 1
+  },
+  {
+    "major_name": "영어",
+    "major_id": 2
+  },
+  {
+    "major_name": "수학",
+    "major_id": 3
+  },
+  {
+    "major_name": "사회",
+    "major_id": 4
+  },
+  {
+    "major_name": "과학",
+    "major_id": 5
+  },
+  {
+    "major_name": "기타",
+    "major_id": 6
+  }
+]

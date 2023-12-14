@@ -10,6 +10,7 @@ function Main()
   )
 }
 const UserInfoTable = ({ user }) => {
+  console.log(user);
   if(user.user_type === '학생')
   {
     return (
@@ -96,11 +97,11 @@ function StudentBtn()
   return(
     <div className='btn_section'>
       <button className="exam_register">
-        <Link to = '/record'>기출시험 결과보기</Link>
-      </button>
+        <Link to = '/record'>시험결과 보러가기</Link>
+      </button>{/* 
       <button className="exam_register">
         <Link to = '/record'>영단어시험 결과보기</Link>
-      </button>
+      </button> */}
     </div>
   )
 }

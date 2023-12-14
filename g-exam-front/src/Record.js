@@ -9,43 +9,81 @@ function Main()
     <h1><Link to ='/'>G-PLAN</Link></h1>
   )
 }
-function ChangoForm()
-{
+function ChangoForm({ onFormTypeChange }) {
   const [formType, setFormType] = useState('');
-  const handleFormTypeChange = (e) => {
-    setFormType(e.target.value);
+
+  const handleButtonClick = (selectedFormType) => {
+    setFormType(selectedFormType);
+    onFormTypeChange(selectedFormType);
   };
 
   return (
     <div className="input_place">
       <div className="radiobtn_place">
-        <label>
-          <input
-            type="radio"
-            value="pre_exam"
-            checked={formType === 'pre_exam'}
-            onChange={handleFormTypeChange}
-          />
+        <button
+          onClick={() => handleButtonClick('pre_exam')}
+          className={formType === 'pre_exam' ? 'active' : ''}
+        >
           기출시험 결과
-        </label>
-        <label>
-          <input
-            type="radio"
-            value="eng_word"
-            checked={formType === 'eng_word'}
-            onChange={handleFormTypeChange}
-          />
+        </button>
+        <button
+          onClick={() => handleButtonClick('eng_word')}
+          className={formType === 'eng_word' ? 'active' : ''}
+        >
           영단어 시험 결과
-        </label>
+        </button>
       </div>
     </div>
   );
 }
 
 
-function Check()
+function Check({ formType, user })
+{
+  if(user.user_type === "학생")
+  {
+    if(formType === 'eng_word')
+    {
+      return (
+        <div>
+          <p>{user.id}의 영단어 시험 결과</p>
+        </div>
+      );
+    }
+    if(formType === 'pre_exam')
+    {
+      return (
+        <div>
+          <p>{user.id}의 기출문제 시험 결과</p>
+        </div>
+      );
+    }
+  }
+  else if(user.user_type === "선생")
+  {
+    
+    return (
+      <div>
+        <p >전체학생 {formType} 시험 결과</p>
+      </div>
+    );
+  }
+  else
+  {
+    return (
+      <p>로그인되지 않았습니다.</p>
+    );
+  }
+}
+
+function MyApp() 
 {
   const [user, setUser] = useState([]);
+  const [formType, setFormType] = useState('');
+
+  const handleFormTypeChange = (selectedFormType) => {
+    setFormType(selectedFormType);
+  };
 
   useEffect(() => {
     fetch('/profile')
@@ -62,35 +100,12 @@ function Check()
         console.error('세션 정보를 가져오는 중 오류 발생:', error);
       });
   }, []);
-
-  if(user.user_type === "학생")
-  {
-    return (
-      <p>{user.id}의 </p>
-    );
-  }
-  else if(user.user_type === "선생")
-  {
-    
-    return (
-      <p>Teacher</p>
-    );
-  }
-  else
-  {
-    return (
-      <p>로그인되지 않았습니다.</p>
-    );
-  }
-}
-
-function MyApp() {
     return (
     <div className = "background">
       <div className = "wrap">
         <Main/>
-        <ChangoForm/>
-        <Check/>
+        <ChangoForm onFormTypeChange={handleFormTypeChange} />
+        <Check formType={formType} user={user} />
       </div>
     </div>
   );

@@ -27,6 +27,9 @@ function LoginControl()
   const handleLogout = () => {
     fetch('/logout', {
       method:'POST', 
+      headers: {
+        'Content-type': 'application/json',
+      },
       credentials:'include',
     })
       .then(response => response.json())

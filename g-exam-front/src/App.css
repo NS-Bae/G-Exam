@@ -188,7 +188,7 @@
     font-weight: 450;
     text-decoration: underline;
   }
-  .login_etc label:hover, .login_etc span:hover
+  .login_etc label:hover, .login_etc span:hover, .radiobtn_place button:hover
   {
     color: #ffa600;
   }
@@ -204,9 +204,24 @@
     display: flex;
     flex-direction: row;
     justify-content: center;
+    justify-content: space-around;
     align-items: center;
     text-align:  center;
     margin-top: 1%;
+  }
+  .radiobtn_place button
+  {
+    width: 40%;
+    height: auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    font-size: 1rem;
+    font-weight: bolder;
+    margin-top: 0;
+    border : 0;
+    background-color: white;
   }
   .radiobtn_place label
   {
@@ -218,6 +233,8 @@
     text-align: center;
     font-size: 0.8rem;
     margin-top: 0;
+    border : 0;
+    background-color: white;
   }
   .radiobtn_place label input
   {
@@ -226,6 +243,8 @@
     margin: 0;
     margin-right: 5%;
   }
+
+
   .btn_section
   {
     display: flex;

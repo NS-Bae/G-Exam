@@ -343,7 +343,7 @@ function ChangoForm()
             checked={formType === 'student'}
             onChange={handleFormTypeChange}
           />
-          학생용 회원가입
+          학생용
         </label>
         <label>
           <input
@@ -352,7 +352,7 @@ function ChangoForm()
             checked={formType === 'teacher'}
             onChange={handleFormTypeChange}
           />
-          교사용 회원가입
+          교사용
         </label>
       </div>
       <div className="input_place">

@@ -20,10 +20,12 @@ router.get('/checksession', (req, res) => {
   if(req.session && req.session.passport && req.session.passport.user) 
   {
     res.json({isLoggedIn : true});
+    console.log("로그인되어있음", req.session);
   }
   else
   {
     res.json({isLoggedIn : false});
+    console.log("로그인아님");
   }
 });
 
@@ -47,34 +49,43 @@ router.post('/login', function(req, res, next)
       console.log('사용자 인증 실패');
       return res.status(401).json({ error: '사용자 인증 실패' });
     }
-    
-    req.session.user = user;
+
+    req.session.user = {
+      id: user.id,
+      user_type: user.user_type
+  };
 
     req.login(user, function(loginErr) {
       if (loginErr) {
         console.log('로그인 실패: ', loginErr);
         return res.status(500).json({ error: '로그인 실패' });
       }
-      
-      console.log('로그인 성공');
       return res.json({ message: '로그인 성공' });
     });
     
   })(req, res, next);
 });
-router.post('/logout', function (req, res) {
-  // 세션 파괴를 시도합니다.
-  req.session.destroy(function (err) {
-    if (err) {
-      // 세션 파괴에 실패한 경우, 오류를 처리합니다.
-      console.error('세션 파괴 중 오류 발생:', err);
-      res.status(500).json({ error: '로그아웃 중 오류가 발생했습니다.' });
-    } else {
-      // 세션 파괴에 성공한 경우, 홈페이지로 리디렉션합니다.
-      res.json({ success: true });
-    }
-  });
+
+router.post('/logout', function(req, res) {
+  // 세션에 passport의 user 정보가 있는지 확인
+  if (req.session.passport && req.session.passport.user) {
+     // 세션 파괴를 시도합니다.
+     req.session.destroy(function (err) {
+        if (err) {
+           // 세션 파괴에 실패한 경우, 오류를 처리합니다.
+           console.error('세션 파괴 중 오류 발생:', err);
+           res.status(500).json({ error: '로그아웃 중 오류가 발생했습니다.' });
+        } else {
+           // 세션 파괴에 성공한 경우, 홈페이지로 리디렉션합니다.
+           res.json({ success: true });
+        }
+     });
+  } else {
+     // 사용자 정보가 없을 때
+     res.status(401).json({ error: '세션이 올바르게 초기화되지 않았습니다.' });
+  }
 });
+
 //변경 불필요. 학교리스트 조회 가능.
 router.get('/get_school_details', async (req, res) => {
   const schoolType = req.query.school;
@@ -104,8 +115,8 @@ router.post('/join_member', function(req, res) {
     const school = req.body.school_details;
     const grade = req.body.grade;
 
-    const sql = 'INSERT INTO users VALUES (?, ?, ?, "학생", 0, ?, ?, null)';
-    const params = [user_id, user_pw, name, school, grade];
+    const sql = 'INSERT INTO user_student VALUES (?, ?, ?, ?, ?, ?, ?)';
+    const params = [user_id, user_pw, name, grade, 0, school, '학생'];
 
     console.log(user_id, user_pw, name, school, grade);
     
@@ -125,8 +136,8 @@ router.post('/join_member', function(req, res) {
     const name = req.body.name;
     const subject = req.body.subject;
 
-    const sql = 'INSERT INTO users VALUES (?, ?, ?, "선생", 0, null, null, ?)';
-    const params = [user_id, user_pw, name, subject];
+    const sql = 'INSERT INTO user_teacher VALUES (?, ?, ?, ?, ?, ?)';
+    const params = [user_id, user_pw, name, 0, subject, '선생'];
 
     console.log(user_id, user_pw, name, subject);
     
