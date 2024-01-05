@@ -15,7 +15,7 @@ router.use(passport.initialize());
 router.use(passport.session());
 router.use(flash());
 router.use(express.json());
-
+//변경 불필요.
 router.get('/checksession', (req, res) => {
   if(req.session && req.session.passport && req.session.passport.user) 
   {
@@ -28,17 +28,18 @@ router.get('/checksession', (req, res) => {
     console.log("로그인아님");
   }
 });
-
+//변경 불필요.
 router.get('/profile', (req, res) => {
-  if (req.isAuthenticated()) {
-    // 세션 정보가 있는 경우 세션 정보를 클라이언트로 보냅니다.
+  if (req.isAuthenticated()) 
+  {
     res.json({ user: req.user });
-/*     console.log(req.user);
- */  } else {
+    } 
+  else 
+  {
     res.status(401).json({ message: '로그인되지 않았습니다.' });
   }
 });
-
+//변경 불필요.
 router.post('/login', function(req, res, next)
 {
   passport.authenticate('local', function(err, user, info) {
@@ -66,7 +67,7 @@ router.post('/login', function(req, res, next)
     
   })(req, res, next);
 });
-
+//변경 불필요.
 router.post('/logout', function(req, res) {
   // 세션에 passport의 user 정보가 있는지 확인
   if (req.session.passport && req.session.passport.user) {
@@ -86,7 +87,6 @@ router.post('/logout', function(req, res) {
      res.status(401).json({ error: '세션이 올바르게 초기화되지 않았습니다.' });
   }
 });
-
 //변경 불필요. 학교리스트 조회 가능.
 router.get('/get_school_details', async (req, res) => {
   const schoolType = req.query.school;
@@ -158,4 +158,23 @@ router.post('/join_member', function(req, res) {
   }
 });
 
+router.post('/get_exam_record', (req, res) => {
+  // 클라이언트에서 보낸 데이터는 req.body에 있음
+  const { formType } = req.body;
+  
+  if(formType === 'pre_exam')
+  {
+    console.log("기출문제");
+  }
+  else if(formType === 'eng_word')
+  {
+    console.log("영단어");
+  }
+  else
+  {
+    console.log("ㅎㅎ병신");
+  }
+
+  res.json({ message: 'Received formType successfully' });
+});
 module.exports = router;
