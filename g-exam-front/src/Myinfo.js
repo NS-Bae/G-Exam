@@ -10,7 +10,6 @@ function Main()
   )
 }
 const UserInfoTable = ({ user }) => {
-  console.log(user);
   if(user.user_type === '학생')
   {
     return (
@@ -34,7 +33,7 @@ const UserInfoTable = ({ user }) => {
           <tr>
             <td>사용자 학교</td>
             <td> : </td>
-            <td>{user.school}</td>
+            <td>{user.school_list_school_name}</td>
           </tr>
           <tr>
             <td>사용자 학년</td>
@@ -68,7 +67,7 @@ const UserInfoTable = ({ user }) => {
           <tr>
             <td>강의 과목</td>
             <td> : </td>
-            <td>{user.major}</td>
+            <td>{user.major_list_major_name}</td>
           </tr>
         </tbody>
       </table>

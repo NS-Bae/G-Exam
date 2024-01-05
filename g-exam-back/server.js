@@ -39,20 +39,23 @@ passport.use(new LocalStrategy({
   
   db.query(sql, params, function(err, rows)
   {
+    var user= rows[0];
+    user.ready = rows[0].ready;
     if(err) return done(err);
     if(rows.length === 0)
     {
       console.log("등록되지 않은 사용자입니다.");
       return done(null, false, { message: "등록되지 않은 사용자입니다." });
     }
-    if(rows[0].pw!==pw) 
+    if(user.pw!==pw) 
     { 
       console.log('비밀번호가 일치하지 않습니다.');
       return done(null, false, { message: '비밀번호가 일치하지 않습니다.' });
     }
-    var user= rows[0];
-    user.user_type = rows[0].user_type;
-    console.log('모든정보가 일치합니다.');
+    if (user.ready !== 1) {
+      return done(null, false, { message: '계정이 준비되지 않았습니다.' });
+    }
+    console.log('모든정보가 일치합니다.', user.user_type);
     return done(null, user); 
     
   })
@@ -83,7 +86,32 @@ passport.deserializeUser(function(id, done) {
         return done(err, null);
         }
         else{
-          return done(null, results[0]);
+          const userType = results[0].user_type;
+          let tableName = '';
+          switch (userType) {
+              case '학생':
+                  tableName = 'user_student';
+                  break;
+              case '선생':
+                  tableName = 'user_teacher';
+                  break;
+              default:
+                  tableName = 'total_user'; // 기본 테이블 선택
+                  break;
+          }
+
+          // 선택된 테이블에서 정보 가져오기
+          db.query(`SELECT * FROM ${tableName} WHERE id = ?`, [id], function (err, userResults) {
+              if (err || userResults.length === 0) {
+                  return done(err, null);
+              }
+              const user = userResults[0];
+              if (user.ready !== 1) {
+                return done(null, false, { message: '계정이 준비되지 않았습니다.' });
+              }
+              // 로그인 성공 - 조건에 맞는 사용자 정보 반환
+              return done(null, user);
+          });
         }
     });
 });

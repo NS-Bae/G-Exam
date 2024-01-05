@@ -33,7 +33,8 @@ router.get('/profile', (req, res) => {
   if (req.isAuthenticated()) {
     // 세션 정보가 있는 경우 세션 정보를 클라이언트로 보냅니다.
     res.json({ user: req.user });
-  } else {
+/*     console.log(req.user);
+ */  } else {
     res.status(401).json({ message: '로그인되지 않았습니다.' });
   }
 });
@@ -46,8 +47,8 @@ router.post('/login', function(req, res, next)
       return res.status(500).json({ error: '에러 발생' });
     }
     if (!user) {
-      console.log('사용자 인증 실패');
-      return res.status(401).json({ error: '사용자 인증 실패' });
+      console.log('사용자 인증 실패', info.message);
+      return res.status(401).json({ error: info.message });
     }
 
     req.session.user = {
