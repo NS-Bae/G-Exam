@@ -158,15 +158,6 @@ router.post('/join_member', function(req, res) {
   }
 });
 
-async function performDBQuery(formType, userId) {
-  // 여기에 실제 DB 조회 로직을 작성
-  // 예시로 SQL 쿼리를 사용하는 것처럼 작성할 수 있습니다.
-  const sql = `SELECT * FROM exam_record WHERE user_student_id = ? AND form_type = ?;`;
-  const [rows] = await db.promise().query(sql, [userId, formType]);
-
-  return rows;
-}
-
 router.post('/get_exam_record', (req, res) => {
   const { formType, user } = req.body;
 
@@ -255,8 +246,45 @@ router.post('/get_exam_record', (req, res) => {
   }
   else
   {
-    console.log("ㅎㅎ병신");
-  }/* 
-  res.json({ message: 'Received formType successfully' }); */
+    console.log("옳바르지 않은 요청입니다.");
+  }
 });
+
+router.post('/change_state', (req, res) => {
+  try {
+    const sql = 'SELECT * FROM user_student;';
+    db.promise()
+      .query(sql)
+      .then(([rows]) => {
+        res.json({ studentInfo: rows }); // 결과를 examRecords라는 키로 반환
+      })
+      .catch((error) => {
+        console.error('학생정보를 가져오는데 실패했습니다', error);
+        res.status(500).json({ error: '학생정보를 가져오는데 실패했습니다' });
+      });
+  } catch (error) {
+    console.error('학생정보를 가져오는데 실패했습니다', error);
+    res.status(500).json({ error: '학생정보를 가져오는데 실패했습니다' });
+  }
+});
+
+router.post('/approval_of_membership', async (req, res) => {
+  const selectedRows = req.body.selectedRows;
+
+  const placeholders = selectedRows.map(() => '?').join(', ');
+  const sql = `UPDATE user_student SET READY = 1 WHERE id IN (${placeholders});`;
+
+  try 
+  {
+    const [result] = await db.promise().query(sql, selectedRows);
+    console.log(result);
+    res.status(200).json({ message: 'Rows updated successfully' });
+  } 
+  catch (error) 
+  {
+    console.error('Error executing query:', error);
+    res.status(500).json({ error: 'Error executing query' });
+  }
+})
+
 module.exports = router;
