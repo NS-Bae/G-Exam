@@ -53,7 +53,11 @@ function LoginControl()
     <ul>
       <button id = 'login' className="login_btn" onClick={isLoggedIn ? handleLogout : () => navigate('/login')}>
         {isLoggedIn ? "로그아웃" : "로그인"}</button>
-      <button id = 'myinformation' className="login_btn"><Link to ='/myinformation'>내정보</Link></button>  
+        {isLoggedIn && (
+          <button id='myinformation' className="login_btn">
+            <Link to='/myinformation'>내정보</Link>
+          </button>
+      )}    
     </ul>
   );
 }

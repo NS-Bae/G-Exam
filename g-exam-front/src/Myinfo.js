@@ -97,10 +97,7 @@ function StudentBtn()
     <div className='btn_section'>
       <button className="exam_register">
         <Link to = '/record'>시험결과 보러가기</Link>
-      </button>{/* 
-      <button className="exam_register">
-        <Link to = '/record'>영단어시험 결과보기</Link>
-      </button> */}
+      </button>
     </div>
   )
 }
