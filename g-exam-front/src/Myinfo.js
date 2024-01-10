@@ -145,18 +145,7 @@ function MyInformation() {
       </div>
     );
   }
-  else
-  {
-    return (
-      <div className="background">
-        <div className="wrap">
-          <Main />
-          <h2>나의 정보</h2>
-            <p>로그인되지 않았습니다.</p>
-        </div>
-      </div>
-    );
-  }
+  
 }
 
 export default MyInformation;

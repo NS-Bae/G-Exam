@@ -20,7 +20,7 @@ router.get('/checksession', (req, res) => {
   if(req.session && req.session.passport && req.session.passport.user) 
   {
     res.json({isLoggedIn : true});
-    console.log("로그인되어있음", req.session);
+    console.log("로그인되어있음");
   }
   else
   {
@@ -33,7 +33,7 @@ router.get('/profile', (req, res) => {
   if (req.isAuthenticated()) 
   {
     res.json({ user: req.user });
-    } 
+  } 
   else 
   {
     res.status(401).json({ message: '로그인되지 않았습니다.' });
@@ -158,23 +158,105 @@ router.post('/join_member', function(req, res) {
   }
 });
 
+async function performDBQuery(formType, userId) {
+  // 여기에 실제 DB 조회 로직을 작성
+  // 예시로 SQL 쿼리를 사용하는 것처럼 작성할 수 있습니다.
+  const sql = `SELECT * FROM exam_record WHERE user_student_id = ? AND form_type = ?;`;
+  const [rows] = await db.promise().query(sql, [userId, formType]);
+
+  return rows;
+}
+
 router.post('/get_exam_record', (req, res) => {
-  // 클라이언트에서 보낸 데이터는 req.body에 있음
-  const { formType } = req.body;
-  
-  if(formType === 'pre_exam')
+  const { formType, user } = req.body;
+
+  if (!formType || !user || !user.user_type) 
   {
-    console.log("기출문제");
+    return res.status(400).json({ error: 'Invalid request parameters' });
   }
-  else if(formType === 'eng_word')
+
+  if(formType === "pre_exam")
   {
-    console.log("영단어");
+    if(user.user_type === '학생')
+    {
+      try {
+        const sql = 'SELECT * FROM exam_record WHERE user_student_id = ?;';
+        db.promise()
+          .query(sql, [user.id])
+          .then(([rows]) => {
+            res.json({ examRecords: rows }); // 결과를 examRecords라는 키로 반환
+          })
+          .catch((error) => {
+            console.error('시험 결과를 가져오는데 실패했습니다', error);
+            res.status(500).json({ error: '시험 결과를 가져오는데 실패했습니다' });
+          });
+      } catch (error) {
+        console.error('시험 결과를 가져오는데 실패했습니다', error);
+        res.status(500).json({ error: '시험 결과를 가져오는데 실패했습니다' });
+      }
+    }
+    else if(user.user_type === '선생')
+    {
+      try {
+        const sql = 'SELECT * FROM exam_record;';
+        db.promise()
+          .query(sql)
+          .then(([rows]) => {
+            res.json({ examRecords: rows }); // 결과를 examRecords라는 키로 반환
+          })
+          .catch((error) => {
+            console.error('시험 결과를 가져오는데 실패했습니다', error);
+            res.status(500).json({ error: '시험 결과를 가져오는데 실패했습니다' });
+          });
+      } catch (error) {
+        console.error('시험 결과를 가져오는데 실패했습니다', error);
+        res.status(500).json({ error: '시험 결과를 가져오는데 실패했습니다' });
+      }
+    }
+  }
+  else if(formType === "eng_word")
+  {
+    if(user.user_type === '학생')
+    {
+      try {
+        const sql = 'SELECT * FROM word_record WHERE user_student_id = ?;';
+        db.promise()
+          .query(sql, [user.id])
+          .then(([rows]) => {
+            res.json({ examRecords: rows }); // 결과를 examRecords라는 키로 반환
+          })
+          .catch((error) => {
+            console.error('시험 결과를 가져오는데 실패했습니다', error);
+            res.status(500).json({ error: '시험 결과를 가져오는데 실패했습니다' });
+          });
+      } catch (error) {
+        console.error('시험 결과를 가져오는데 실패했습니다', error);
+        res.status(500).json({ error: '시험 결과를 가져오는데 실패했습니다' });
+      }
+    }
+    else if(user.user_type === '선생')
+    {
+      try {
+        const sql = 'SELECT * FROM word_record;';
+        db.promise()
+          .query(sql)
+          .then(([rows]) => {
+            res.json({ examRecords: rows }); // 결과를 examRecords라는 키로 반환
+          })
+          .catch((error) => {
+            console.error('시험 결과를 가져오는데 실패했습니다', error);
+            res.status(500).json({ error: '시험 결과를 가져오는데 실패했습니다' });
+          });
+      } catch (error) {
+        console.error('시험 결과를 가져오는데 실패했습니다', error);
+        res.status(500).json({ error: '시험 결과를 가져오는데 실패했습니다' });
+      }
+    }
   }
   else
   {
     console.log("ㅎㅎ병신");
-  }
-
-  res.json({ message: 'Received formType successfully' });
+  }/* 
+  res.json({ message: 'Received formType successfully' }); */
 });
 module.exports = router;

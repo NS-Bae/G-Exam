@@ -12,36 +12,11 @@ function Main()
 
 function ChangeForm({ onFormTypeChange }) {
   const [formType, setFormType] = useState('');
-
-  console.log(formType);
   
-  const handleButtonClick = async (selectedFormType) => {
+  const handleButtonClick =  (selectedFormType) => {
     setFormType(selectedFormType);
-    await handleFormTypeSubmit(selectedFormType);
+    onFormTypeChange(selectedFormType); 
   };
-
-  async function handleFormTypeSubmit(selectedFormType) {
-    try {
-      const response = await fetch('/get_exam_record', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ formType: selectedFormType }),
-      });
-
-      if (!response.ok) {
-        throw new Error('Network response was not ok');
-      }
-
-      const data = await response.json();
-      console.log(data); // 서버에서 받은 응답 데이터
-
-      // 여기서 받은 데이터로 다음 작업을 수행할 수 있습니다.
-    } catch (error) {
-      console.error('There has been a problem with your fetch operation:', error);
-    }
-  }
 
   return (
     <div className="input_place">
@@ -62,7 +37,6 @@ function ChangeForm({ onFormTypeChange }) {
     </div>
   );
 }
-
 
 function Check({ formType, user })
 {
@@ -89,7 +63,7 @@ function Check({ formType, user })
     {
       return (
         <div>
-          <p>{user.name}의 시험 결과 보기</p>
+          <p>{user.name}의 결과 보기</p>
         </div>
       );
     }
@@ -109,6 +83,116 @@ function Check({ formType, user })
       <p>로그인되지 않았습니다.</p>
     );
   }
+}
+
+/* function GetRecord({formType, user})
+{
+  const sendDataToBackend = async () => {
+    try {
+      const response = await fetch('/get_exam_record', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ formType, user }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Network response was not ok');
+      }
+
+      const data = await response.json();
+      console.log(data);
+
+    } catch (error) {
+      console.error('There has been a problem with your fetch operation:', error);
+    }
+  };
+  sendDataToBackend();
+} */
+
+function RecordTable({ formType, user })
+{
+  /* GetRecord({formType, user}); */
+  const [examRecords, setExamRecords] = useState([]);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try 
+      {
+        const record_response = await fetch('/get_exam_record', {
+          method : 'POST', 
+          headers : {
+            'Content-Type' : 'application/json',
+          }, 
+          body : JSON.stringify({formType, user}),
+        });
+
+        if(!record_response.ok)
+        {
+          throw new Error('네트워크 응답이 올바르지 않습니다.');
+        }
+
+        const record_data = await record_response.json();
+
+        setExamRecords(record_data.examRecords);
+      }
+      catch(error)
+      {
+        console.log("데이터를 가져오는 과정에서 문제가 발생하였습니다.", error);
+      }
+    };
+    fetchData();
+  }, [formType, user]);
+
+  
+    if(user.user_type === '학생')
+    {
+      return (
+        <table className='record_table'>
+          <thead>
+            <tr>
+              <th>시험 정보</th>
+              <th>점수</th>
+            </tr>
+          </thead>
+          <tbody>
+            {examRecords.map((record, index) => (
+              <tr key = {index}>
+                <td>{record.exam_info}</td>
+                <td>{record.score}</td>
+                <td><p className='details'>자세히 보기</p></td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      );
+    }
+    if(user.user_type === '선생')
+    {
+      return (
+        <table className='record_table'>
+          <thead>
+            <tr>
+              <th>학생 아이디</th>
+              <th>시험 정보</th>
+              <th>점수</th>
+            </tr>
+          </thead>
+          <tbody>
+            {examRecords.map((record, index) => (
+              <tr key = {index}>
+                <td>{record.user_student_id}</td>
+                <td>{record.exam_info}</td>
+                <td>{record.score}</td>
+                <td><p className='details'>자세히 보기</p></td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      );
+    }
+  
 }
 
 function MyApp() 
@@ -141,6 +225,7 @@ function MyApp()
         <Main/>
         <ChangeForm onFormTypeChange={handleFormTypeChange} />
         <Check formType={formType} user={user} />
+        <RecordTable formType={formType} user={user}/>
       </div>
     </div>
   );
