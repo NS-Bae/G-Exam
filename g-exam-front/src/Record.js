@@ -142,57 +142,63 @@ function RecordTable({ formType, user })
         console.log("데이터를 가져오는 과정에서 문제가 발생하였습니다.", error);
       }
     };
-    fetchData();
+    if(formType === 'eng_word' || formType === 'pre_exam')
+    {
+      fetchData();
+    }
   }, [formType, user]);
 
   
-    if(user.user_type === '학생')
-    {
-      return (
-        <table className='record_table'>
-          <thead>
-            <tr>
-              <th>시험 정보</th>
-              <th>점수</th>
+  if(user.user_type === '학생' && formType !== '')
+  {
+    return (
+      <table className='record_table'>
+        <thead>
+          <tr>
+            <th>시험 정보</th>
+            <th>점수</th>
+          </tr>
+        </thead>
+        <tbody>
+          {examRecords.map((record, index) => (
+            <tr key = {index}>
+              <td>{record.exam_info}</td>
+              <td>{record.score}</td>
+              <td><p className='details'>자세히 보기</p></td>
             </tr>
-          </thead>
-          <tbody>
-            {examRecords.map((record, index) => (
-              <tr key = {index}>
-                <td>{record.exam_info}</td>
-                <td>{record.score}</td>
-                <td><p className='details'>자세히 보기</p></td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      );
-    }
-    if(user.user_type === '선생')
-    {
-      return (
-        <table className='record_table'>
-          <thead>
-            <tr>
-              <th>학생 아이디</th>
-              <th>시험 정보</th>
-              <th>점수</th>
+          ))}
+        </tbody>
+      </table>
+    );
+  }
+  else if(user.user_type === '선생' && formType !== '')
+  {
+    return (
+      <table className='record_table'>
+        <thead>
+          <tr>
+            <th>학생 아이디</th>
+            <th>시험 정보</th>
+            <th>점수</th>
+          </tr>
+        </thead>
+        <tbody>
+          {examRecords.map((record, index) => (
+            <tr key = {index}>
+              <td>{record.user_student_id}</td>
+              <td>{record.exam_info}</td>
+              <td>{record.score}</td>
+              <td><p className='details'>자세히 보기</p></td>
             </tr>
-          </thead>
-          <tbody>
-            {examRecords.map((record, index) => (
-              <tr key = {index}>
-                <td>{record.user_student_id}</td>
-                <td>{record.exam_info}</td>
-                <td>{record.score}</td>
-                <td><p className='details'>자세히 보기</p></td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      );
-    }
-  
+          ))}
+        </tbody>
+      </table>
+    );
+  }
+  if(formType === '')
+  {
+    <p>보고싶은 시험의 결과를 선택해주세요.</p>
+  }
 }
 
 function MyApp() 
