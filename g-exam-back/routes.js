@@ -252,11 +252,12 @@ router.post('/get_exam_record', (req, res) => {
 
 router.post('/change_state', (req, res) => {
   try {
-    const sql = 'SELECT * FROM user_student;';
+    const sql = 'SELECT * FROM user_student WHERE ready = 0;';
     db.promise()
       .query(sql)
       .then(([rows]) => {
-        res.json({ studentInfo: rows }); // 결과를 examRecords라는 키로 반환
+        res.json({ studentInfo: rows });
+        console.log({ studentInfo: rows });
       })
       .catch((error) => {
         console.error('학생정보를 가져오는데 실패했습니다', error);

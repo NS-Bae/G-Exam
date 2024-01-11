@@ -53,7 +53,7 @@ passport.use(new LocalStrategy({
       return done(null, false, { message: '비밀번호가 일치하지 않습니다.' });
     }
     if (user.ready !== 1) {
-      return done(null, false, { message: '계정이 준비되지 않았습니다.' });
+      return done(null, false, { message: '계정이 승인되지 않았습니다. 관리자에게 계정의 승인을 요청하세요.' });
     }
     console.log('모든정보가 일치합니다.', user.user_type);
     return done(null, user); 
