@@ -122,17 +122,76 @@ const ApprovalModal = ({ modalIsOpen, closeModal, studentInfo, handleCheckboxCha
     </Modal>
   );
 };
+const DeleteModal = ({ modalIsOpen, closeModal, studentInfo, handleCheckboxChange, handleUpdateCheckedRows, isUpdateButtonDisabled }) => {
+  return (
+    <Modal
+      isOpen={modalIsOpen}
+      onRequestClose={closeModal}
+      contentLabel="회원 삭제"
+    >
+      <h2>회원 삭제</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>선택</th>
+            <th>아이디</th>
+            <th>비번</th>
+            <th>이름</th>
+            <th>학교, 학년</th>
+          </tr>
+        </thead>
+        <tbody>
+          {studentInfo.map((item, index) => (
+            <tr key={index}>
+              <td>
+                <input
+                  type="checkbox"
+                />
+              </td>
+              <td>{item.id}</td>
+              <td>{item.pw}</td>
+              <td>{item.name}</td>
+              <td>{item.school_list_school_name} {item.grade}학년</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+      <button
+        onClick={handleUpdateCheckedRows}
+        disabled={isUpdateButtonDisabled}
+      >
+        회원 삭제
+      </button>
+      <button onClick={closeModal}>닫기</button>
+    </Modal>
+  );
+};
 function TeacherBtn()
 {
+  Modal.setAppElement('#root');
+
   const [modalIsOpen, setModalIsOpen] = useState(false);
   const [checkedRows, setCheckedRows] = useState([]);
   const [studentInfo, setStudentInfo] = useState([]);
   const [isUpdateButtonDisabled, setUpdateButtonDisabled] = useState(true);
+  const [modalType, setModalType] = useState(null);
 
-  const fetchData = async () => {
+  const fetchData = async (modalType) => {
+    console.log(modalType);
     try 
     {
-      const response = await fetch('/change_state', {
+      let endpoint = '';
+
+      if(modalType === 'approval')
+      {
+        endpoint = '/change_state';
+      }
+      else if(modalType === 'delete')
+      {
+        endpoint = '/change_state_delete';
+      }
+
+      const response = await fetch(endpoint, {
         method : 'POST', 
         headers : {
           'Content-Type' : 'application/json',
@@ -155,19 +214,19 @@ function TeacherBtn()
     }
   };
 
-  const openModal = async () => {
-    await fetchData();
+  const openModal = async (type) => {
+    Modal.setAppElement('#root');
+    await fetchData(type);
+    setModalType(type);
     setModalIsOpen(true);
   };
-
   const closeModal = () => {
     setModalIsOpen(false);
+    setModalType(null);
   };
-
   useEffect(() => {
     fetchData();
   }, []);
-
   const handleCheckboxChange = (event, id) => {
     const isChecked = event.target.checked;
     const updatedRows = isChecked
@@ -177,7 +236,6 @@ function TeacherBtn()
     setCheckedRows(updatedRows);
     setUpdateButtonDisabled(updatedRows.length === 0);
   };
-
   const handleUpdateCheckedRows = async () => {
     try 
     {
@@ -210,22 +268,46 @@ function TeacherBtn()
     }
     console.log('Checked rows:', checkedRows);
   };
+  const renderModalContent = () => {
+    if (modalType === 'approval') 
+    {
+      return (
+        <ApprovalModal
+          modalIsOpen={modalIsOpen}
+          closeModal={closeModal}
+          studentInfo={studentInfo}
+          handleCheckboxChange={handleCheckboxChange}
+          handleUpdateCheckedRows={handleUpdateCheckedRows}
+          isUpdateButtonDisabled={isUpdateButtonDisabled}
+        />
+      );
+    } 
+    else if (modalType === 'delete') 
+    {
+      return (
+        <DeleteModal
+          modalIsOpen={modalIsOpen}
+          closeModal={closeModal}
+          studentInfo={studentInfo}
+        />
+      );
+    } 
+    else 
+    {
+      return null;
+    }
+  };
 
   return (
     <div className="btn_section" id="manage_student">
-      <button onClick={openModal} className="exam_register">
-        학생정보 관리
+      <button onClick={() => openModal('approval')} className="exam_register" id="approval">
+        회원가입 승인
       </button>
-      <ApprovalModal
-        modalIsOpen={modalIsOpen}
-        closeModal={closeModal}
-        studentInfo={studentInfo}
-        handleCheckboxChange={handleCheckboxChange}
-        handleUpdateCheckedRows={handleUpdateCheckedRows}
-        isUpdateButtonDisabled={isUpdateButtonDisabled}
-      />
+      <button onClick={() => openModal('delete')} className="exam_register" id="delete">
+        회원 삭제
+      </button>
+      {renderModalContent()}
       <button className="exam_register">시험문제 관리</button>
-      <button className="exam_register">영단어 관리</button>
     </div>
   );
 }

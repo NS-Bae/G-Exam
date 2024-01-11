@@ -288,4 +288,26 @@ router.post('/approval_of_membership', async (req, res) => {
   }
 })
 
+router.post('/change_state_delete', (req, res) => {
+  try 
+  {
+    const sql = 'SELECT * FROM user_student;';
+    db.promise()
+      .query(sql)
+      .then(([rows]) => {
+        res.json({ studentInfo: rows });
+        console.log({ studentInfo: rows });
+      })
+      .catch((error) => {
+        console.error('학생정보를 가져오는데 실패했습니다', error);
+        res.status(500).json({ error: '학생정보를 가져오는데 실패했습니다' });
+      });
+  } 
+  catch (error) 
+  {
+    console.error('학생정보를 가져오는데 실패했습니다', error);
+    res.status(500).json({ error: '학생정보를 가져오는데 실패했습니다' });
+  }
+});
+
 module.exports = router;
