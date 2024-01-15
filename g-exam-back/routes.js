@@ -257,7 +257,6 @@ router.post('/change_state', (req, res) => {
       .query(sql)
       .then(([rows]) => {
         res.json({ studentInfo: rows });
-        console.log({ studentInfo: rows });
       })
       .catch((error) => {
         console.error('학생정보를 가져오는데 실패했습니다', error);
@@ -278,7 +277,6 @@ router.post('/approval_of_membership', async (req, res) => {
   try 
   {
     const [result] = await db.promise().query(sql, selectedRows);
-    console.log(result);
     res.status(200).json({ message: 'Rows updated successfully' });
   } 
   catch (error) 
@@ -296,7 +294,6 @@ router.post('/change_state_delete', (req, res) => {
       .query(sql)
       .then(([rows]) => {
         res.json({ studentInfo: rows });
-        console.log({ studentInfo: rows });
       })
       .catch((error) => {
         console.error('학생정보를 가져오는데 실패했습니다', error);
@@ -308,6 +305,62 @@ router.post('/change_state_delete', (req, res) => {
     console.error('학생정보를 가져오는데 실패했습니다', error);
     res.status(500).json({ error: '학생정보를 가져오는데 실패했습니다' });
   }
+});
+
+router.post('/delete_of_membership', async (req, res) => {
+  const selectedRows = req.body.selectedRows;
+
+  const placeholders = selectedRows.map(() => '?').join(', ');
+  const sql = `DELETE FROM user_student WHERE id IN (${placeholders});`;
+
+  try 
+  {
+    const [result] = await db.promise().query(sql, selectedRows);
+    res.status(200).json({ message: 'Rows updated successfully' });
+  } 
+  catch (error) 
+  {
+    console.error('Error executing query:', error);
+    res.status(500).json({ error: 'Error executing query' });
+  }
+});
+
+router.post('/update_info', function(req, res) {  
+  const school = req.body.school_details;
+  const grade = req.body.grade;
+  const user = req.body.user;
+  const id = user.id;
+
+  const sql = `UPDATE user_student SET school_list_school_name = ?, grade = ? WHERE id = ?;`;
+  const params = [school, grade, id];
+
+  console.log(id, school, grade);
+  
+  db.query(sql, params, function(err, result) {
+    if (err) {
+      console.log(err);
+      res.status(500).json({ error: '데이터베이스에 저장 중 오류가 발생했습니다.' });
+    } else {
+      res.status(200).json({ message: '회원정보 수정이 성공적으로 완료되었습니다.' });
+    }
+  });
+});
+
+router.post('/withgrawal', function(req, res) {
+  const user = req.body;
+  console.log(user);
+
+  const sql = `DELETE FROM user_student WHERE id = ?;`;
+  const params = [user.id];
+
+  db.query(sql, params, function(err, result) {
+    if (err) {
+      console.log(err);
+      res.status(500).json({ error: '데이터베이스에 저장 중 오류가 발생했습니다.' });
+    } else {
+      res.status(200).json({ message: '회원정보 수정이 성공적으로 완료되었습니다.' });
+    }
+  });
 });
 
 module.exports = router;

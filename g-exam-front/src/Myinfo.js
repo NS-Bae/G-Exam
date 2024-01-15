@@ -83,7 +83,7 @@ const ApprovalModal = ({ modalIsOpen, closeModal, studentInfo, handleCheckboxCha
       contentLabel="회원가입 승인"
     >
       <h2>회원가입 승인</h2>
-      <table>
+      <table className='third_table'>
         <thead>
           <tr>
             <th>선택</th>
@@ -112,13 +112,16 @@ const ApprovalModal = ({ modalIsOpen, closeModal, studentInfo, handleCheckboxCha
           ))}
         </tbody>
       </table>
-      <button
-        onClick={handleUpdateCheckedRows}
-        disabled={isUpdateButtonDisabled}
-      >
-        선택한 로우 업데이트
-      </button>
-      <button onClick={closeModal}>닫기</button>
+      <div className='btn_section'>
+        <button
+          onClick={() => handleUpdateCheckedRows('approval')}
+          disabled={isUpdateButtonDisabled}
+          className="exam_register"
+        >
+          선택한 로우 업데이트
+        </button>
+        <button onClick={closeModal} className="exam_register">닫기</button>
+      </div>
     </Modal>
   );
 };
@@ -130,7 +133,7 @@ const DeleteModal = ({ modalIsOpen, closeModal, studentInfo, handleCheckboxChang
       contentLabel="회원 삭제"
     >
       <h2>회원 삭제</h2>
-      <table>
+      <table className='third_table'>
         <thead>
           <tr>
             <th>선택</th>
@@ -146,6 +149,7 @@ const DeleteModal = ({ modalIsOpen, closeModal, studentInfo, handleCheckboxChang
               <td>
                 <input
                   type="checkbox"
+                  onChange={(event) => handleCheckboxChange(event, item.id)}
                 />
               </td>
               <td>{item.id}</td>
@@ -156,13 +160,178 @@ const DeleteModal = ({ modalIsOpen, closeModal, studentInfo, handleCheckboxChang
           ))}
         </tbody>
       </table>
-      <button
-        onClick={handleUpdateCheckedRows}
-        disabled={isUpdateButtonDisabled}
-      >
-        회원 삭제
-      </button>
-      <button onClick={closeModal}>닫기</button>
+      <div className='btn_section'>
+        <button
+          onClick={() => handleUpdateCheckedRows('delete')}
+          disabled={isUpdateButtonDisabled}
+          className="exam_register"
+        >
+          회원 삭제
+        </button>
+        <button onClick={closeModal} className="exam_register">닫기</button>
+      </div>
+    </Modal>
+  );
+};
+const UpdateInfo = ({ modalIsOpen, closeModal, user }) => {
+  const [grade, setGrade] = useState('');
+  const [school, setSchool] = useState('');
+  const[schoolsList, setSchoolsList] = useState([]);
+
+  const handleSchoolTypeChange = (e) => {
+    const selectedSchool = e.target.value;
+  
+    fetch(`/get_school_details?school=${selectedSchool}`)
+      .then((response) => response.json())
+      .then((data) => {
+        if (data && data.schoolDetails) {
+          setSchoolsList(data.schoolDetails);
+        }
+      })
+      .catch((error) => console.error('학교 목록 불러오기 오류:', error));
+  };
+  const handleJoin = async (e) => {
+    e.preventDefault();
+    const formData = {
+      user, 
+      grade,
+      school, 
+      school_details: document.getElementById('school_details').value, // 학생 또는 교사 여부를 백엔드로 전달
+    };
+
+    fetch('/update_info', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+      })
+        .then((response) => response.json())
+        .then((data) => {
+          if (data.message) 
+          {
+            alert(data.message);
+            closeModal();
+          } 
+          else if (data.error) 
+          {
+            alert(data.error);
+          }
+        })
+        .catch((error) => {
+          console.error('네트워크 오류:', error);
+        });
+
+      setSchool('');
+      setGrade('');
+  };
+  const withdrawal = async () => {
+    fetch('/withgrawal', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(user),
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        if (data.message) 
+        {
+          alert(data.message);
+          closeModal();
+          window.location.href = '/';
+        } 
+        else if (data.error) 
+        {
+          alert(data.error);
+        }
+      })
+      .catch((error) => {
+        console.error('네트워크 오류:', error);
+      });
+  };
+  return (
+    <Modal
+      isOpen={modalIsOpen}
+      onRequestClose={closeModal}
+      contentLabel="회원정보 수정"
+    >
+      <h2>회원정보 수정</h2>
+        <table className='third_table'>
+          <thead>
+            <tr>
+              <th>분류</th>
+              <th></th>
+              <th>정보</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>사용자 ID</td>
+              <td> : </td>
+              <td>{user.id}</td>
+            </tr>
+            <tr>
+              <td>비밀번호</td>
+              <td> : </td>
+              <td>{user.pw}</td>
+            </tr>
+            <tr>
+              <td>사용자 이름</td>
+              <td> : </td>
+              <td>
+                {user.name}
+              </td>
+            </tr>
+            <tr>
+              <td>사용자 분류</td>
+              <td> : </td>
+              <td>{user.user_type}</td>
+            </tr>
+            <tr>
+              <td>사용자 학교</td>
+              <td> : </td>
+              <td>
+                <div>
+                  <div>
+                    <select id='school_grade' onChange={handleSchoolTypeChange}>
+                      <option value={''}>선택하세요</option>
+                      <option value={'초등'}>초등학교</option>
+                      <option value={'중등'}>중학교</option>
+                      <option value={'고등'}>고등학교</option>
+                    </select>
+                    <select id="school_details">
+                      <option value={''}>선택하세요</option>
+                      {schoolsList.map((schoolOption, index) => (
+                        <option key={index} value={schoolOption.school_name}>
+                          {schoolOption.school_name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </div>  
+              </td>
+            </tr>
+            <tr>
+              <td>사용자 학년</td>
+              <td> : </td>
+              <td>
+                <input
+                  id='grade'
+                  type="text"
+                  value={grade}
+                  placeholder='학년'
+                  onChange={(e) => setGrade(e.target.value)}
+                />  
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        <div className='btn_section'>
+          <button className="exam_register" onClick={handleJoin} type = "submit">정보 수정</button>
+          <button onClick={closeModal} className="exam_register">닫기</button>
+          <button className="exam_register" onClick={withdrawal}>회원 탈퇴</button>
+        </div>
     </Modal>
   );
 };
@@ -177,7 +346,6 @@ function TeacherBtn()
   const [modalType, setModalType] = useState(null);
 
   const fetchData = async (modalType) => {
-    console.log(modalType);
     try 
     {
       let endpoint = '';
@@ -190,6 +358,7 @@ function TeacherBtn()
       {
         endpoint = '/change_state_delete';
       }
+      
 
       const response = await fetch(endpoint, {
         method : 'POST', 
@@ -224,47 +393,82 @@ function TeacherBtn()
     setModalIsOpen(false);
     setModalType(null);
   };
-  useEffect(() => {
-    fetchData();
-  }, []);
+  
   const handleCheckboxChange = (event, id) => {
-    const isChecked = event.target.checked;
-    const updatedRows = isChecked
-      ? [...checkedRows, id]
-      : checkedRows.filter((rowId) => rowId !== id);
-
-    setCheckedRows(updatedRows);
-    setUpdateButtonDisabled(updatedRows.length === 0);
+    setCheckedRows(prevRows => {
+      const isChecked = event.target.checked;
+      const updatedRows = isChecked
+        ? [...prevRows, id]
+        : prevRows.filter((rowId) => rowId !== id);
+  
+      setUpdateButtonDisabled(updatedRows.length === 0);
+      return updatedRows;
+    });
   };
-  const handleUpdateCheckedRows = async () => {
-    try 
+  const handleUpdateCheckedRows = async (modalType) => {
+    if(modalType === 'approval')
     {
-      const response = await fetch('/approval_of_membership', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          selectedRows: checkedRows,
-        }),
-      });
+      try 
+      {
+        const response = await fetch('/approval_of_membership', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            selectedRows: checkedRows,
+          }),
+        });
 
-      if (!response.ok) {
-        throw new Error('Network response was not ok');
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
+
+        await fetchData();
+
+        response.json().then((data) => {
+          alert(data.message);
+          setCheckedRows([]);
+          setUpdateButtonDisabled(true);
+          closeModal();
+        });
+      } 
+      catch (error) 
+      {
+        console.error('There has been a problem with your fetch operation:', error);
       }
-
-      await fetchData();
-
-      response.json().then((data) => {
-        alert(data.message);
-        setCheckedRows([]);
-        setUpdateButtonDisabled(true);
-        closeModal();
-      });
-    } 
-    catch (error) 
+    }
+    else if(modalType === 'delete')
     {
-      console.error('There has been a problem with your fetch operation:', error);
+      try 
+      {
+        const response = await fetch('/delete_of_membership', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            selectedRows: checkedRows,
+          }),
+        });
+
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
+
+        await fetchData();
+
+        response.json().then((data) => {
+          alert(data.message);
+          setCheckedRows([]);
+          setUpdateButtonDisabled(true);/* 
+          closeModal(); */
+        });
+      } 
+      catch (error) 
+      {
+        console.error('There has been a problem with your fetch operation:', error);
+      }
     }
     console.log('Checked rows:', checkedRows);
   };
@@ -289,6 +493,9 @@ function TeacherBtn()
           modalIsOpen={modalIsOpen}
           closeModal={closeModal}
           studentInfo={studentInfo}
+          handleCheckboxChange={handleCheckboxChange}
+          handleUpdateCheckedRows={handleUpdateCheckedRows}
+          isUpdateButtonDisabled={isUpdateButtonDisabled}
         />
       );
     } 
@@ -311,13 +518,39 @@ function TeacherBtn()
     </div>
   );
 }
-function StudentBtn()
+function StudentBtn({user})
 {
+  Modal.setAppElement('#root');
+
+  const [modalIsOpen, setModalIsOpen] = useState(false);
+
+  const openModal = async (type) => {
+    Modal.setAppElement('#root');
+    setModalIsOpen(true);
+  };
+  const closeModal = () => {
+    setModalIsOpen(false);
+    window.location.reload();
+  };
+  const renderModalContent = () => {
+    return (
+      <UpdateInfo
+        modalIsOpen={modalIsOpen}
+        closeModal={closeModal}
+        user = {user}
+      />
+    );
+  };
+
   return(
     <div className='btn_section'>
       <button className="exam_register">
         <Link to = '/record'>시험결과 보러가기</Link>
       </button>
+      <button onClick={() => openModal('update_info')} className="exam_register" id="update_info">
+        정보수정
+      </button>
+      {renderModalContent()}
     </div>
   )
 }
@@ -325,20 +558,21 @@ function StudentBtn()
 function MyInformation() {
   const [user, setUser] = useState([]);
 
+  const fetchUserInfo = async () => {
+    try {
+      const response = await fetch('/profile');
+      if (!response.ok) {
+        throw new Error('HTTP 오류 ' + response.status);
+      }
+      const data = await response.json();
+      setUser(data.user);
+    } catch (error) {
+      console.error('세션 정보를 가져오는 중 오류 발생:', error);
+    }
+  };
+  
   useEffect(() => {
-    fetch('/profile')
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error('HTTP 오류 ' + response.status);
-        }
-        return response.json();
-      })
-      .then((data) => {
-        setUser(data.user);
-      })
-      .catch((error) => {
-        console.error('세션 정보를 가져오는 중 오류 발생:', error);
-      });
+    fetchUserInfo();
   }, []);
 
   if (user.user_type === '학생') {
@@ -347,7 +581,7 @@ function MyInformation() {
         <div className="wrap">
           <Main />
           <UserInfoTable user={user} />
-          <StudentBtn />
+          <StudentBtn user={user} />
         </div>
       </div>
     );
