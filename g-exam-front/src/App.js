@@ -18,6 +18,7 @@ import HighWord from "./WordExam_High";
 import TOEICWord from "./WordExam_TOEIC";
 import ResetPw from "./ResetPw";
 import JoinMember from "./Join_member.js";
+import Regist from "./Regist.js";
 
 
 const App = () => {
@@ -40,6 +41,7 @@ const App = () => {
       <Route path = "/record" element = {<Record />} />
       <Route path = "/reset_pw" element = {<ResetPw />} />
       <Route path = "/join_member" element = {<JoinMember />} />
+      <Route path = "/Regist" element = {<Regist />} />
     </Routes>
   );
 };

@@ -514,7 +514,7 @@ function TeacherBtn()
         회원 삭제
       </button>
       {renderModalContent()}
-      <button className="exam_register">시험문제 관리</button>
+      <button className="exam_register"><Link to ='/Regist'>시험문제 관리</Link></button>
     </div>
   );
 }
