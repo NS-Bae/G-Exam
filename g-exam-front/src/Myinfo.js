@@ -226,29 +226,32 @@ const UpdateInfo = ({ modalIsOpen, closeModal, user }) => {
       setGrade('');
   };
   const withdrawal = async () => {
-    fetch('/withgrawal', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(user),
-    })
-      .then((response) => response.json())
-      .then((data) => {
-        if (data.message) 
-        {
-          alert(data.message);
-          closeModal();
-          window.location.href = '/';
-        } 
-        else if (data.error) 
-        {
-          alert(data.error);
-        }
+    const confirmation = window.confirm('정말로 회원을 탈퇴하시겠습니까?');
+
+    if(confirmation)
+    {
+      fetch('/withgrawal', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(user),
       })
-      .catch((error) => {
-        console.error('네트워크 오류:', error);
-      });
+        .then((response) => response.json())
+        .then((data) => {
+          if (data.message) {
+            alert(data.message);
+            closeModal();
+            window.location.href = '/';
+          } else if (data.error) {
+            alert(data.error);
+          }
+        })
+        .catch((error) => {
+          console.error('네트워크 오류:', error);
+        });
+    }
+    
   };
   return (
     <Modal
