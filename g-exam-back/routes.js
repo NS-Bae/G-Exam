@@ -384,7 +384,6 @@ async function getLastNumber(selectedLevel) {
   });
 }
 
-
 async function saveNewWords(selectedLevel, wordTag, wordSave) {
   try {
     const lastNumber = await getLastNumber(selectedLevel);
@@ -447,6 +446,40 @@ router.post('/save_eng_word', async (req, res) => {
     res.status(500).json({ message: 'Error saving new words' });
   }
 
+});
+
+router.post('/search_table', (req, res) => {
+  const form = req.body;
+  const { selectedCategory, tagValue, selectedLevel, offset } = req.body;
+  
+  let sql;
+  let countSql;
+  
+  if (tagValue === undefined) {
+    sql = `SELECT word_id, word, word_mean1, word_mean2, word_mean3, word_mean4 FROM ${selectedLevel} LIMIT 10 OFFSET ${offset};`;
+    countSql = `SELECT COUNT(*) as totalCount FROM ${selectedLevel};`;
+  } else {
+    sql = `SELECT word_id, word, word_mean1, word_mean2, word_mean3, word_mean4 FROM ${selectedLevel} WHERE word_id LIKE '%${tagValue}%' LIMIT 15 OFFSET ${offset};`;
+    countSql = `SELECT COUNT(*) as totalCount FROM ${selectedLevel} WHERE word_id LIKE '%${tagValue}%';`;
+  }
+
+  db.query(countSql, (countErr, countResult) => {
+    if (countErr) {
+      console.log(countErr);
+      res.status(500).json({ error: '' });
+    } else {
+      const totalCount = countResult[0].totalCount;
+
+      db.query(sql, (err, result) => {
+        if (err) {
+          console.log(err);
+          res.status(500).json({ error: '' });
+        } else {
+          res.status(200).json({ data: result, totalCount });
+        }
+      });
+    }
+  });
 });
 
 module.exports = router;
