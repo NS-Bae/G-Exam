@@ -126,6 +126,13 @@ const ApprovalModal = ({ modalIsOpen, closeModal, studentInfo, handleCheckboxCha
   );
 };
 const DeleteModal = ({ modalIsOpen, closeModal, studentInfo, handleCheckboxChange, handleUpdateCheckedRows, isUpdateButtonDisabled }) => {
+  const handleDeleteButtonClick = () => {
+    const confirmation = window.confirm('정말로 회원을 삭제하시겠습니까?');
+
+    if (confirmation) {
+      handleUpdateCheckedRows('delete');
+    }
+  };
   return (
     <Modal
       isOpen={modalIsOpen}
@@ -162,7 +169,7 @@ const DeleteModal = ({ modalIsOpen, closeModal, studentInfo, handleCheckboxChang
       </table>
       <div className='btn_section'>
         <button
-          onClick={() => handleUpdateCheckedRows('delete')}
+          onClick={handleDeleteButtonClick}
           disabled={isUpdateButtonDisabled}
           className="exam_register"
         >
@@ -557,7 +564,6 @@ function StudentBtn({user})
     </div>
   )
 }
-
 function MyInformation() {
   const [user, setUser] = useState([]);
 

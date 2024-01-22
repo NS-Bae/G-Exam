@@ -482,4 +482,43 @@ router.post('/search_table', (req, res) => {
   });
 });
 
+router.post('/delete_word', async (req, res) => {
+  const selectedRows = req.body.selectedRows;
+  const selectedLevel = req.body.selectedLevel;
+
+  console.log(selectedRows, selectedLevel);
+
+  const placeholders = selectedRows.map(() => '?').join(', ');
+  const sql = `DELETE FROM ${selectedLevel} WHERE word_id IN (${placeholders});`;
+
+  try 
+  {
+    const [result] = await db.promise().query(sql, selectedRows);
+    res.status(200).json({ message: 'Rows updated successfully' });
+  } 
+  catch (error) 
+  {
+    console.error('Error executing query:', error);
+    res.status(500).json({ error: 'Error executing query' });
+  }
+});
+
+router.post('/update_word', async (req, res) => {
+  const selectedRows = req.body.selectedRows;
+  const selectedLevel = req.body.selectedLevel;
+
+  const placeholders = selectedRows.map(() => '?').join(', ');
+  sql = `SELECT word_id, word, word_mean1, word_mean2, word_mean3, word_mean4 FROM ${selectedLevel} WHERE word_id IN (${placeholders});`;
+  try 
+  {
+    const [result] = await db.promise().query(sql, selectedRows);
+    res.status(200).json({ data: result });
+  } 
+  catch (error) 
+  {
+    console.error('Error executing query:', error);
+    res.status(500).json({ error: 'Error executing query' });
+  }
+});
+
 module.exports = router;

@@ -5,16 +5,18 @@
   font-family: "Noto Sans KR", sans-serif;
   }
   .background {
+    min-height: 100vh;
     width: 100%;
-    height: 100vh;
+    height: 100%;
     display: flex;
     align-items: center;
     justify-content: center;
     background: rgba(0, 0, 0, 0.1);
   }
   .wrap {
+    min-height: 90vh;
     width: 95%;
-    height: 97%;
+    height: 90%;
     background: white;
     border-radius: 20px;
     display: flex;
@@ -377,8 +379,9 @@
     flex-direction: column;
     align-items: center;
   }
-  .place > p
+  .place > p, .sel_option > p
   {
+    display: flex;
     text-align: center;
     font-size: 1.1rem;
     font-weight: bold;

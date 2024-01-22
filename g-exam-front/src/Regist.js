@@ -2,6 +2,7 @@ import './App.css';
 import React from 'react';
 import { useState, useEffect, useRef } from 'react';
 import { Link } from "react-router-dom";
+import Modal from 'react-modal';
 
 function Main()
 {
@@ -13,10 +14,21 @@ function ChoiceForm() {
   const [selectedCategory, setSelectedCategory] = useState('');
   const [selectedManagement, setSelectedManagement] = useState('');
   const [isConfirmButtonClicked, setConfirmButtonClicked] = useState(false);
+  const [isChoiceFormVisible, setChoiceFormVisible] = useState(true);
 
   const handleConfirmButtonClick = () => {
-    console.log(selectedManagement);
     setConfirmButtonClicked(true);
+  };
+  const handleConfirmButtonClick2 = () => {
+    console.log(isChoiceFormVisible);
+    setChoiceFormVisible(false);
+    console.log(isChoiceFormVisible);
+  }
+  const handleFormBackClick = () => {
+    setSelectedCategory('');
+    setSelectedManagement('');
+    setConfirmButtonClicked(false);
+    setChoiceFormVisible(true);
   };
   
   useEffect(() => {
@@ -37,6 +49,7 @@ function ChoiceForm() {
         <RegistForm
           selectedCategory={selectedCategory}
           selectedManagement={selectedManagement}
+          onChangeFormBackClick={handleFormBackClick}
         />
       );
     } else if (selectedManagement === '관리') {
@@ -44,53 +57,60 @@ function ChoiceForm() {
         <ManagementForm
           selectedCategory={selectedCategory}
           selectedManagement={selectedManagement}
+          onChangeFormBackClick={handleFormBackClick}
+          onChangeFormClick={handleConfirmButtonClick2}
         />
       );
     }
     setConfirmButtonClicked(false);
     return null;
   };
-
   return (
     <div className = 'place'>
-      <div className='upper_button_place'>
-        <select
-          id='category'
-          onChange={(e) => setSelectedCategory(e.target.value)}
-          value={selectedCategory}
-        >
-            <option value={''}>선택하세요</option>
-            <option value={'영단어'}>영단어</option>
-            <option value={'국어'}>국어</option>
-            <option value={'영어'}>영어</option>
-            <option value={'수학'}>수학</option>
-            <option value={'사회'}>사회</option>
-            <option value={'과학'}>과학</option>
-            <option value={'기타'}>기타</option>
-        </select>
-        <select
-          id='management'
-          onChange={(e) => setSelectedManagement(e.target.value)}
-          value={selectedManagement}
-        >
-            <option value={''}>선택하세요</option>
-            <option value={'등록'}>등록하기</option>
-            <option value={'관리'}>관리하기</option>
-        </select>
-        <button className='letter_btn' type='submit' onClick={handleConfirmButtonClick}>
-          확인
-        </button>
-      </div>
+      {isChoiceFormVisible && (
+        <div className='upper_button_place'>
+          <select
+            id='category'
+            onChange={(e) => setSelectedCategory(e.target.value)}
+            value={selectedCategory}
+          >
+              <option value={''}>선택하세요</option>
+              <option value={'영단어'}>영단어</option>
+              <option value={'국어'}>국어</option>
+              <option value={'영어'}>영어</option>
+              <option value={'수학'}>수학</option>
+              <option value={'사회'}>사회</option>
+              <option value={'과학'}>과학</option>
+              <option value={'기타'}>기타</option>
+          </select>
+          <select
+            id='management'
+            onChange={(e) => setSelectedManagement(e.target.value)}
+            value={selectedManagement}
+          >
+              <option value={''}>선택하세요</option>
+              <option value={'등록'}>등록하기</option>
+              <option value={'관리'}>관리하기</option>
+          </select>
+          <button className='letter_btn' type='button' onClick={handleConfirmButtonClick}>
+            확인
+          </button>
+        </div>
+      )}
       {isConfirmButtonClicked && renderForm()}
     </div>
   );
 }
-function RegistForm ({ selectedCategory, selectedManagement })
+function RegistForm ({ selectedCategory, selectedManagement, onChangeFormBackClick })
 {
   const qRefs = Array.from({ length: 10 }, (_, i) => React.createRef());
   const aRefs = Array.from({ length: 10 }, (_, i) => React.createRef());
   const selLevelRef = useRef(null);
   const tagRef = useRef(null);
+
+  const handleBackButtonClick =() => {
+    onChangeFormBackClick();
+  }
 
   const handleConfirmButtonClick = () => {
     const wordTag = tagRef.current.value;
@@ -178,9 +198,12 @@ function RegistForm ({ selectedCategory, selectedManagement })
               ))}
             </tbody>
           </table>
-          <button className='letter_btn' type='submit' onClick= {handleConfirmButtonClick}>
-              등록하기
-          </button>
+          <div className='btn_section'>
+            <button className='letter_btn' type='submit' onClick= {handleConfirmButtonClick}>
+                등록하기
+            </button>
+            <button className="exam_register" onClick={handleBackButtonClick}>뒤로가기</button>
+          </div>
         </div>
       );
     }
@@ -294,7 +317,7 @@ function RegistForm ({ selectedCategory, selectedManagement })
   }
     
 };
-function ManagementForm({ selectedCategory, selectedManagement })
+function ManagementForm({ selectedCategory, selectedManagement, onChangeFormClick, onChangeFormBackClick  })
 {
   const selLevelRef = useRef(null);
   const tagRef = useRef(null);
@@ -302,6 +325,12 @@ function ManagementForm({ selectedCategory, selectedManagement })
   const [totalCount, setTotalCount] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const [selOptionHidden, setSelOptionHidden] = useState(false);
+  const [tableButtonHidden, setTableButtonHidden] = useState(false);
+  const [checkedRows, setCheckedRows] = useState([]);
+  const [isModalOpen, setModalOpen] = useState(false);
+  const [modalType, setModalType] = useState(null);
+  const [modalIsOpen, setModalIsOpen] = useState(false);
 
   const fetchData = (page) => {
     const itemsPerPage = 15; // 페이지당 아이템 수
@@ -337,23 +366,116 @@ function ManagementForm({ selectedCategory, selectedManagement })
         console.log('데이터 처리과정에서 문제가 발생하였습니다.', error);
       });
   };
-
   const handlePageClick = (page) => {
     setCurrentPage(page);
     fetchData(page);
   };
   const handleConfirmButtonClick = () => {
     const selectedLevel = selLevelRef.current ? selLevelRef.current.value : '';
-  
-    if ( !selectedLevel || selectedLevel === "select") {
+
+    if ( !selectedLevel || selectedLevel === "select")
+    {
       console.log('tagValue or selectedLevel is null, undefined, or "select". Skipping the request.');
       alert('올바른 단어 태그와 레벨을 선택하세요.');
       return;
     }
-  
     fetchData(1);
+    onChangeFormClick();
   };
+  const handleBackButtonClick =() => {
+    onChangeFormBackClick();
+    setSelOptionHidden(!selOptionHidden);
+    setTableButtonHidden(!tableButtonHidden);
+  }
+  const handleDeleteButton = () => {
+    const selectedLevel = selLevelRef.current.value;
+    console.log("삭제Checked Rows:", checkedRows, selectedLevel);
+    const confirmation = window.confirm('정말로 영단어를 삭제하시겠습니까?');
+    fetch('/delete_word', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        selectedRows: checkedRows,
+        selectedLevel : selectedLevel,
+      }),
+    })
+    .then((response) => {
+      if (!response.ok) {
+        throw new Error(`Network response was not ok, status: ${response.status}`);
+      }
+      return response.json();
+    })
+    .then((data) => {
+      console.log('Response data:', data);
+      alert("영단어를 삭제하였습니다");
+      fetchData(1);
+    })
+    .catch((error) => {
+      console.error('Error during fetch operation:', error);
+    });
+  
+  }
+  /* const handleUpdateButton = () => {
+    const selectedLevel = selLevelRef.current.value;
+    console.log("수정Checked Rows:", checkedRows, selectedLevel);
+    const confirmation = window.confirm('정말로 영단어를 수정하시겠습니까?');
 
+    fetch('/update_word', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        selectedRows: checkedRows,
+        selectedLevel : selectedLevel,
+      }),
+    })
+    .then((response) => {
+      if (!response.ok) {
+        throw new Error(`Network response was not ok, status: ${response.status}`);
+      }
+      return response.json();
+    })
+    .then((data) => {
+      console.log('Response data:', data);
+      alert("영단어를 수정하였습니다");
+      fetchData(1);
+    })
+    .catch((error) => {
+      console.error('Error during fetch operation:', error);
+    });
+  } */
+  const openModal = async (type) => {
+    Modal.setAppElement('#root');
+    setModalType(type);
+    setModalIsOpen(true);
+  };
+  const closeModal = () => {
+    setModalIsOpen(false);
+    setModalType(null);
+  };
+  const handleCheckboxChange = (event, wordId) => {
+    const isChecked = event.target.checked;
+    if (isChecked) {
+      setCheckedRows((prevCheckedRows) => [...prevCheckedRows, wordId]);
+    } else {
+      setCheckedRows((prevCheckedRows) => prevCheckedRows.filter((id) => id !== wordId));
+    }
+  };
+  const renderModalContent = () => {
+    if (modalType === 'update') {
+      return (
+        <UpdateModal
+          modalIsOpen={modalIsOpen}
+          closeModal={closeModal}
+          handleCheckboxChange={handleCheckboxChange}
+        />
+      );
+    }
+  }
+  
   if(selectedManagement === '관리')
   {
     if(selectedCategory === '영단어')
@@ -375,7 +497,7 @@ function ManagementForm({ selectedCategory, selectedManagement })
                 <h3>문제 태그</h3>
                 <input type="text" name="word_tag" id="tag" ref={tagRef} placeholder="영단어 정보" />
             </div>
-            <button className='letter_btn' type='submit' onClick={handleConfirmButtonClick}>
+            <button className='letter_btn' type='button' onClick={handleConfirmButtonClick}>
               확인
             </button>
           </div>
@@ -383,6 +505,7 @@ function ManagementForm({ selectedCategory, selectedManagement })
           <table className='third_table'>
             <thead>
               <tr>
+                <td>체크</td>
                 <td>식별 번호</td>
                 <td>영단어</td>
                 <td>뜻1</td>
@@ -394,6 +517,10 @@ function ManagementForm({ selectedCategory, selectedManagement })
             <tbody>
               {Array.from({ length: Math.min(result.length, 15) }, (_, i) => (
                 <tr key={result[i].word_id}>
+                  <td><input
+                  type="checkbox"
+                  onChange={(event) => handleCheckboxChange(event, result[i].word_id)}
+                /></td>
                   <td>{result[i].word_id}</td>
                   <td>{result[i].word}</td>
                   <td>{result[i].word_mean1}</td>
@@ -411,10 +538,16 @@ function ManagementForm({ selectedCategory, selectedManagement })
               </button>
             ))}
           </div>
+          <div className='btn_section'>
+            <button className="exam_register" onClick={handleDeleteButton}>삭제하기</button>
+            <button className="exam_register" onClick={() => openModal('update')}>수정하기</button>
+            <button className="exam_register" onClick={handleBackButtonClick}>뒤로가기</button>
+            {renderModalContent()}  
+          </div>
         </div>
       );
     }
-    else if(selectedCategory === '국어')
+    /* else if(selectedCategory === '국어')
     {
       return (
         <div>
@@ -461,7 +594,7 @@ function ManagementForm({ selectedCategory, selectedManagement })
           <p>{selectedCategory} {selectedManagement}</p>
         </div>
       );
-    }
+    } */
   }
   else
   {
@@ -469,6 +602,87 @@ function ManagementForm({ selectedCategory, selectedManagement })
       <p>선택해주세요!</p>
     );
   }
+}
+
+const UpdateModal = ({ modalIsOpen, closeModal, handleCheckboxChange, result }) => {
+  const tableHeaders = ['Word ID', 'Word', 'Meaning 1', 'Meaning 2', 'Meaning 3', 'Meaning 4'];
+  const [tableData, setTableData] = useState([]);
+  const selectedLevel = selLevelRef.current.value;
+  console.log("수정Checked Rows:", checkedRows, selectedLevel);
+
+  const [modalData, setModalData] = useState(null);
+
+  useEffect(() => {
+    // 모달이 열릴 때 데이터를 불러오기
+    if (modalIsOpen) {
+      fetch('/update_word', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          selectedRows: checkedRows,
+          selectedLevel: selectedLevel,
+        }),
+      })
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error(`Network response was not ok, status: ${response.status}`);
+        }
+        return response.json();
+      })
+      .then((data) => {
+        console.log('Response data:', data);
+        // 불러온 데이터를 state에 저장
+        setModalData(data.result);
+      })
+      .catch((error) => {
+        console.error('Error during fetch operation:', error);
+      });
+    }
+  }, [modalIsOpen, checkedRows, selectedLevel]);
+
+
+  return (
+    <Modal
+      isOpen={modalIsOpen}
+      onRequestClose={closeModal}
+      contentLabel="영단어 수정"
+    >
+      <h2>영단어 수정</h2>
+      <table className='third_table'>
+        <thead>
+          <tr>
+            {tableHeaders.map((header, index) => (
+              <th key={index}>{header}</th>
+            ))}
+            <th>수정하기</th>
+          </tr>
+        </thead>
+        <tbody>
+          {tableData.map((row, rowIndex) => (
+            <tr key={rowIndex}>
+              <td>
+                <input
+                  type="checkbox"
+                  onChange={(event) => handleCheckboxChange(event, row.word_id)}
+                />
+              </td>
+              <td>{row.word_id}</td>
+              <td>{row.word}</td>
+              <td>{row.word_mean1}</td>
+              <td>{row.word_mean2}</td>
+              <td>{row.word_mean3}</td>
+              <td>{row.word_mean4}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+      <div className='btn_section'>
+        <button onClick={closeModal}>닫기</button>
+      </div>
+    </Modal>
+  );
 };
 function MyApp() 
 {
