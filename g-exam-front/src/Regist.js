@@ -208,7 +208,7 @@ function RegistForm ({ selectedCategory, selectedManagement, onChangeFormBackCli
     }
     else if(selectedCategory === '국어')
     {
-      return <RegistKorean />;
+      return <RegistKorean selectedCategory = {selectedCategory}/>;
     }
     else if(selectedCategory === '영어')
     {
