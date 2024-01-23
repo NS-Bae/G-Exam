@@ -640,5 +640,8 @@ router.post('/update_word_change', (req, res) => {
 
 
 });
-
+router.post('/regist_pre_exam', (req, res) => {
+  const formData = req.body.formData;
+  console.log(formData);
+});
 module.exports = router;

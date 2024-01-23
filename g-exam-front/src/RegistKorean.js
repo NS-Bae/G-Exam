@@ -23,7 +23,7 @@ const RegistKorean = ({selectedCategory}) => {
         choice3: '',
         choice4: '',
         choice5: '',
-      });
+    });
     const handleInputChange = (e) => {
         const { id, value } = e.target;
         setFormData((prevData) => ({
@@ -92,7 +92,27 @@ const RegistKorean = ({selectedCategory}) => {
         alert('폼데이터가 콘솔에 출력되었습니다. 추가 작업을 수행하세요.');
     };
     const handleButton = () => {
-        console.log(formData);
+        fetch('/regist_pre_exam', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({formData}),
+          })
+            .then((response) => response.json())
+            .then((data) => {
+              if (data.message) 
+              {
+                alert(data.message);
+              } 
+              else if (data.error) 
+              {
+                alert(data.error);
+              }
+            })
+            .catch((error) => {
+              console.error('네트워크 오류:', error);
+            });
     }
 
     return (
