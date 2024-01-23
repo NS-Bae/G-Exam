@@ -386,52 +386,131 @@ async function getLastNumber(selectedLevel) {
 
 async function saveNewWords(selectedLevel, wordTag, wordSave) {
   try {
-    const lastNumber = await getLastNumber(selectedLevel);
-
-    for (let i = 0; i < wordSave.length; i++) {
-      const newNumber = (lastNumber + i + 1).toString().padStart(8, '0');
-      const word_id = `${selectedLevel}_${wordTag}_${newNumber}`;
-
-      const engword = (wordSave[i]?.engWord) || '';
-      const korword = (wordSave[i]?.korWord) || [];
-      const korWords = wordSave[i].korWord.slice(0, 4); // 최대 4개까지만 유지
-      const korword1 = korWords[0] || null;
-      const korword2 = korWords[1] || null;
-      const korword3 = korWords[2] || null;
-      const korword4 = korWords[3] || null;
-
-      console.log(word_id, engword);
-      console.log(korword);
-
-      let query;
-      let values;
-
-      if (selectedLevel === "elementary") 
-      {
-        query = `INSERT INTO ${selectedLevel} VALUES (?, ?, ?, ?, ?, ?, '초등')`;
-        values = [word_id, engword, korword1, korword2, korword3, korword4];
+    const exist = await isWordTagExists(selectedLevel, wordTag);
+    
+    if(exist > 0)
+    {
+      const lastNumber = await getLastNumber(selectedLevel);
+      for (let i = 0; i < wordSave.length; i++) {
+        const newNumber = (lastNumber + i + 1).toString().padStart(8, '0');
+        const word_id = `${selectedLevel}_${wordTag}_${newNumber}`;
+  
+        const engword = (wordSave[i]?.engWord) || '';
+        const korword = (wordSave[i]?.korWord) || [];
+        const korWords = wordSave[i].korWord.slice(0, 4); // 최대 4개까지만 유지
+        const korword1 = korWords[0] || null;
+        const korword2 = korWords[1] || null;
+        const korword3 = korWords[2] || null;
+        const korword4 = korWords[3] || null;
+  
+        console.log(word_id, engword);
+        console.log(korword);
+  
+        let query;
+        let values;
+  
+        if (selectedLevel === "elementary") 
+        {
+          query = `INSERT INTO ${selectedLevel} VALUES (?, ?, ?, ?, ?, ?, '초등')`;
+          values = [word_id, engword, korword1, korword2, korword3, korword4];
+        }
+        else if (selectedLevel === "middle") 
+        {
+          query = `INSERT INTO ${selectedLevel} VALUES (?, ?, ?, ?, ?, ?, '중등')`;
+          values = [word_id, engword, korword1, korword2, korword3, korword4];
+        } 
+        else if (selectedLevel === "high") 
+        {
+          query = `INSERT INTO ${selectedLevel} VALUES (?, ?, ?, ?, ?, ?, '고등')`;
+          values = [word_id, engword, korword1, korword2, korword3, korword4];
+        } 
+        else if (selectedLevel === "toeic") 
+        {
+          query = `INSERT INTO ${selectedLevel} VALUES (?, ?, ?, ?, ?, ?, '토익')`;
+          values = [word_id, engword, korword1, korword2, korword3, korword4];
+        }
+  
+        await db.execute(query, values);
       }
-      else if (selectedLevel === "middle") 
-      {
-        query = `INSERT INTO ${selectedLevel} VALUES (?, ?, ?, ?, ?, ?, '중등')`;
-        values = [word_id, engword, korword1, korword2, korword3, korword4];
-      } 
-      else if (selectedLevel === "high") 
-      {
-        query = `INSERT INTO ${selectedLevel} VALUES (?, ?, ?, ?, ?, ?, '고등')`;
-        values = [word_id, engword, korword1, korword2, korword3, korword4];
-      } 
-      else if (selectedLevel === "toeic") 
-      {
-        query = `INSERT INTO ${selectedLevel} VALUES (?, ?, ?, ?, ?, ?, '토익')`;
-        values = [word_id, engword, korword1, korword2, korword3, korword4];
+    }
+    else
+    {
+      const lastNumber = 0;
+      for (let i = 0; i < wordSave.length; i++) {
+        const newNumber = (lastNumber + i + 1).toString().padStart(8, '0');
+        const word_id = `${selectedLevel}_${wordTag}_${newNumber}`;
+  
+        const engword = (wordSave[i]?.engWord) || '';
+        const korword = (wordSave[i]?.korWord) || [];
+        const korWords = wordSave[i].korWord.slice(0, 4); // 최대 4개까지만 유지
+        const korword1 = korWords[0] || null;
+        const korword2 = korWords[1] || null;
+        const korword3 = korWords[2] || null;
+        const korword4 = korWords[3] || null;
+  
+        console.log(word_id, engword);
+        console.log(korword);
+  
+        let query;
+        let values;
+  
+        if (selectedLevel === "elementary") 
+        {
+          query = `INSERT INTO ${selectedLevel} VALUES (?, ?, ?, ?, ?, ?, '초등')`;
+          values = [word_id, engword, korword1, korword2, korword3, korword4];
+        }
+        else if (selectedLevel === "middle") 
+        {
+          query = `INSERT INTO ${selectedLevel} VALUES (?, ?, ?, ?, ?, ?, '중등')`;
+          values = [word_id, engword, korword1, korword2, korword3, korword4];
+        } 
+        else if (selectedLevel === "high") 
+        {
+          query = `INSERT INTO ${selectedLevel} VALUES (?, ?, ?, ?, ?, ?, '고등')`;
+          values = [word_id, engword, korword1, korword2, korword3, korword4];
+        } 
+        else if (selectedLevel === "toeic") 
+        {
+          query = `INSERT INTO ${selectedLevel} VALUES (?, ?, ?, ?, ?, ?, '토익')`;
+          values = [word_id, engword, korword1, korword2, korword3, korword4];
+        }
+  
+        await db.execute(query, values);
       }
-
-      await db.execute(query, values);
     }
     return `${wordSave.length} 단어가 성공적으로 저장되었습니다!`;
-  } catch (error) {
+  } 
+  catch (error) 
+  {
     console.error('단어 저장 오류:', error);
+    throw error;
+  }
+}
+
+async function isWordTagExists(selectedLevel, wordTag) {
+  try 
+  {
+    console.log(wordTag);
+    const query = `SELECT COUNT(*) as count FROM ${selectedLevel} WHERE word_id LIKE ?`;
+    const values = [`%${wordTag}%`];
+
+    console.log(query);
+
+    return new Promise((resolve, reject) => {
+      db.query(query, values, function (err, rows) {
+        if (err) {
+          console.error('WordTag 확인 오류:', err);
+          reject(err);
+        } else {
+          console.log(rows);
+          resolve(rows[0].count > 0);
+        }
+      });
+    });
+  } 
+  catch (error) 
+  {
+    console.error('WordTag 확인 오류:', error);
     throw error;
   }
 }
@@ -439,10 +518,13 @@ async function saveNewWords(selectedLevel, wordTag, wordSave) {
 router.post('/save_eng_word', async (req, res) => {
   const { selectedCategory, selectedManagement, wordSave, selectedLevel, wordTag } = req.body;
 
-  try {
+  try 
+  {
     const result = await saveNewWords(selectedLevel, wordTag, wordSave);
     res.status(200).json({ message: result });
-  } catch (error) {
+  } 
+  catch (error) 
+  {
     res.status(500).json({ message: 'Error saving new words' });
   }
 
@@ -512,13 +594,51 @@ router.post('/update_word', async (req, res) => {
   try 
   {
     const [result] = await db.promise().query(sql, selectedRows);
-    res.status(200).json({ data: result });
+    console.log(result);
+    res.status(200).json({ result });
   } 
   catch (error) 
   {
     console.error('Error executing query:', error);
     res.status(500).json({ error: 'Error executing query' });
   }
+});
+
+router.post('/update_word_change', (req, res) => {
+  const {updatedData, selectedLevel} = req.body;
+  
+  const updateQuery = `
+    UPDATE ${selectedLevel}
+    SET
+    word = CASE WHEN ? IS NOT NULL THEN ? ELSE word END,
+    word_mean1 = CASE WHEN ? IS NOT NULL THEN ? ELSE word_mean1 END,
+    word_mean2 = CASE WHEN ? IS NOT NULL THEN ? ELSE word_mean2 END,
+    word_mean3 = CASE WHEN ? IS NOT NULL THEN ? ELSE word_mean3 END,
+    word_mean4 = CASE WHEN ? IS NOT NULL THEN ? ELSE word_mean4 END
+  WHERE word_id = ?;
+  `;
+  const values = [
+    updatedData.word, updatedData.word,
+    updatedData.word_mean1, updatedData.word_mean1,
+    updatedData.word_mean2, updatedData.word_mean2,
+    updatedData.word_mean3, updatedData.word_mean3,
+    updatedData.word_mean4, updatedData.word_mean4,
+    updatedData.word_id
+  ];
+
+  db.query(updateQuery, values, (error, result) => {
+    if (error)
+    {
+      console.error('업데이트 쿼리 실핼중에 문제가 발생했습니다.', error);
+    }
+    else
+    {
+      console.log('업데이트에 성공했습니다.', result);
+      res.status(200).json({ message : '업데이트에 성공했습니다.' });
+    }
+  })
+
+
 });
 
 module.exports = router;

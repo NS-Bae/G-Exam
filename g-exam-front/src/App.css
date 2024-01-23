@@ -153,6 +153,15 @@
     justify-content: center;
     align-items: center;
   }
+  .small_select_place
+  {
+    width: 100%;
+    height: auto;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+    align-items: center;
+  }
   .input_place input
   {
     width: 70%;
@@ -365,7 +374,7 @@
     text-decoration: underline;
     font-size: smaller;
   }
-  .details:hover, .letter_btn:hover, .paging_number:hover
+  .details:hover, .letter_btn:hover, .paging_number:hover, .small_letter_btn:hover
   {
     color : #ffa600;
     cursor: pointer;
@@ -572,4 +581,41 @@
     overflow: auto;
     text-align: center;
     align-items: center;
+  }
+
+  .modal_design
+  {
+    padding-left: 0;
+    padding-right: 0;
+    position: absolute;
+    inset: 40px;
+    border: 1px solid rgb(204, 204, 204);
+    background: rgb(255, 255, 255);
+    overflow: auto;
+    border-radius: 4px;
+    outline: none;
+    padding-top: 20px;
+    padding-bottom: 20px;
+    align-items: center;
+  }
+  .textarea_design
+  {
+    width : 100%;
+    height: 1%;
+    resize: none;
+    text-align: center;
+    vertical-align: middle;
+    font-size: 1rem;
+  }
+  .small_letter_btn
+  {
+    width: auto;
+    display: flex;
+    background-color: white;
+    border: 0;
+    text-align: center;
+    font-size: 0.7em;
+    font-weight: bold;
+    cursor: pointer;
+    justify-content: center;
   }

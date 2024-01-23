@@ -81,37 +81,40 @@ const ApprovalModal = ({ modalIsOpen, closeModal, studentInfo, handleCheckboxCha
       isOpen={modalIsOpen}
       onRequestClose={closeModal}
       contentLabel="회원가입 승인"
+      className="modal_design"
     >
       <h2>회원가입 승인</h2>
-      <table className='third_table'>
-        <thead>
-          <tr>
-            <th>선택</th>
-            <th>아이디</th>
-            <th>비번</th>
-            <th>이름</th>
-            <th>학교, 학년</th>
-            <th>승인 여부</th>
-          </tr>
-        </thead>
-        <tbody>
-          {studentInfo.map((item, index) => (
-            <tr key={index}>
-              <td>
-                <input
-                  type="checkbox"
-                  onChange={(event) => handleCheckboxChange(event, item.id)}
-                />
-              </td>
-              <td>{item.id}</td>
-              <td>{item.pw}</td>
-              <td>{item.name}</td>
-              <td>{item.school_list_school_name} {item.grade}학년</td>
-              <td>{item.ready === 1 ? '승인' : '미승인'}</td>
+      <div className='place'>
+        <table className='third_table'>
+          <thead>
+            <tr>
+              <th>선택</th>
+              <th>아이디</th>
+              <th>비번</th>
+              <th>이름</th>
+              <th>학교, 학년</th>
+              <th>승인 여부</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {studentInfo.map((item, index) => (
+              <tr key={index}>
+                <td>
+                  <input
+                    type="checkbox"
+                    onChange={(event) => handleCheckboxChange(event, item.id)}
+                  />
+                </td>
+                <td>{item.id}</td>
+                <td>{item.pw}</td>
+                <td>{item.name}</td>
+                <td>{item.school_list_school_name} {item.grade}학년</td>
+                <td>{item.ready === 1 ? '승인' : '미승인'}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
       <div className='btn_section'>
         <button
           onClick={() => handleUpdateCheckedRows('approval')}
@@ -138,35 +141,38 @@ const DeleteModal = ({ modalIsOpen, closeModal, studentInfo, handleCheckboxChang
       isOpen={modalIsOpen}
       onRequestClose={closeModal}
       contentLabel="회원 삭제"
+      className="modal_design"
     >
       <h2>회원 삭제</h2>
-      <table className='third_table'>
-        <thead>
-          <tr>
-            <th>선택</th>
-            <th>아이디</th>
-            <th>비번</th>
-            <th>이름</th>
-            <th>학교, 학년</th>
-          </tr>
-        </thead>
-        <tbody>
-          {studentInfo.map((item, index) => (
-            <tr key={index}>
-              <td>
-                <input
-                  type="checkbox"
-                  onChange={(event) => handleCheckboxChange(event, item.id)}
-                />
-              </td>
-              <td>{item.id}</td>
-              <td>{item.pw}</td>
-              <td>{item.name}</td>
-              <td>{item.school_list_school_name} {item.grade}학년</td>
+      <div className='place'>
+        <table className='third_table'>
+          <thead>
+            <tr>
+              <th>선택</th>
+              <th>아이디</th>
+              <th>비번</th>
+              <th>이름</th>
+              <th>학교, 학년</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {studentInfo.map((item, index) => (
+              <tr key={index}>
+                <td>
+                  <input
+                    type="checkbox"
+                    onChange={(event) => handleCheckboxChange(event, item.id)}
+                  />
+                </td>
+                <td>{item.id}</td>
+                <td>{item.pw}</td>
+                <td>{item.name}</td>
+                <td>{item.school_list_school_name} {item.grade}학년</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
       <div className='btn_section'>
         <button
           onClick={handleDeleteButtonClick}
