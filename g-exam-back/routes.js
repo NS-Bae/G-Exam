@@ -157,7 +157,7 @@ router.post('/join_member', function(req, res) {
     res.status(400).json({ error: 'formType이 잘못되었습니다.' });
   }
 });
-
+//변경 불필요.
 router.post('/get_exam_record', (req, res) => {
   const { formType, user } = req.body;
 
@@ -249,7 +249,7 @@ router.post('/get_exam_record', (req, res) => {
     console.log("옳바르지 않은 요청입니다.");
   }
 });
-
+//변경 불필요.
 router.post('/change_state', (req, res) => {
   try {
     const sql = 'SELECT * FROM user_student WHERE ready = 0;';
@@ -267,7 +267,7 @@ router.post('/change_state', (req, res) => {
     res.status(500).json({ error: '학생정보를 가져오는데 실패했습니다' });
   }
 });
-
+//변경 불필요.
 router.post('/approval_of_membership', async (req, res) => {
   const selectedRows = req.body.selectedRows;
 
@@ -285,7 +285,7 @@ router.post('/approval_of_membership', async (req, res) => {
     res.status(500).json({ error: 'Error executing query' });
   }
 })
-
+//변경 불필요.
 router.post('/change_state_delete', (req, res) => {
   try 
   {
@@ -306,7 +306,7 @@ router.post('/change_state_delete', (req, res) => {
     res.status(500).json({ error: '학생정보를 가져오는데 실패했습니다' });
   }
 });
-
+//변경 불필요.
 router.post('/delete_of_membership', async (req, res) => {
   const selectedRows = req.body.selectedRows;
 
@@ -324,7 +324,7 @@ router.post('/delete_of_membership', async (req, res) => {
     res.status(500).json({ error: 'Error executing query' });
   }
 });
-
+//변경 불필요.
 router.post('/update_info', function(req, res) {  
   const school = req.body.school_details;
   const grade = req.body.grade;
@@ -345,7 +345,7 @@ router.post('/update_info', function(req, res) {
     }
   });
 });
-
+//변경 불필요.
 router.post('/withgrawal', function(req, res) {
   const user = req.body;
   console.log(user);
@@ -362,30 +362,37 @@ router.post('/withgrawal', function(req, res) {
     }
   });
 });
-
+//변경 불필요. 영단어 정보 기반 마지막숫자 가져오기
 async function getLastNumber(selectedLevel) {
   return new Promise((resolve, reject) => {
     const sql = `SELECT word_id FROM ${selectedLevel} ORDER BY word_id DESC LIMIT 1`;
     const params = [];
 
     db.query(sql, params, function (err, rows) {
-      if (err) {
+      if (err) 
+      {
         console.error('최신 번호 가져오기 오류:', err);
         reject('최신 번호 가져오기 오류');
-      } else {
-        if (rows.length > 0) {
+      } 
+      else
+      {
+        if (rows.length > 0)
+        {
           const lastNumber = parseInt(rows[0].word_id.split('_').pop(), 10);
           resolve(lastNumber);
-        } else {
+        } 
+        else 
+        {
           resolve(0);
         }
       }
     });
   });
 }
-
+//변경 불필요. 영단어 저장하기
 async function saveNewWords(selectedLevel, wordTag, wordSave) {
-  try {
+  try 
+  {
     const exist = await isWordTagExists(selectedLevel, wordTag);
     
     if(exist > 0)
@@ -402,9 +409,6 @@ async function saveNewWords(selectedLevel, wordTag, wordSave) {
         const korword2 = korWords[1] || null;
         const korword3 = korWords[2] || null;
         const korword4 = korWords[3] || null;
-  
-        console.log(word_id, engword);
-        console.log(korword);
   
         let query;
         let values;
@@ -486,11 +490,10 @@ async function saveNewWords(selectedLevel, wordTag, wordSave) {
     throw error;
   }
 }
-
+//변경 불필요. 영단어 정보가 포함된 word_id 가져오기
 async function isWordTagExists(selectedLevel, wordTag) {
   try 
   {
-    console.log(wordTag);
     const query = `SELECT COUNT(*) as count FROM ${selectedLevel} WHERE word_id LIKE ?`;
     const values = [`%${wordTag}%`];
 
@@ -514,7 +517,7 @@ async function isWordTagExists(selectedLevel, wordTag) {
     throw error;
   }
 }
-
+//변경 불필요.
 router.post('/save_eng_word', async (req, res) => {
   const { selectedCategory, selectedManagement, wordSave, selectedLevel, wordTag } = req.body;
 
@@ -529,7 +532,7 @@ router.post('/save_eng_word', async (req, res) => {
   }
 
 });
-
+//변경 불필요.
 router.post('/search_table', (req, res) => {
   const form = req.body;
   const { selectedCategory, tagValue, selectedLevel, offset } = req.body;
@@ -563,7 +566,7 @@ router.post('/search_table', (req, res) => {
     }
   });
 });
-
+//변경 불필요.
 router.post('/delete_word', async (req, res) => {
   const selectedRows = req.body.selectedRows;
   const selectedLevel = req.body.selectedLevel;
@@ -584,7 +587,7 @@ router.post('/delete_word', async (req, res) => {
     res.status(500).json({ error: 'Error executing query' });
   }
 });
-
+//변경 불필요.
 router.post('/update_word', async (req, res) => {
   const selectedRows = req.body.selectedRows;
   const selectedLevel = req.body.selectedLevel;
@@ -603,7 +606,7 @@ router.post('/update_word', async (req, res) => {
     res.status(500).json({ error: 'Error executing query' });
   }
 });
-
+//변경 불필요.
 router.post('/update_word_change', (req, res) => {
   const {updatedData, selectedLevel} = req.body;
   
@@ -637,11 +640,130 @@ router.post('/update_word_change', (req, res) => {
       res.status(200).json({ message : '업데이트에 성공했습니다.' });
     }
   })
-
-
 });
-router.post('/regist_pre_exam', (req, res) => {
-  const formData = req.body.formData;
-  console.log(formData);
+//한영전환 함수
+function convertKorean(selectedCategory) 
+{
+  const conversion = {
+    '국어' : 'korean', 
+    '영어' : 'english', 
+    '수학' : 'math', 
+    '사회' : 'social', 
+    '과학' : 'science', 
+    '기타' : 'etc', 
+  }
+
+  return conversion[selectedCategory] || selectedCategory;
+}
+//exam_id_pre값이 DB에 자장되어 있을 때 가장 큰 숫자 찾기
+async function findExamidNumber(exam_id_pre, major)
+{
+  return new Promise((resolve, reject) => {
+    const sql = `SELECT exam_id FROM ${major} WHERE exam_id LIKE ? ORDER BY exam_id DESC LIMIT 1`;
+    const params = [`${exam_id_pre}%`];
+
+    db.query(sql, params, function (err, rows) {
+      if (err) 
+      {
+        console.error('최신 번호 가져오기 오류:', err);
+        reject('최신 번호 가져오기 오류');
+      } 
+      else 
+      {
+        if (rows.length > 0) 
+        {
+          const lastNumber = parseInt(rows[0].exam_id.split('_').pop(), 10);
+          resolve(lastNumber);
+        } 
+        else 
+        {
+          resolve(0);
+        }
+      }
+    });
+  });
+}
+//exam_id_pre값이 DB에 자장되어 있을 때 가장 큰 숫자 찾기
+async function checkExamid(exam_id_pre, major)
+{
+  try 
+  {
+    const query = `SELECT COUNT(*) as count FROM ${major} WHERE exam_id LIKE ?`;
+    const values = [`${exam_id_pre}%`];
+
+    return new Promise((resolve, reject) => {
+      db.query(query, values, function (err, rows) {
+        if (err) 
+        {
+          console.error('시험정보 확인 오류:', err);
+          reject(err);
+        } 
+        else 
+        {
+          resolve(rows[0].count > 0);
+        }
+      });
+    });
+  } 
+  catch (error) 
+  {
+    console.error('WordTag 확인 오류:', error);
+    throw error;
+  }
+}
+//변경 불필요.
+router.post('/regist_pre_exam', async (req, res) => {
+  try
+  {
+    const formData = req.body.formData;
+    const year = formData.year;
+    const school_details = formData.school_details;
+    const grade = formData.grade;
+    const selectedCategory = formData.selectedCategory;
+    const major = convertKorean(formData.selectedCategory);
+    const semester = formData.semester;
+    const period = formData.period;
+    const type = formData.type;
+    const paragraph = formData.paragraph || null;
+    const question = formData.question || null;
+    const choice1 = formData.choice1 || null;
+    const choice2 = formData.choice2 || null;
+    const choice3 = formData.choice3 || null;
+    const choice4 = formData.choice4 || null;
+    const choice5 = formData.choice5 || null;
+
+    if (formData.selectedCategory !== "기타") {
+      const exam_id_pre = `${year}_${school_details}_${selectedCategory}_${grade}_${semester}_${period}_${type}`;
+      const total_semester = `${grade}_${semester}_${period}`;
+      
+      const existExamId = await checkExamid(exam_id_pre, major);
+      let lastNumber = 0;
+      let newNumber;
+
+      if(!existExamId)
+      {
+        newNumber = (lastNumber + 1).toString().padStart(3, '0');
+      }
+      else
+      {
+        lastNumber = await findExamidNumber(exam_id_pre, major);
+        newNumber = (lastNumber + 1).toString().padStart(3, '0');
+        console.log(existExamId, lastNumber);
+      }
+      let exam_id = `${exam_id_pre}_${newNumber}`;
+
+      const regist_query = `INSERT INTO ${major} VALUES (?, ?, ?, ?, ?, ?, null, ?, ?, ?, ?, ?, ?)`
+      const values = [exam_id, selectedCategory, school_details, total_semester, type, paragraph, question, choice1, choice2, choice3, choice4, choice5];
+
+      await db.execute(regist_query, values);
+    }
+    res.status(200).json({ message: '시험문제를 등록하였습니다.' });
+  }
+  catch (error) 
+  {
+    console.error('단어 저장 오류:', error);
+    throw error;
+  }
 });
+
 module.exports = router;

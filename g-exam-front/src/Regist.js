@@ -3,7 +3,7 @@ import React from 'react';
 import { useState, useEffect, useRef } from 'react';
 import { Link } from "react-router-dom";
 import Modal from 'react-modal';
-import RegistKorean from './RegistKorean.js'
+import Regist from './RegistForm.js'
 
 function Main()
 {
@@ -206,41 +206,9 @@ function RegistForm ({ selectedCategory, selectedManagement, onChangeFormBackCli
         </div>
       );
     }
-    else if(selectedCategory === '국어')
+    else if(selectedCategory === '국어' || selectedCategory === '영어' || selectedCategory === '수학' || selectedCategory === '사회' || selectedCategory === '과학')
     {
-      return <RegistKorean selectedCategory = {selectedCategory}/>;
-    }
-    else if(selectedCategory === '영어')
-    {
-      return (
-        <div>
-          <p>{selectedCategory} {selectedManagement}</p>
-        </div>
-      );
-    }
-    else if(selectedCategory === '수학')
-    {
-      return (
-        <div>
-          <p>{selectedCategory} {selectedManagement}</p>
-        </div>
-      );
-    }
-    else if(selectedCategory === '사회')
-    {
-      return (
-        <div>
-          <p>{selectedCategory} {selectedManagement}</p>
-        </div>
-      );
-    }
-    else if(selectedCategory === '과학')
-    {
-      return (
-        <div>
-          <p>{selectedCategory} {selectedManagement}</p>
-        </div>
-      );
+      return <Regist selectedCategory = {selectedCategory}/>;
     }
     else if(selectedCategory === '기타')
     {

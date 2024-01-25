@@ -3,11 +3,16 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { useState, useEffect } from 'react';
 import { Link } from "react-router-dom";
-import OCR_Request from './OCR_Request';
+import OcrRequest  from './OCR_Request';
+import ImgPreview from './ImagePreview';
+import ReactDOMServer from 'react-dom/server';
+import { createRoot } from 'react-dom/client';
 
-const RegistKorean = ({selectedCategory}) => {
+const RegistForm = ({selectedCategory}) => {
     console.log(selectedCategory);
     const[schoolsList, setSchoolsList] = useState([]);
+    const [selectedType, setSelectedType] = useState('');
+
     const [formData, setFormData] = useState({
         year: '',
         school_details: '',
@@ -24,6 +29,22 @@ const RegistKorean = ({selectedCategory}) => {
         choice4: '',
         choice5: '',
     });
+    const validateForm = () => {
+      const requiredFields = ['year', 'school_details', 'grade', 'semester', 'period', 'type', 'question'];
+      for (const field of requiredFields) 
+      {
+        if (!formData[field]) 
+        {
+          return false;
+        }
+      }
+      return true;
+    };
+    const handleTypeChange = (e) => {
+      const value = e.target.value;
+      setSelectedType(value);
+      handleInputChange(e);
+    };
     const handleInputChange = (e) => {
         const { id, value } = e.target;
         setFormData((prevData) => ({
@@ -33,8 +54,6 @@ const RegistKorean = ({selectedCategory}) => {
     };
     const handleSchoolTypeChange = (e) => {
         const selectedSchool = e.target.value;
-        
-        // 백엔드로 선택한 학교 유형을 보냅니다
         fetch(`/get_school_details?school=${selectedSchool}`)
         .then((response) => response.json())
         .then((data) => {
@@ -44,52 +63,88 @@ const RegistKorean = ({selectedCategory}) => {
         })
         .catch((error) => console.error('학교 목록 불러오기 오류:', error));
     };
-    const ImageUploadComponent = ({ onImageUpload }) => {
+    const ImageUploadComponent = () => {
         const [image, setImage] = useState(null);
       
         const handleImageChange = (e) => {
-          const selectedImage = e.target.files[0];
-          setImage(selectedImage);
+          const imageFile = e.target.files[0];
+          if(imageFile)
+          {
+            const reader = new FileReader();
+
+            reader.onload = () => {
+                setImage(reader.result);
+            };
+            reader.readAsDataURL(imageFile);
+          }
         };
-      
-        const handleUpload = () => {
-          // 이미지를 업로드하는 함수 호출
-          onImageUpload(image);
+        const openImagePreview = () => {
+            const imagePreviewWindow = window.open('', '_blank', 'width=600,height=400');
+            const imagePreviewPage = <ImgPreview image={image} />;
+          
+            imagePreviewWindow.document.write(ReactDOMServer.renderToStaticMarkup(imagePreviewPage));
         };
+        
       
         return (
           <div className='upper_button_place'>
-            <input type="file" onChange={handleImageChange} />
+            <input type="file" onChange={handleImageChange} accept="image/*" />
+            {image && <button type = 'button' className='letter_btn' onClick={openImagePreview}>미리보기</button> }
           </div>
         );
     };
     const openNewWindow = () => {
-        // 아무 문자열이나 사용 가능한 새 창의 이름
         const newWindowName = 'myNewWindow';
-    
-        // 새 창 열기
+      
         const newWindow = window.open('', newWindowName, 'width=800,height=600');
-    
+      
         if (newWindow) {
           newWindow.document.body.innerHTML = '<div id="root"></div>';
-          ReactDOM.render(<OCR_Request/>, newWindow.document.getElementById('root'));
+          const rootElement = newWindow.document.getElementById('root');
+      
+          if (rootElement && typeof ReactDOM.createRoot === 'function') {
+            const root = ReactDOM.createRoot(rootElement);
+            root.render(<OcrRequest  />);
+          } else {
+            ReactDOM.render(<OcrRequest  />, rootElement);
+          }
         } else {
           console.error('새 창을 열 수 없습니다.');
         }
     };
     const handleSubmit = (e) => {
-        e.preventDefault();
-    
-        const formDataObject = new FormData();
-        Object.entries(formData).forEach(([key, value]) => {
-          formDataObject.append(key, value);
-        });
-    
-        for (const [key, value] of formDataObject.entries()) {
-          console.log(`${key}: ${value}`);
-        }
-    
-        alert('폼데이터가 콘솔에 출력되었습니다. 추가 작업을 수행하세요.');
+      e.preventDefault();
+  
+      if (!validateForm()) {
+        alert('입력되지 않은 값이 있습니다. 모든 항목을 입력해주세요.');
+        return;
+      }
+  
+      // 이하 코드는 유효성 검사를 통과한 경우에만 실행
+      const formDataObject = new FormData();
+      Object.entries(formData).forEach(([key, value]) => {
+        formDataObject.append(key, value);
+      });
+  
+      // 나머지 코드는 유효성 검사를 통과한 경우의 로직
+      for (const [key, value] of formDataObject.entries()) {
+        console.log(`${key}: ${value}`);
+      }
+  
+      // 나머지 코드는 유효성 검사를 통과한 경우의 로직
+      handleButton(); 
+
+      setFormData({
+        type: '',
+        paragraph: '',
+        question: '',
+        choice1: '',
+        choice2: '',
+        choice3: '',
+        choice4: '',
+        choice5: '',
+      });
+      setSelectedType('');
     };
     const handleButton = () => {
         fetch('/regist_pre_exam', {
@@ -156,7 +211,11 @@ const RegistKorean = ({selectedCategory}) => {
                     </div>
                     <div className="insert_tag">
                         <h3>유형</h3>
-                        <input type="text" id = 'type' placeholder="유형" value={formData.type} onChange={handleInputChange}></input>
+                        <select id='type' value={formData.type} onChange={handleTypeChange}>
+                          <option value={''}>선택하세요</option>
+                          <option value={'객관식'}>객관식</option>
+                          <option value={'주관식'}>주관식</option>
+                        </select>
                     </div>
                 </div>
                 <ImageUploadComponent />
@@ -193,12 +252,12 @@ const RegistKorean = ({selectedCategory}) => {
                     </div>
                 </div>
                 <div className='btn_section'>
-                    <button type = 'submit' className="letter_btn" onClick={handleButton}>등록</button>
-                    <button className="letter_btn" onClick={openNewWindow}>OCR하러가기</button>
+                    <button type = 'submit' className="letter_btn" onClick={handleSubmit}>등록</button>
+                    <button type = 'button' className="letter_btn" onClick={openNewWindow}>OCR하러가기</button>
                 </div>
             </form>
         </div>
     );
 };
   
-export default RegistKorean;
+export default RegistForm;
