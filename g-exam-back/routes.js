@@ -848,4 +848,29 @@ router.post('/update_exam', (req, res) => {
   
 });
 
+router.post('/search_classification', (req, res) => {
+  const classification_category = req.body.selectedCategory;
+  console.log(classification_category);
+
+  try 
+  {
+    const sql = `SELECT * FROM classification_list WHERE major_name = '${classification_category}';`;
+    db.promise()
+      .query(sql)
+      .then(([rows]) => {
+        res.json({ classInfo: rows });
+        console.log(rows);
+      })
+      .catch((error) => {
+        console.error('분류정보를 가져오는데 실패했습니다', error);
+        res.status(500).json({ error: '분류정보를 가져오는데 실패했습니다' });
+      });
+  } 
+  catch (error) 
+  {
+    console.error('분류정보를 가져오는데 실패했습니다', error);
+    res.status(500).json({ error: '분류정보를 가져오는데 실패했습니다' });
+  }
+});
+
 module.exports = router;
