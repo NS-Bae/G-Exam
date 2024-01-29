@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import { Link } from "react-router-dom";
 import Modal from 'react-modal';
 import Regist from './RegistForm.js'
+import Management from './ManagementFrom.js'
 
 function Main()
 {
@@ -237,7 +238,6 @@ function ManagementForm({ selectedCategory, selectedManagement, onChangeFormClic
   const [selOptionHidden, setSelOptionHidden] = useState(false);
   const [tableButtonHidden, setTableButtonHidden] = useState(false);
   const [checkedRows, setCheckedRows] = useState([]);
-  const [isModalOpen, setModalOpen] = useState(false);
   const [modalType, setModalType] = useState(null);
   const [modalIsOpen, setModalIsOpen] = useState(false);
 
@@ -429,7 +429,13 @@ function ManagementForm({ selectedCategory, selectedManagement, onChangeFormClic
         </div>
       );
     }
-  } else {
+    else if(selectedCategory === '국어' || selectedCategory === '영어' || selectedCategory === '수학' || selectedCategory === '사회' || selectedCategory === '과학')
+    {
+      return <Management selectedCategory = {selectedCategory}/>;
+    }
+  } 
+  else 
+  {
     return (
       <p>선택해주세요!</p>
     );
@@ -445,8 +451,7 @@ const UpdateModal = ({ modalIsOpen, closeModal, handleCheckboxChange, checkedRow
     word_mean3 : '',
     word_mean4 : '',
 
-  })
-
+  });
   useEffect(() => {
     // 모달이 열릴 때 데이터를 불러오기
     if (modalIsOpen) {

@@ -733,7 +733,7 @@ router.post('/regist_pre_exam', async (req, res) => {
     const choice5 = formData.choice5 || null;
 
     if (formData.selectedCategory !== "기타") {
-      const exam_id_pre = `${year}_${school_details}_${selectedCategory}_${grade}_${semester}_${period}_${type}`;
+      const exam_id_pre = `${year}_${school_details}_${selectedCategory}_${grade}학년_${semester}학기_${period}_${type}`;
       const total_semester = `${grade}_${semester}_${period}`;
       
       const existExamId = await checkExamid(exam_id_pre, major);
@@ -748,7 +748,6 @@ router.post('/regist_pre_exam', async (req, res) => {
       {
         lastNumber = await findExamidNumber(exam_id_pre, major);
         newNumber = (lastNumber + 1).toString().padStart(3, '0');
-        console.log(existExamId, lastNumber);
       }
       let exam_id = `${exam_id_pre}_${newNumber}`;
 
@@ -764,6 +763,117 @@ router.post('/regist_pre_exam', async (req, res) => {
     console.error('단어 저장 오류:', error);
     throw error;
   }
+});
+
+router.post('/search_exam', (req, res) => {
+  const form = req.body;
+  const major = convertKorean(form.selectedCategory);
+  const search = form.search;
+  const offset = form.offset;
+  
+  let sql;
+  let countSql;
+  
+  if (search === undefined) {
+    sql = `SELECT exam_id, school_list_school_name, semester FROM ${major} LIMIT 10 OFFSET ${offset};`;
+    countSql = `SELECT COUNT(*) as totalCount FROM ${major};`;
+  } else {
+    sql = `SELECT exam_id, school_list_school_name, semester FROM ${major} WHERE exam_id LIKE '%${search}%' LIMIT 10 OFFSET ${offset};`;
+    countSql = `SELECT COUNT(*) as totalCount FROM ${major} WHERE exam_id LIKE '%${search}%';`;
+  }
+
+  db.query(countSql, (countErr, countResult) => {
+    if (countErr) {
+      console.log(countErr);
+      res.status(500).json({ error: '' });
+    } else {
+      const totalCount = countResult[0].totalCount;
+
+      db.query(sql, (err, result) => {
+        if (err) {
+          console.log(err);
+          res.status(500).json({ error: '' });
+        } else {
+          res.status(200).json({ data: result, totalCount });
+        }
+      });
+    }
+  });
+});
+
+router.post('/delete_exam', async (req, res) => {
+  const form = req.body;
+  const target = form.selectedRows;
+  const target_table = convertKorean(form.selectedCategory);
+
+  const target_group = target.map(() => '?').join(', ');
+  const delete_query = `DELETE FROM ${target_table} WHERE exam_id IN (${target_group});`;
+
+  try 
+  {
+    const [result] = await db.promise().query(delete_query, target);
+    res.status(200).json({ message: 'Rows updated successfully' });
+  } 
+  catch (error) 
+  {
+    console.error('Error executing query:', error);
+    res.status(500).json({ error: 'Error executing query' });
+  }
+});
+
+router.post('/show_exam', async (req, res) => {
+  const form = req.body
+  const selectedRows = req.body.selectedRows;
+  const selectedCategory = convertKorean(req.body.selectedCategory);
+
+  console.log(form,'dkdk', selectedRows,'gkgk', selectedCategory);
+
+  sql = `SELECT * FROM ${selectedCategory} WHERE exam_id = '${selectedRows}';`;
+  try 
+  {
+    const [result] = await db.promise().query(sql, selectedRows);
+    res.status(200).json({ result });
+  } 
+  catch (error) 
+  {
+    console.error('Error executing query:', error);
+    res.status(500).json({ error: 'Error executing query' });
+  }
+});
+
+router.post('/update_exam', (req, res) => {
+  const {updatedData, selectedLevel} = req.body;
+  
+  const updateQuery = `
+    UPDATE ${selectedLevel}
+    SET
+    word = CASE WHEN ? IS NOT NULL THEN ? ELSE word END,
+    word_mean1 = CASE WHEN ? IS NOT NULL THEN ? ELSE word_mean1 END,
+    word_mean2 = CASE WHEN ? IS NOT NULL THEN ? ELSE word_mean2 END,
+    word_mean3 = CASE WHEN ? IS NOT NULL THEN ? ELSE word_mean3 END,
+    word_mean4 = CASE WHEN ? IS NOT NULL THEN ? ELSE word_mean4 END
+  WHERE exam_id = ?;
+  `;
+  const values = [
+    updatedData.word, updatedData.word,
+    updatedData.word_mean1, updatedData.word_mean1,
+    updatedData.word_mean2, updatedData.word_mean2,
+    updatedData.word_mean3, updatedData.word_mean3,
+    updatedData.word_mean4, updatedData.word_mean4,
+    updatedData.word_id
+  ];
+
+  db.query(updateQuery, values, (error, result) => {
+    if (error)
+    {
+      console.error('업데이트 쿼리 실핼중에 문제가 발생했습니다.', error);
+    }
+    else
+    {
+      console.log('업데이트에 성공했습니다.', result);
+      res.status(200).json({ message : '업데이트에 성공했습니다.' });
+    }
+  })
 });
 
 module.exports = router;

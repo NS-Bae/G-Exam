@@ -1,12 +1,10 @@
 import './App.css';
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { useState, useEffect } from 'react';
-import { Link } from "react-router-dom";
+import { useState } from 'react';
 import OcrRequest  from './OCR_Request';
 import ImgPreview from './ImagePreview';
 import ReactDOMServer from 'react-dom/server';
-import { createRoot } from 'react-dom/client';
 
 const RegistForm = ({selectedCategory}) => {
     console.log(selectedCategory);
@@ -88,7 +86,7 @@ const RegistForm = ({selectedCategory}) => {
       
         return (
           <div className='upper_button_place'>
-            <input type="file" onChange={handleImageChange} accept="image/*" />
+            <input type="file" onChange={handleImageChange} accept="image/*" className='img_input'/>
             {image && <button type = 'button' className='letter_btn' onClick={openImagePreview}>미리보기</button> }
           </div>
         );
@@ -212,7 +210,7 @@ const RegistForm = ({selectedCategory}) => {
                     <div className="insert_tag">
                         <h3>유형</h3>
                         <select id='type' value={formData.type} onChange={handleTypeChange}>
-                          <option value={''}>선택하세요</option>
+                          <option value={'select'}>선택하세요</option>
                           <option value={'객관식'}>객관식</option>
                           <option value={'주관식'}>주관식</option>
                         </select>
