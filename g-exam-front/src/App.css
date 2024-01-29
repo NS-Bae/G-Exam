@@ -435,6 +435,13 @@
     justify-content: space-around;
     margin-top: 2%;
   }
+  .upper_button_place > p
+  {
+    display: flex;
+    text-align: center;
+    font-size: 1.1rem;
+    font-weight: bold;
+  }
   .upper_button_place > input
   {
     width : 80%;

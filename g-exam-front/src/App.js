@@ -19,6 +19,7 @@ import TOEICWord from "./WordExam_TOEIC";
 import ResetPw from "./ResetPw";
 import JoinMember from "./Join_member.js";
 import Regist from "./Regist.js";
+import Classification from "./Management_Classification.js"
 
 
 const App = () => {
@@ -42,6 +43,7 @@ const App = () => {
       <Route path = "/reset_pw" element = {<ResetPw />} />
       <Route path = "/join_member" element = {<JoinMember />} />
       <Route path = "/Regist" element = {<Regist />} />
+      <Route path = "/Classification" element = {<Classification />} />
     </Routes>
   );
 };

@@ -4,12 +4,12 @@ import ReactDOM from 'react-dom';
 import { useState } from 'react';
 import OcrRequest  from './OCR_Request';
 import ImgPreview from './ImagePreview';
-import ReactDOMServer from 'react-dom/server';
+import ReactDOMServer from 'react-dom/client';
 
 const RegistForm = ({selectedCategory}) => {
-    console.log(selectedCategory);
     const[schoolsList, setSchoolsList] = useState([]);
     const [selectedType, setSelectedType] = useState('');
+    const [selectedSchooltype, setSelectedSchoolType] = useState('');
 
     const [formData, setFormData] = useState({
         year: '',
@@ -26,6 +26,7 @@ const RegistForm = ({selectedCategory}) => {
         choice3: '',
         choice4: '',
         choice5: '',
+        answer: '',
     });
     const validateForm = () => {
       const requiredFields = ['year', 'school_details', 'grade', 'semester', 'period', 'type', 'question'];
@@ -52,6 +53,7 @@ const RegistForm = ({selectedCategory}) => {
     };
     const handleSchoolTypeChange = (e) => {
         const selectedSchool = e.target.value;
+        setSelectedSchoolType(e.target.value);
         fetch(`/get_school_details?school=${selectedSchool}`)
         .then((response) => response.json())
         .then((data) => {
@@ -60,6 +62,33 @@ const RegistForm = ({selectedCategory}) => {
         }
         })
         .catch((error) => console.error('학교 목록 불러오기 오류:', error));
+    };
+    const GradeSelector = ({ value, onChange, schoolType }) => {
+      return (
+          <div className="insert_tag">
+              <h3>학년</h3>
+              <select id='grade' value={value} onChange={onChange}>
+                  <option value="select">선택하세요</option>
+                  {schoolType === '초등' && (
+                      <>
+                          <option value="1">1학년</option>
+                          <option value="2">2학년</option>
+                          <option value="3">3학년</option>
+                          <option value="4">4학년</option>
+                          <option value="5">5학년</option>
+                          <option value="6">6학년</option>
+                      </>
+                  )}
+                  {(schoolType === '중등' || schoolType === '고등') && (
+                      <>
+                          <option value="1">1학년</option>
+                          <option value="2">2학년</option>
+                          <option value="3">3학년</option>
+                      </>
+                  )}
+              </select>
+          </div>
+      );
     };
     const ImageUploadComponent = () => {
         const [image, setImage] = useState(null);
@@ -132,7 +161,7 @@ const RegistForm = ({selectedCategory}) => {
       // 나머지 코드는 유효성 검사를 통과한 경우의 로직
       handleButton(); 
 
-      setFormData({
+      /* setFormData({
         type: '',
         paragraph: '',
         question: '',
@@ -141,8 +170,9 @@ const RegistForm = ({selectedCategory}) => {
         choice3: '',
         choice4: '',
         choice5: '',
-      });
-      setSelectedType('');
+        answer: '',
+      }); *//* 
+      setSelectedType(''); */
     };
     const handleButton = () => {
         fetch('/regist_pre_exam', {
@@ -180,13 +210,13 @@ const RegistForm = ({selectedCategory}) => {
                         <h3>학교</h3>
                         <div className='small_select_place'>
                             <select id='school_grade' onChange={handleSchoolTypeChange}>
-                                <option value={''}>선택하세요</option>
+                                <option value={'select'}>선택하세요</option>
                                 <option value={'초등'}>초등학교</option>
                                 <option value={'중등'}>중학교</option>
                                 <option value={'고등'}>고등학교</option>
                             </select>
                             <select id="school_details" value={formData.schoolDetails} onChange={handleInputChange}>
-                                <option value={''}>선택하세요</option>
+                                <option value={'select'}>선택하세요</option>
                                 {schoolsList.map((schoolOption, index) => (
                                 <option key={index} value={schoolOption.school_name}>
                                     {schoolOption.school_name}
@@ -195,17 +225,23 @@ const RegistForm = ({selectedCategory}) => {
                             </select>
                         </div>
                     </div>
+                    <GradeSelector value={formData.grade} onChange={handleInputChange} schoolType={selectedSchooltype} />
                     <div className="insert_tag">
-                        <h3>학년</h3>
-                        <input type="text" id = 'grade' placeholder="학년" value={formData.grade} onChange={handleInputChange}></input>
+                      <h3>학기</h3>
+                      <select id="semester" value={formData.semester} onChange={handleInputChange}>
+                          <option value="select">선택하세요</option>
+                            <option value="1">1학기</option>
+                            <option value="2">2학기</option>
+                      </select>
                     </div>
-                    <div className="insert_tag">
-                        <h3>학기</h3>
-                        <input type="text" id = 'semester' placeholder="학기" value={formData.semester} onChange={handleInputChange}></input>
-                    </div>
+
                     <div className="insert_tag">
                         <h3>시기</h3>
-                        <input type="text" id = 'period' placeholder="시기" value={formData.period} onChange={handleInputChange}></input>
+                        <select id="period" value={formData.period} onChange={handleInputChange}>
+                            <option value="select">선택하세요</option>
+                            <option value="중간">중간고사</option>
+                            <option value="기말">기말고사</option>
+                        </select>
                     </div>
                     <div className="insert_tag">
                         <h3>유형</h3>
@@ -246,6 +282,10 @@ const RegistForm = ({selectedCategory}) => {
                         <div className="choice">
                             <h4>선택지5</h4>
                             <textarea type="text" name="" id="choice5" placeholder="선택지5" value={formData.choice5} onChange={handleInputChange}></textarea>
+                        </div>
+                        <div className="choice">
+                            <h4>정답</h4>
+                            <textarea type="text" name="" id="answer" placeholder="정답" value={formData.answer} onChange={handleInputChange}></textarea>
                         </div>
                     </div>
                 </div>

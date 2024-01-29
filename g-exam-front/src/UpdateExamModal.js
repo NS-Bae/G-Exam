@@ -39,8 +39,7 @@ const UpdateExamModal = ({ modalIsOpen, closeModal, modalExamId, selectedCategor
           }
           return response.json();
         })
-        .then((data) => {/* 
-          setDefaultData(data.result[0]); */
+        .then((data) => {
           setDefaultData({
             year: data.result[0]?.exam_id.split('_')[0] || '',
             school: data.result[0]?.exam_id.split('_')[1],
@@ -55,6 +54,7 @@ const UpdateExamModal = ({ modalIsOpen, closeModal, modalExamId, selectedCategor
             choice3: data.result[0]?.choice3 || '',
             choice4: data.result[0]?.choice4 || '',
             choice5: data.result[0]?.choice5 || '',
+            answer: data.result[0]?.answer || '',
           });
           console.log("defaultData", defaultData);
         })
@@ -135,6 +135,10 @@ const UpdateExamModal = ({ modalIsOpen, closeModal, modalExamId, selectedCategor
                     <div className="choice">
                         <h4>선택지5</h4>
                         <textarea type="text" name="" id="choice5" defaultValue={defaultData.choice5} onChange={handleInputChange}></textarea>
+                    </div>
+                    <div className="choice">
+                        <h4>정답</h4>
+                        <textarea type="text" name="" id="answer" placeholder="정답" value={defaultData.answer} onChange={handleInputChange}></textarea>
                     </div>
                 </div>
             </div>

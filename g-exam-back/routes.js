@@ -534,9 +534,9 @@ router.post('/save_eng_word', async (req, res) => {
 });
 //변경 불필요.
 router.post('/search_table', (req, res) => {
-  const form = req.body;
   const { selectedCategory, tagValue, selectedLevel, offset } = req.body;
-  
+  const level = `eng_word_${selectedLevel}`;
+
   let sql;
   let countSql;
   
@@ -720,7 +720,7 @@ router.post('/regist_pre_exam', async (req, res) => {
     const school_details = formData.school_details;
     const grade = formData.grade;
     const selectedCategory = formData.selectedCategory;
-    const major = convertKorean(formData.selectedCategory);
+    const major = `pre_exam_${convertKorean(formData.selectedCategory)}`;
     const semester = formData.semester;
     const period = formData.period;
     const type = formData.type;
@@ -731,6 +731,7 @@ router.post('/regist_pre_exam', async (req, res) => {
     const choice3 = formData.choice3 || null;
     const choice4 = formData.choice4 || null;
     const choice5 = formData.choice5 || null;
+    const answer = formData.answer || null;
 
     if (formData.selectedCategory !== "기타") {
       const exam_id_pre = `${year}_${school_details}_${selectedCategory}_${grade}학년_${semester}학기_${period}_${type}`;
@@ -751,8 +752,8 @@ router.post('/regist_pre_exam', async (req, res) => {
       }
       let exam_id = `${exam_id_pre}_${newNumber}`;
 
-      const regist_query = `INSERT INTO ${major} VALUES (?, ?, ?, ?, ?, ?, null, ?, ?, ?, ?, ?, ?)`
-      const values = [exam_id, selectedCategory, school_details, total_semester, type, paragraph, question, choice1, choice2, choice3, choice4, choice5];
+      const regist_query = `INSERT INTO ${major} VALUES (?, ?, ?, ?, ?, ?, null, ?, ?, ?, ?, ?, ?, ?)`
+      const values = [exam_id, selectedCategory, school_details, total_semester, type, paragraph, question, choice1, choice2, choice3, choice4, choice5, answer];
 
       await db.execute(regist_query, values);
     }
@@ -760,14 +761,14 @@ router.post('/regist_pre_exam', async (req, res) => {
   }
   catch (error) 
   {
-    console.error('단어 저장 오류:', error);
+    console.error('시험문제 등록 오류:', error);
     throw error;
   }
 });
 
 router.post('/search_exam', (req, res) => {
   const form = req.body;
-  const major = convertKorean(form.selectedCategory);
+  const major = `pre_exam_${convertKorean(req.body.selectedCategory)}`;
   const search = form.search;
   const offset = form.offset;
   
@@ -804,7 +805,7 @@ router.post('/search_exam', (req, res) => {
 router.post('/delete_exam', async (req, res) => {
   const form = req.body;
   const target = form.selectedRows;
-  const target_table = convertKorean(form.selectedCategory);
+  const target_table = `pre_exam_${convertKorean(req.body.selectedCategory)}`;
 
   const target_group = target.map(() => '?').join(', ');
   const delete_query = `DELETE FROM ${target_table} WHERE exam_id IN (${target_group});`;
@@ -824,7 +825,7 @@ router.post('/delete_exam', async (req, res) => {
 router.post('/show_exam', async (req, res) => {
   const form = req.body
   const selectedRows = req.body.selectedRows;
-  const selectedCategory = convertKorean(req.body.selectedCategory);
+  const selectedCategory = `pre_exam_${convertKorean(req.body.selectedCategory)}`;
 
   console.log(form,'dkdk', selectedRows,'gkgk', selectedCategory);
 
@@ -844,36 +845,7 @@ router.post('/show_exam', async (req, res) => {
 router.post('/update_exam', (req, res) => {
   const {updatedData, selectedLevel} = req.body;
   
-  const updateQuery = `
-    UPDATE ${selectedLevel}
-    SET
-    word = CASE WHEN ? IS NOT NULL THEN ? ELSE word END,
-    word_mean1 = CASE WHEN ? IS NOT NULL THEN ? ELSE word_mean1 END,
-    word_mean2 = CASE WHEN ? IS NOT NULL THEN ? ELSE word_mean2 END,
-    word_mean3 = CASE WHEN ? IS NOT NULL THEN ? ELSE word_mean3 END,
-    word_mean4 = CASE WHEN ? IS NOT NULL THEN ? ELSE word_mean4 END
-  WHERE exam_id = ?;
-  `;
-  const values = [
-    updatedData.word, updatedData.word,
-    updatedData.word_mean1, updatedData.word_mean1,
-    updatedData.word_mean2, updatedData.word_mean2,
-    updatedData.word_mean3, updatedData.word_mean3,
-    updatedData.word_mean4, updatedData.word_mean4,
-    updatedData.word_id
-  ];
-
-  db.query(updateQuery, values, (error, result) => {
-    if (error)
-    {
-      console.error('업데이트 쿼리 실핼중에 문제가 발생했습니다.', error);
-    }
-    else
-    {
-      console.log('업데이트에 성공했습니다.', result);
-      res.status(200).json({ message : '업데이트에 성공했습니다.' });
-    }
-  })
+  
 });
 
 module.exports = router;

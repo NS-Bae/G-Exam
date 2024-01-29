@@ -531,6 +531,7 @@ function TeacherBtn()
       </button>
       {renderModalContent()}
       <button className="exam_register"><Link to ='/Regist'>시험문제 관리</Link></button>
+      <button className="exam_register"><Link to ='/Classification'>분류 관리</Link></button>
     </div>
   );
 }

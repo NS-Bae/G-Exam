@@ -176,10 +176,10 @@ function RegistForm ({ selectedCategory, selectedManagement, onChangeFormBackCli
                 <h3>문제 유형</h3>
                 <select name="level" id="sel_level" ref={selLevelRef} required >
                     <option value="select">선택하세요</option>
-                    <option value="elementary">초등</option>
-                    <option value="middle">중등</option>
-                    <option value="high">고등</option>
-                    <option value="toeic">토익</option>
+                    <option value="eng_word_elementary">초등</option>
+                    <option value="eng_word_middle">중등</option>
+                    <option value="eng_word_high">고등</option>
+                    <option value="eng_word_toeic">토익</option>
                 </select>
             </div>
             <div className="word_tag">
@@ -369,10 +369,10 @@ function ManagementForm({ selectedCategory, selectedManagement, onChangeFormClic
               <h3>문제 유형</h3>
               <select name="level" id="sel_level" value={selLevel} onChange={(e) => setSelLevel(e.target.value)} required>
                 <option value="select">선택하세요</option>
-                <option value="elementary">초등</option>
-                <option value="middle">중등</option>
-                <option value="high">고등</option>
-                <option value="toeic">토익</option>
+                <option value="eng_word_elementary">초등</option>
+                <option value="eng_word_middle">중등</option>
+                <option value="eng_word_high">고등</option>
+                <option value="eng_word_toeic">토익</option>
               </select>
             </div>
             <div className="word_tag">
@@ -570,7 +570,7 @@ function MyApp()
         console.error('세션 정보를 가져오는 중 오류 발생:', error);
       });
   }, []);
-    if(user.user_type !== "선생")
+    if(user.user_type === "학생")
     {
         return (
             <div className = "background">
