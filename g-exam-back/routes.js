@@ -541,7 +541,7 @@ router.post('/search_table', (req, res) => {
   let countSql;
   
   if (tagValue === undefined) {
-    sql = `SELECT word_id, word, word_mean1, word_mean2, word_mean3, word_mean4 FROM ${selectedLevel} LIMIT 10 OFFSET ${offset};`;
+    sql = `SELECT word_id, word, word_mean1, word_mean2, word_mean3, word_mean4 FROM ${selectedLevel} LIMIT 15 OFFSET ${offset};`;
     countSql = `SELECT COUNT(*) as totalCount FROM ${selectedLevel};`;
   } else {
     sql = `SELECT word_id, word, word_mean1, word_mean2, word_mean3, word_mean4 FROM ${selectedLevel} WHERE word_id LIKE '%${tagValue}%' LIMIT 15 OFFSET ${offset};`;
@@ -556,10 +556,13 @@ router.post('/search_table', (req, res) => {
       const totalCount = countResult[0].totalCount;
 
       db.query(sql, (err, result) => {
-        if (err) {
+        if (err) 
+        {
           console.log(err);
           res.status(500).json({ error: '' });
-        } else {
+        } 
+        else 
+        {
           res.status(200).json({ data: result, totalCount });
         }
       });
@@ -827,8 +830,6 @@ router.post('/show_exam', async (req, res) => {
   const selectedRows = req.body.selectedRows;
   const selectedCategory = `pre_exam_${convertKorean(req.body.selectedCategory)}`;
 
-  console.log(form,'dkdk', selectedRows,'gkgk', selectedCategory);
-
   sql = `SELECT * FROM ${selectedCategory} WHERE exam_id = '${selectedRows}';`;
   try 
   {
@@ -850,27 +851,111 @@ router.post('/update_exam', (req, res) => {
 
 router.post('/search_classification', (req, res) => {
   const classification_category = req.body.selectedCategory;
-  console.log(classification_category);
+  const offset = req.body.offset;
 
-  try 
+  let sql;
+  let countSql;
+
+  if(classification_category === "영단어" || classification_category === "국어" || classification_category === "영어" || classification_category === "수학" || classification_category === "사회" || classification_category === "과학" || classification_category === "기타")
   {
-    const sql = `SELECT * FROM classification_list WHERE major_name = '${classification_category}';`;
-    db.promise()
-      .query(sql)
-      .then(([rows]) => {
-        res.json({ classInfo: rows });
-        console.log(rows);
-      })
-      .catch((error) => {
-        console.error('분류정보를 가져오는데 실패했습니다', error);
-        res.status(500).json({ error: '분류정보를 가져오는데 실패했습니다' });
+    sql = `SELECT * FROM classification_list WHERE major_name = '${classification_category}' LIMIT 15 OFFSET ${offset};`;
+    countSql = `SELECT COUNT(*) as totalCount FROM classification_list WHERE major_name = '${classification_category}';`
+  }
+  else
+  {
+    sql = `SELECT * FROM classification_list LIMIT 15 OFFSET ${offset};`;
+    countSql = `SELECT COUNT(*) as totalCount FROM classification_list;`;
+  }
+
+  db.query(countSql, (countErr, countResult) => {
+    if (countErr) {
+      console.log(countErr);
+      res.status(500).json({ error: '' });
+    } else {
+      const totalCount = countResult[0].totalCount;
+
+      db.query(sql, (err, result) => {
+        if (err) 
+        {
+          console.log(err);
+          res.status(500).json({ error: '' });
+        } 
+        else 
+        {
+          res.status(200).json({ data: result, totalCount });
+        }
       });
-  } 
+    }
+  });
+  
+});
+
+async function getMaxId() 
+{
+  const maxIdQuery = 'SELECT MAX(classification_id) AS maxId FROM classification_list;';
+  return new Promise((resolve, reject) => {
+    db.query(maxIdQuery, (error, results) => {
+      if (error) 
+      {
+        console.error('Failed to get maxId:', error);
+        reject(error);
+      } 
+      else 
+      {
+        const maxId = results && results.length > 0 ? results[0].maxId || 0 : 0;
+        resolve(maxId);
+      }
+    });
+  });
+}
+
+router.post('/add_classification', async (req, res) => {
+  const classification = req.body.tagValue;
+  const classificationArray = classification.split('_');
+  const major = classificationArray[0];
+  const table = "classification_list";
+
+  try
+  {
+    const maxId = await getMaxId();
+    const newClassificationId = maxId + 1;
+
+    const sql = `INSERT INTO ${table} VALUES (?, ?, 0, ?)`;
+    const values = [newClassificationId, classification, major];
+
+    await db.execute(sql, values);
+    res.status(200).json({ message: '문제분류를 등록하였습니다.' });
+  }
   catch (error) 
   {
-    console.error('분류정보를 가져오는데 실패했습니다', error);
-    res.status(500).json({ error: '분류정보를 가져오는데 실패했습니다' });
+    console.error('문제분류 등록 오류:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
   }
 });
+
+router.post('/delete_classification', async (req, res) => {
+  const target = req.body.checkedRows;
+  const target_group = target.map(() => '?').join(', ');
+
+  const sql = `DELETE FROM classification_list WHERE classification_id IN (${target_group});`;
+
+  try
+  {
+    await db.execute(sql, target);
+    const setSql = 'SET @row_number := 0;';
+    const updateSql = 'UPDATE classification_list SET classification_id = (@row_number := @row_number + 1);';
+
+    await db.execute(setSql);
+    await db.execute(updateSql);
+
+    res.status(200).json({ message: '문제분류를 삭제하였습니다.' });
+  }
+  catch (error) 
+  {
+    console.error('문제분류 삭제 오류:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+
 
 module.exports = router;

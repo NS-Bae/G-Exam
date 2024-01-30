@@ -282,7 +282,6 @@ function ManagementForm({ selectedCategory, selectedManagement, onChangeFormClic
 
   const handleConfirmButtonClick = () => {
     if (!selLevel || selLevel === "select") {
-      console.log('tagValue or selectedLevel is null, undefined, or "select". Skipping the request.');
       alert('올바른 단어 태그와 레벨을 선택하세요.');
       return;
     }
@@ -297,7 +296,6 @@ function ManagementForm({ selectedCategory, selectedManagement, onChangeFormClic
   };
   // 삭제기능
   const handleDeleteButton = () => {
-    console.log("삭제Checked Rows:", checkedRows, selLevel);
     const confirmation = window.confirm('정말로 영단어를 삭제하시겠습니까?');
     fetch('/delete_word', {
       method: 'POST',
@@ -440,7 +438,7 @@ function ManagementForm({ selectedCategory, selectedManagement, onChangeFormClic
       <p>선택해주세요!</p>
     );
   }
-}
+};
 const UpdateModal = ({ modalIsOpen, closeModal, handleCheckboxChange, checkedRows, selectedLevel }) => {
   const tableHeaders = ['Word ID', '영단어', '뜻 1', '뜻 2', '뜻 3', '뜻 4', ''];
   const [tableData, setTableData] = useState([]);

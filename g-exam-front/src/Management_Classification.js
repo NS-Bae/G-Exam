@@ -1,5 +1,5 @@
 import './App.css';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { Link } from "react-router-dom";
 
 function Main()
@@ -10,64 +10,144 @@ function Main()
 };
 function ChoiceForm() {
     const [selectedCategory, setSelectedCategory] = useState('');
+    const [currentPage, setCurrentPage] = useState(1);
+    const [totalPages, setTotalPages] = useState(1);
+    const [totalCount, setTotalCount] = useState(0);
     const [classificationInfo, setClassificationInfo] = useState([]);
     const [checkedRows, setCheckedRows] = useState([]);
     const [isConfirmButtonClicked, setConfirmButtonClicked] = useState(false);
     const [isAddButtonClicked, setAddButtonClicked] = useState(false);
+    const tagRef = useRef(null);
 
-    const fetchData = async () => {
-      try 
-      {
-        const response = await fetch('/search_classification', {
-          method : 'POST', 
-          headers : {
-            'Content-Type' : 'application/json',
-          }, 
-          body : JSON.stringify({selectedCategory}),
+    const fetchData = (page) => {
+      const itemsPerPage = 15; // 페이지당 아이템 수
+      const offset = (page - 1) * itemsPerPage;
+      fetch('/search_classification', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          selectedCategory,
+          offset,
+        }),
+      })
+        .then((response) => {
+          if (!response.ok) {
+            throw new Error('네트워크의 응답이 좋지 않습니다.');
+          }
+          return response.json();
+        })
+        .then((data) => {
+          setClassificationInfo(data.data);
+          setTotalCount(data.totalCount);
+          setTotalPages(Math.ceil(data.totalCount / itemsPerPage));
+        })
+        .catch((error) => {
+          console.log('데이터 처리과정에서 문제가 발생하였습니다.', error);
         });
-  
-        if(!response.ok)
-        {
-          throw new Error('네트워크 응답이 올바르지 않습니다.');
-        }
-  
-        const classification_data = await response.json();
-  
-        setClassificationInfo(classification_data.classInfo);
-      }
-      catch(error)
-      {
-        console.log("데이터를 가져오는 과정에서 문제가 발생하였습니다.", error);
-      }
+    };
+
+    const handlePageClick = (page) => {
+      setCurrentPage(page);
+      fetchData(page);
     };
   
     const handleConfirmButtonClick = () => {
       setConfirmButtonClicked(true);
-      console.log(selectedCategory);
-      fetchData();
+      fetchData(1);
     };
 
-    const handleAddButtonClick = () => {
+    const handleAddButtonClick = async () => {
+      const tagValue = tagRef.current ? tagRef.current.value : '';
       setAddButtonClicked(true);
-      //분류추가 엔드포인트 추가.
+      if(tagValue !== '')
+      {
+        try 
+        {
+          const response = await fetch('/add_classification', {
+            method : 'POST', 
+            headers : {
+              'Content-Type' : 'application/json',
+            }, 
+            body : JSON.stringify({tagValue}),
+          });
+    
+          if(!response.ok)
+          {
+            throw new Error('네트워크 응답이 올바르지 않습니다.');
+          }
+          tagRef.current.value = '';
+          fetchData(1);
+        }
+        catch(error)
+        {
+          console.log("데이터를 가져오는 과정에서 문제가 발생하였습니다.", error);
+        }
+      }
+      else
+      {
+        alert("분류값이 입력되지 않았습니다.");
+      }
     };
+
+    const handleDeleteButtonClick = async () => {
+      if (checkedRows.length > 0) 
+      {
+        console.log("Selected Rows for Deletion:", checkedRows);
+        const confirmation = window.confirm('정말로 문제분류를 삭제하시겠습니까?');
+
+        try 
+        {
+          const response = await fetch('/delete_classification', {
+            method : 'POST', 
+            headers : {
+              'Content-Type' : 'application/json',
+            }, 
+            body : JSON.stringify({checkedRows}),
+          });
+    
+          if(!response.ok)
+          {
+            throw new Error('네트워크 응답이 올바르지 않습니다.');
+          }
+          fetchData(1);
+          setCheckedRows([]);
+        }
+        catch(error)
+        {
+          console.log("데이터를 가져오는 과정에서 문제가 발생하였습니다.", error);
+        }
+      } 
+      else 
+      {
+        alert("선택된 행이 없습니다.");
+      }
+
+      
+    }
 
     const handleCheckboxChange = (event, id) => {
       setCheckedRows(prevRows => {
         const isChecked = event.target.checked;
-        const updatedRows = isChecked
-          ? [...prevRows, id]
-          : prevRows.filter((rowId) => rowId !== id);
-        return updatedRows;
+        if (isChecked) 
+        {
+          return [...prevRows, id];
+        } 
+        else 
+        {
+          return prevRows.filter((rowId) => rowId !== id);
+        }
       });
     };
   
-    useEffect(() => {/* 
-      fetchData(selectedCategory); */
-      if (selectedCategory !== '') {
-        setConfirmButtonClicked(false);
+    useEffect(() => {
+      if ((isConfirmButtonClicked || !selectedCategory) && !classificationInfo.length) 
+      {
+        fetchData(1);
+        setConfirmButtonClicked(false); 
       }
-    }, [selectedCategory]);
+    }, [isConfirmButtonClicked, selectedCategory, classificationInfo]);
   
     return (
       <div className = 'place'>
@@ -91,8 +171,9 @@ function ChoiceForm() {
             확인
           </button>
         </div>
-        <div className='upper_button_place'>
-          <input type="text" name="word_tag" id="tag" placeholder="분류 입력 (띄어쓰기 대신 _ 를 사용해주세요)" />
+        <p>태그 입력시 과목명만 가장 앞에 입력하고 _를 사용해주세요</p>
+        <div className='sel_option'>
+          <input type="text" name="word_tag" id="tag" ref={tagRef} placeholder="분류 입력 (띄어쓰기 대신 _ 를 사용해주세요)" />
           <button className='letter_btn' type='button' onClick={handleAddButtonClick}>
             추가하기
           </button>
@@ -114,21 +195,32 @@ function ChoiceForm() {
                   <td>
                     <input
                       type="checkbox"
-                      onChange={(event) => handleCheckboxChange(event, item.id)}
+                      onChange={(event) => handleCheckboxChange(event, item.classification_id)}
+                      checked={checkedRows.includes(item.classification_id)}
                     />
                   </td>
                   <td>{item.classification_id}</td>
                   <td>{item.classification_name}</td>
                   <td>{item.major_name}</td>
-                  <td>과목 수</td>
+                  <td>{item.workbook_count}</td>
                 </tr>
               ))}
             </tbody>
           </table>
+          <div className="paging_number_place">
+            {Array.from({ length: totalPages }, (_, i) => (
+              <button className="paging_number" key={i + 1} onClick={() => handlePageClick(i + 1)}>
+                {i + 1}
+              </button>
+            ))}
+          </div>
+        </div>
+        <div className='upper_button_place'>
+          <button className='letter_btn' onClick={handleDeleteButtonClick} disabled={checkedRows.length === 0}>분류 삭제</button>
         </div>
       </div>
     );
-  }
+}
 function ManagementClassification() 
 {
   return (

@@ -442,7 +442,7 @@
     font-size: 1.1rem;
     font-weight: bold;
   }
-  .upper_button_place > input
+  .upper_button_place > input, .sel_option > input
   {
     width : 80%;
     text-align: center;
