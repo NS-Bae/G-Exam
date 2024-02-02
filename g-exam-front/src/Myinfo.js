@@ -1,7 +1,7 @@
 import './App.css';
 import React from 'react';
 import { useState, useEffect } from 'react';
-import { Link } from "react-router-dom";
+import { Link, Navigate, useNavigate } from "react-router-dom";
 import Modal from 'react-modal';
 
 function Main()
@@ -573,25 +573,32 @@ function StudentBtn({user})
 }
 function MyInformation() {
   const [user, setUser] = useState([]);
+  const navigate = useNavigate();
 
   const fetchUserInfo = async () => {
-    try {
+    try 
+    {
       const response = await fetch('/profile');
-      if (!response.ok) {
+      if (!response.ok) 
+      {
         throw new Error('HTTP 오류 ' + response.status);
       }
       const data = await response.json();
       setUser(data.user);
-    } catch (error) {
-      console.error('세션 정보를 가져오는 중 오류 발생:', error);
+    } 
+    catch (error) 
+    {
+      console.error('로그인이 되어있지 않습니다.', error);
+      navigate('/'); 
     }
   };
   
   useEffect(() => {
     fetchUserInfo();
   }, []);
-
-  if (user.user_type === '학생') {
+  
+  if (user.user_type === '학생') 
+  {
     return (
       <div className="background">
         <div className="wrap">
@@ -601,7 +608,9 @@ function MyInformation() {
         </div>
       </div>
     );
-  } else if (user.user_type === '선생') {
+  } 
+  else if (user.user_type === '선생') 
+  {
     return (
       <div className="background">
         <div className="wrap">
@@ -611,6 +620,10 @@ function MyInformation() {
         </div>
       </div>
     );
+  }
+  else
+  {
+    return null;
   }
 }
 

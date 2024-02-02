@@ -118,8 +118,6 @@ router.post('/join_member', function(req, res) {
 
     const sql = 'INSERT INTO user_student VALUES (?, ?, ?, ?, ?, ?, ?)';
     const params = [user_id, user_pw, name, grade, 0, school, '학생'];
-
-    console.log(user_id, user_pw, name, school, grade);
     
     db.query(sql, params, function(err, result) {
       if (err) {
@@ -139,8 +137,6 @@ router.post('/join_member', function(req, res) {
 
     const sql = 'INSERT INTO user_teacher VALUES (?, ?, ?, ?, ?, ?)';
     const params = [user_id, user_pw, name, 0, subject, '선생'];
-
-    console.log(user_id, user_pw, name, subject);
     
     db.query(sql, params, function(err, result) {
       if (err) {
@@ -348,7 +344,6 @@ router.post('/update_info', function(req, res) {
 //변경 불필요.
 router.post('/withgrawal', function(req, res) {
   const user = req.body;
-  console.log(user);
 
   const sql = `DELETE FROM user_student WHERE id = ?;`;
   const params = [user.id];
@@ -451,10 +446,6 @@ async function saveNewWords(selectedLevel, wordTag, wordSave) {
         const korword2 = korWords[1] || null;
         const korword3 = korWords[2] || null;
         const korword4 = korWords[3] || null;
-  
-        console.log(word_id, engword);
-        console.log(korword);
-  
         let query;
         let values;
   
@@ -497,15 +488,12 @@ async function isWordTagExists(selectedLevel, wordTag) {
     const query = `SELECT COUNT(*) as count FROM ${selectedLevel} WHERE word_id LIKE ?`;
     const values = [`%${wordTag}%`];
 
-    console.log(query);
-
     return new Promise((resolve, reject) => {
       db.query(query, values, function (err, rows) {
         if (err) {
           console.error('WordTag 확인 오류:', err);
           reject(err);
         } else {
-          console.log(rows);
           resolve(rows[0].count > 0);
         }
       });
@@ -574,8 +562,6 @@ router.post('/delete_word', async (req, res) => {
   const selectedRows = req.body.selectedRows;
   const selectedLevel = req.body.selectedLevel;
 
-  console.log(selectedRows, selectedLevel);
-
   const placeholders = selectedRows.map(() => '?').join(', ');
   const sql = `DELETE FROM ${selectedLevel} WHERE word_id IN (${placeholders});`;
 
@@ -600,7 +586,6 @@ router.post('/update_word', async (req, res) => {
   try 
   {
     const [result] = await db.promise().query(sql, selectedRows);
-    console.log(result);
     res.status(200).json({ result });
   } 
   catch (error) 
@@ -639,7 +624,7 @@ router.post('/update_word_change', (req, res) => {
     }
     else
     {
-      console.log('업데이트에 성공했습니다.', result);
+      console.log('업데이트에 성공했습니다.');
       res.status(200).json({ message : '업데이트에 성공했습니다.' });
     }
   })

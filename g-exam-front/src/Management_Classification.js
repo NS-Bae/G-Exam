@@ -77,6 +77,8 @@ function ChoiceForm() {
           {
             throw new Error('네트워크 응답이 올바르지 않습니다.');
           }
+          const data = await response.json();
+          alert(data.message);
           tagRef.current.value = '';
           fetchData(1);
         }
@@ -94,29 +96,33 @@ function ChoiceForm() {
     const handleDeleteButtonClick = async () => {
       if (checkedRows.length > 0) 
       {
-        console.log("Selected Rows for Deletion:", checkedRows);
         const confirmation = window.confirm('정말로 문제분류를 삭제하시겠습니까?');
-
-        try 
+        
+        if(confirmation)
         {
-          const response = await fetch('/delete_classification', {
-            method : 'POST', 
-            headers : {
-              'Content-Type' : 'application/json',
-            }, 
-            body : JSON.stringify({checkedRows}),
-          });
-    
-          if(!response.ok)
+          try 
           {
-            throw new Error('네트워크 응답이 올바르지 않습니다.');
+            const response = await fetch('/delete_classification', {
+              method : 'POST', 
+              headers : {
+                'Content-Type' : 'application/json',
+              }, 
+              body : JSON.stringify({checkedRows}),
+            });
+      
+            if(!response.ok)
+            {
+              throw new Error('네트워크 응답이 올바르지 않습니다.');
+            }
+            const data = await response.json();
+            alert(data.message);
+            fetchData(1);
+            setCheckedRows([]);
           }
-          fetchData(1);
-          setCheckedRows([]);
-        }
-        catch(error)
-        {
-          console.log("데이터를 가져오는 과정에서 문제가 발생하였습니다.", error);
+          catch(error)
+          {
+            console.log("데이터를 가져오는 과정에서 문제가 발생하였습니다.", error);
+          }
         }
       } 
       else 
@@ -125,7 +131,7 @@ function ChoiceForm() {
       }
 
       
-    }
+    };
 
     const handleCheckboxChange = (event, id) => {
       setCheckedRows(prevRows => {
