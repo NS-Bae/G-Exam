@@ -5,7 +5,7 @@ import Modal from 'react-modal';
 import UpdateExamModal from './UpdateExamModal';
 
 
-const ManagementForm = ({selectedCategory}) => {
+const ManagementExamForm = ({selectedCategory}) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [totalCount, setTotalCount] = useState(0);
@@ -14,6 +14,8 @@ const ManagementForm = ({selectedCategory}) => {
   const [search, setSearch] = useState('');
   const [modalIsOpen, setModalIsOpen] = useState(false);
   const [modalExamId, setModalExamId] = useState('');
+
+  console.log(selectedCategory);
 
   const fetchData = (page) => {
     const itemsPerPage = 15; // 페이지당 아이템 수
@@ -131,7 +133,6 @@ const ManagementForm = ({selectedCategory}) => {
 
   return (
     <div className='place'>
-      <p>검색조건 미입력시 전체 영단어가 조회됩니다.</p>
       <p>여러조건 입력 시 "년도_학교_과목_학년_학기_시기(중간/기말)_유형_번호" 처럼 입력해주세요</p>
       <div className='upper_button_place'>
         <input type="text" id = 'search' value={search} onChange={handleInputChange} placeholder="검색"></input>
@@ -179,4 +180,4 @@ const ManagementForm = ({selectedCategory}) => {
   );
 };
 
-export default ManagementForm;
+export default ManagementExamForm;

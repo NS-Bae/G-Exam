@@ -11,6 +11,8 @@ const RegistForm = ({selectedCategory}) => {
     const [selectedType, setSelectedType] = useState('');
     const [selectedSchooltype, setSelectedSchoolType] = useState('');
 
+    console.log(selectedCategory);
+
     const [formData, setFormData] = useState({
         year: '',
         school_details: '',
@@ -91,7 +93,7 @@ const RegistForm = ({selectedCategory}) => {
       );
     };
     const ImageUploadComponent = () => {
-        const [image, setImage] = useState(null);
+        const [image, setImage] = useState('');
       
         const handleImageChange = (e) => {
           const imageFile = e.target.files[0];
@@ -141,6 +143,8 @@ const RegistForm = ({selectedCategory}) => {
     };
     const handleSubmit = (e) => {
       e.preventDefault();
+
+      console.log(formData);
   
       if (!validateForm()) {
         alert('입력되지 않은 값이 있습니다. 모든 항목을 입력해주세요.');
@@ -161,7 +165,7 @@ const RegistForm = ({selectedCategory}) => {
       // 나머지 코드는 유효성 검사를 통과한 경우의 로직
       handleButton(); 
 
-      /* setFormData({
+      setFormData({
         type: '',
         paragraph: '',
         question: '',
@@ -171,7 +175,7 @@ const RegistForm = ({selectedCategory}) => {
         choice4: '',
         choice5: '',
         answer: '',
-      }); *//* 
+      });/* 
       setSelectedType(''); */
     };
     const handleButton = () => {
@@ -199,102 +203,101 @@ const RegistForm = ({selectedCategory}) => {
     }
 
     return (
-        <div className='place'>
-            <form onSubmit={handleSubmit}>
-                <div className="upper_button_place">
-                    <div className="insert_tag">
-                        <h3>년도</h3>
-                        <input type="text" id = 'year' placeholder="년도" value={formData.year} onChange={handleInputChange}></input>
-                    </div>
-                    <div className="insert_tag">
-                        <h3>학교</h3>
-                        <div className='small_select_place'>
-                            <select id='school_grade' onChange={handleSchoolTypeChange}>
-                                <option value={'select'}>선택하세요</option>
-                                <option value={'초등'}>초등학교</option>
-                                <option value={'중등'}>중학교</option>
-                                <option value={'고등'}>고등학교</option>
-                            </select>
-                            <select id="school_details" value={formData.schoolDetails} onChange={handleInputChange}>
-                                <option value={'select'}>선택하세요</option>
-                                {schoolsList.map((schoolOption, index) => (
-                                <option key={index} value={schoolOption.school_name}>
-                                    {schoolOption.school_name}
-                                </option>
-                                ))}
-                            </select>
-                        </div>
-                    </div>
-                    <GradeSelector value={formData.grade} onChange={handleInputChange} schoolType={selectedSchooltype} />
-                    <div className="insert_tag">
-                      <h3>학기</h3>
-                      <select id="semester" value={formData.semester} onChange={handleInputChange}>
-                          <option value="select">선택하세요</option>
-                            <option value="1">1학기</option>
-                            <option value="2">2학기</option>
-                      </select>
-                    </div>
-
-                    <div className="insert_tag">
-                        <h3>시기</h3>
-                        <select id="period" value={formData.period} onChange={handleInputChange}>
-                            <option value="select">선택하세요</option>
-                            <option value="중간">중간고사</option>
-                            <option value="기말">기말고사</option>
-                        </select>
-                    </div>
-                    <div className="insert_tag">
-                        <h3>유형</h3>
-                        <select id='type' value={formData.type} onChange={handleTypeChange}>
-                          <option value={'select'}>선택하세요</option>
-                          <option value={'객관식'}>객관식</option>
-                          <option value={'주관식'}>주관식</option>
-                        </select>
-                    </div>
-                </div>
-                <ImageUploadComponent />
-                <div className="question_sub">
-                    <div className="paragraph_area">
-                        <h4>지문</h4>
-                        <textarea type="text" name="" id="paragraph" placeholder="지문" value={formData.paragraph} onChange={handleInputChange}></textarea>
-                    </div>
-                    <div className="question_area">
-                        <div className="question_line">
-                            <h4>질문</h4>
-                            <textarea type="text" name="" id="question" placeholder="질문" value={formData.question} onChange={handleInputChange}></textarea>
-                        </div>
-                        <div className="choice">
-                            <h4>선택지1</h4>
-                            <textarea type="text" name="" id="choice1" placeholder="선택지1" value={formData.choice1} onChange={handleInputChange}></textarea>
-                        </div>
-                        <div className="choice">
-                            <h4>선택지2</h4>
-                            <textarea type="text" name="" id="choice2" placeholder="선택지2" value={formData.choice2} onChange={handleInputChange}></textarea>
-                        </div>
-                        <div className="choice">
-                            <h4>선택지3</h4>
-                            <textarea type="text" name="" id="choice3" placeholder="선택지3" value={formData.choice3} onChange={handleInputChange}></textarea>
-                        </div>
-                        <div className="choice">
-                            <h4>선택지4</h4>
-                            <textarea type="text" name="" id="choice4" placeholder="선택지4" value={formData.choice4} onChange={handleInputChange}></textarea>
-                        </div>
-                        <div className="choice">
-                            <h4>선택지5</h4>
-                            <textarea type="text" name="" id="choice5" placeholder="선택지5" value={formData.choice5} onChange={handleInputChange}></textarea>
-                        </div>
-                        <div className="choice">
-                            <h4>정답</h4>
-                            <textarea type="text" name="" id="answer" placeholder="정답" value={formData.answer} onChange={handleInputChange}></textarea>
-                        </div>
-                    </div>
-                </div>
-                <div className='btn_section'>
-                    <button type = 'submit' className="letter_btn" onClick={handleSubmit}>등록</button>
-                    <button type = 'button' className="letter_btn" onClick={openNewWindow}>OCR하러가기</button>
-                </div>
-            </form>
+      <div className='place'>
+        <form onSubmit={handleSubmit}>
+          <div className="upper_button_place">
+            <div className="insert_tag">
+              <h3>년도</h3>
+              <input type="text" id = 'year' placeholder="년도" value={formData.year} onChange={handleInputChange}></input>
+            </div>
+            <div className="insert_tag">
+              <h3>학교</h3>
+              <div className='small_select_place'>
+                <select id='school_grade' onChange={handleSchoolTypeChange}>
+                  <option value={'select'}>선택하세요</option>
+                  <option value={'초등'}>초등학교</option>
+                  <option value={'중등'}>중학교</option>
+                  <option value={'고등'}>고등학교</option>
+                </select>
+                <select id="school_details" value={formData.schoolDetails} onChange={handleInputChange}>
+                  <option value={'select'}>선택하세요</option>
+                  {schoolsList.map((schoolOption, index) => (
+                  <option key={index} value={schoolOption.school_name}>
+                      {schoolOption.school_name}
+                  </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+            <GradeSelector value={formData.grade} onChange={handleInputChange} schoolType={selectedSchooltype} />
+            <div className="insert_tag">
+              <h3>학기</h3>
+              <select id="semester" value={formData.semester} onChange={handleInputChange}>
+                <option value="select">선택하세요</option>
+                <option value="1">1학기</option>
+                <option value="2">2학기</option>
+              </select>
+            </div>
+            <div className="insert_tag">
+              <h3>시기</h3>
+              <select id="period" value={formData.period} onChange={handleInputChange}>
+                <option value="select">선택하세요</option>
+                <option value="중간">중간고사</option>
+                <option value="기말">기말고사</option>
+              </select>
+            </div>
+            <div className="insert_tag">
+              <h3>유형</h3>
+              <select id='type' value={formData.type} onChange={handleTypeChange}>
+                <option value={'select'}>선택하세요</option>
+                <option value={'객관식'}>객관식</option>
+                <option value={'주관식'}>주관식</option>
+              </select>
+            </div>
         </div>
+        <ImageUploadComponent />
+        <div className="question_sub">
+          <div className="paragraph_area">
+            <h4>지문</h4>
+            <textarea type="text" name="" id="paragraph" placeholder="지문" value={formData.paragraph} onChange={handleInputChange}></textarea>
+          </div>
+          <div className="question_area">
+            <div className="question_line">
+              <h4>질문</h4>
+              <textarea type="text" name="" id="question" placeholder="질문" value={formData.question} onChange={handleInputChange}></textarea>
+            </div>
+            <div className="choice">
+              <h4>선택지1</h4>
+              <textarea type="text" name="" id="choice1" placeholder="선택지1" value={formData.choice1} onChange={handleInputChange}></textarea>
+            </div>
+            <div className="choice">
+              <h4>선택지2</h4>
+              <textarea type="text" name="" id="choice2" placeholder="선택지2" value={formData.choice2} onChange={handleInputChange}></textarea>
+            </div>
+            <div className="choice">
+              <h4>선택지3</h4>
+              <textarea type="text" name="" id="choice3" placeholder="선택지3" value={formData.choice3} onChange={handleInputChange}></textarea>
+            </div>
+            <div className="choice">
+              <h4>선택지4</h4>
+              <textarea type="text" name="" id="choice4" placeholder="선택지4" value={formData.choice4} onChange={handleInputChange}></textarea>
+            </div>
+            <div className="choice">
+              <h4>선택지5</h4>
+              <textarea type="text" name="" id="choice5" placeholder="선택지5" value={formData.choice5} onChange={handleInputChange}></textarea>
+            </div>
+            <div className="choice">
+              <h4>정답</h4>
+              <textarea type="text" name="" id="answer" placeholder="정답" value={formData.answer} onChange={handleInputChange}></textarea>
+            </div>
+          </div>
+        </div>
+        <div className='btn_section'>
+          <button type = 'submit' className="letter_btn" onClick={handleSubmit}>등록</button>
+          <button type = 'button' className="letter_btn" onClick={openNewWindow}>OCR하러가기</button>
+        </div>
+        </form>
+      </div>
     );
 };
   

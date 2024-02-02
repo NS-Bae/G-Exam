@@ -15,13 +15,17 @@ function ChoiceForm() {
     const [totalCount, setTotalCount] = useState(0);
     const [classificationInfo, setClassificationInfo] = useState([]);
     const [checkedRows, setCheckedRows] = useState([]);
+    const [subjectList, setSubjectList] = useState([]);
     const [isConfirmButtonClicked, setConfirmButtonClicked] = useState(false);
     const [isAddButtonClicked, setAddButtonClicked] = useState(false);
     const tagRef = useRef(null);
 
     const fetchData = (page) => {
-      const itemsPerPage = 15; // 페이지당 아이템 수
+      const itemsPerPage = 15; 
       const offset = (page - 1) * itemsPerPage;
+
+      console.log("Fetching data for page", page);
+
       fetch('/search_classification', {
         method: 'POST',
         headers: {
@@ -61,7 +65,12 @@ function ChoiceForm() {
     const handleAddButtonClick = async () => {
       const tagValue = tagRef.current ? tagRef.current.value : '';
       setAddButtonClicked(true);
-      if(tagValue !== '')
+      console.log(selectedCategory);
+      if(selectedCategory === "select" || tagValue === '')
+      {
+        alert("분류값이 입력되지 않았거나 선택된 과목이 올바르지 않습니다.");
+      }
+      else
       {
         try 
         {
@@ -70,7 +79,7 @@ function ChoiceForm() {
             headers : {
               'Content-Type' : 'application/json',
             }, 
-            body : JSON.stringify({tagValue}),
+            body : JSON.stringify({tagValue, selectedCategory}),
           });
     
           if(!response.ok)
@@ -86,10 +95,6 @@ function ChoiceForm() {
         {
           console.log("데이터를 가져오는 과정에서 문제가 발생하였습니다.", error);
         }
-      }
-      else
-      {
-        alert("분류값이 입력되지 않았습니다.");
       }
     };
 
@@ -148,36 +153,52 @@ function ChoiceForm() {
     };
   
     useEffect(() => {
-      if ((isConfirmButtonClicked || !selectedCategory) && !classificationInfo.length) 
-      {
-        fetchData(1);
-        setConfirmButtonClicked(false); 
-      }
-    }, [isConfirmButtonClicked, selectedCategory, classificationInfo]);
+      fetchData(1);
+    }, [])
+
+    useEffect(() => {
+      const fetchSubjectList = async () => {
+        try 
+        {
+          const response = await fetch('/get_majorlist');
+          if (!response.ok) 
+          {
+            throw new Error('네트워크 응답이 올바르지 않습니다.');
+          }
+          const data = await response.json();
+          setSubjectList(data.data);
+          console.log(subjectList); 
+        } 
+        catch (error) 
+        {
+          console.error('과목 리스트를 불러오는 중 오류 발생:', error);
+        }
+      };
+  
+      fetchSubjectList(); // useEffect가 처음 실행될 때 과목 리스트를 가져옴
+    }, []);
   
     return (
       <div className = 'place'>
         <div className='upper_button_place'>
             <p>과목별로 보기</p>
             <select
-                id='category'
-                onChange={(e) => setSelectedCategory(e.target.value)}
-                value={selectedCategory}
+              id='category'
+              onChange={(e) => setSelectedCategory(e.target.value)}
+              value={selectedCategory}
             >
-                <option value={'select'}>선택하세요</option>
-                <option value={'영단어'}>영단어</option>
-                <option value={'국어'}>국어</option>
-                <option value={'영어'}>영어</option>
-                <option value={'수학'}>수학</option>
-                <option value={'사회'}>사회</option>
-                <option value={'과학'}>과학</option>
-                <option value={'기타'}>기타</option>
+              <option value={'select'}>선택하세요</option>
+              {subjectList.map((subject) => (
+                <option key={subject.major_name} value={subject.major_name}>
+                  {subject.major_name}
+                </option>
+              ))}
             </select>
             <button className='letter_btn' type='button' onClick={handleConfirmButtonClick}>
             확인
           </button>
         </div>
-        <p>태그 입력시 과목명만 가장 앞에 입력하고 _를 사용해주세요</p>
+        <p>태그 입력시 과목명은 상단에서 선택하고 띄어쓰기 대신 _를 사용해주세요</p>
         <div className='sel_option'>
           <input type="text" name="word_tag" id="tag" ref={tagRef} placeholder="분류 입력 (띄어쓰기 대신 _ 를 사용해주세요)" />
           <button className='letter_btn' type='button' onClick={handleAddButtonClick}>

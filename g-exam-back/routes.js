@@ -383,7 +383,7 @@ async function getLastNumber(selectedLevel) {
       }
     });
   });
-}
+};
 //변경 불필요. 영단어 저장하기
 async function saveNewWords(selectedLevel, wordTag, wordSave) {
   try 
@@ -408,22 +408,22 @@ async function saveNewWords(selectedLevel, wordTag, wordSave) {
         let query;
         let values;
   
-        if (selectedLevel === "elementary") 
+        if (selectedLevel === "eng_word_elementary") 
         {
           query = `INSERT INTO ${selectedLevel} VALUES (?, ?, ?, ?, ?, ?, '초등')`;
           values = [word_id, engword, korword1, korword2, korword3, korword4];
         }
-        else if (selectedLevel === "middle") 
+        else if (selectedLevel === "eng_word_middle") 
         {
           query = `INSERT INTO ${selectedLevel} VALUES (?, ?, ?, ?, ?, ?, '중등')`;
           values = [word_id, engword, korword1, korword2, korword3, korword4];
         } 
-        else if (selectedLevel === "high") 
+        else if (selectedLevel === "eng_word_high") 
         {
           query = `INSERT INTO ${selectedLevel} VALUES (?, ?, ?, ?, ?, ?, '고등')`;
           values = [word_id, engword, korword1, korword2, korword3, korword4];
         } 
-        else if (selectedLevel === "toeic") 
+        else if (selectedLevel === "eng_word_toeic") 
         {
           query = `INSERT INTO ${selectedLevel} VALUES (?, ?, ?, ?, ?, ?, '토익')`;
           values = [word_id, engword, korword1, korword2, korword3, korword4];
@@ -449,22 +449,22 @@ async function saveNewWords(selectedLevel, wordTag, wordSave) {
         let query;
         let values;
   
-        if (selectedLevel === "elementary") 
+        if (selectedLevel === "eng_word_elementary") 
         {
           query = `INSERT INTO ${selectedLevel} VALUES (?, ?, ?, ?, ?, ?, '초등')`;
           values = [word_id, engword, korword1, korword2, korword3, korword4];
         }
-        else if (selectedLevel === "middle") 
+        else if (selectedLevel === "eng_word_middle") 
         {
           query = `INSERT INTO ${selectedLevel} VALUES (?, ?, ?, ?, ?, ?, '중등')`;
           values = [word_id, engword, korword1, korword2, korword3, korword4];
         } 
-        else if (selectedLevel === "high") 
+        else if (selectedLevel === "eng_word_high") 
         {
           query = `INSERT INTO ${selectedLevel} VALUES (?, ?, ?, ?, ?, ?, '고등')`;
           values = [word_id, engword, korword1, korword2, korword3, korword4];
         } 
-        else if (selectedLevel === "toeic") 
+        else if (selectedLevel === "eng_word_toeic") 
         {
           query = `INSERT INTO ${selectedLevel} VALUES (?, ?, ?, ?, ?, ?, '토익')`;
           values = [word_id, engword, korword1, korword2, korword3, korword4];
@@ -480,7 +480,7 @@ async function saveNewWords(selectedLevel, wordTag, wordSave) {
     console.error('단어 저장 오류:', error);
     throw error;
   }
-}
+};
 //변경 불필요. 영단어 정보가 포함된 word_id 가져오기
 async function isWordTagExists(selectedLevel, wordTag) {
   try 
@@ -504,11 +504,11 @@ async function isWordTagExists(selectedLevel, wordTag) {
     console.error('WordTag 확인 오류:', error);
     throw error;
   }
-}
+};
 //변경 불필요.
 router.post('/save_eng_word', async (req, res) => {
-  const { selectedCategory, selectedManagement, wordSave, selectedLevel, wordTag } = req.body;
-
+  const { wordSave, selectedLevel, wordTag } = req.body;
+  console.log(wordSave, selectedLevel, wordTag);
   try 
   {
     const result = await saveNewWords(selectedLevel, wordTag, wordSave);
@@ -522,7 +522,7 @@ router.post('/save_eng_word', async (req, res) => {
 });
 //변경 불필요.
 router.post('/search_table', (req, res) => {
-  const { selectedCategory, tagValue, selectedLevel, offset } = req.body;
+  const { tagValue, selectedLevel, offset } = req.body;
   const level = `eng_word_${selectedLevel}`;
 
   let sql;
@@ -721,7 +721,7 @@ router.post('/regist_pre_exam', async (req, res) => {
     const choice5 = formData.choice5 || null;
     const answer = formData.answer || null;
 
-    if (formData.selectedCategory !== "기타") {
+    if (formData.selectedCategory !== "") {
       const exam_id_pre = `${year}_${school_details}_${selectedCategory}_${grade}학년_${semester}학기_${period}_${type}`;
       const total_semester = `${grade}_${semester}_${period}`;
       
@@ -831,32 +831,35 @@ router.post('/show_exam', async (req, res) => {
 router.post('/update_exam', (req, res) => {
   const {updatedData, selectedLevel} = req.body;
   
-  
+   
 });
 
 router.post('/search_classification', (req, res) => {
   const classification_category = req.body.selectedCategory;
   const offset = req.body.offset;
-
+  console.log(classification_category);
   let sql;
   let countSql;
 
-  if(classification_category === "영단어" || classification_category === "국어" || classification_category === "영어" || classification_category === "수학" || classification_category === "사회" || classification_category === "과학" || classification_category === "기타")
-  {
-    sql = `SELECT * FROM classification_list WHERE major_name = '${classification_category}' LIMIT 15 OFFSET ${offset};`;
-    countSql = `SELECT COUNT(*) as totalCount FROM classification_list WHERE major_name = '${classification_category}';`
-  }
-  else
+  if(classification_category === 'select' || classification_category === '')
   {
     sql = `SELECT * FROM classification_list LIMIT 15 OFFSET ${offset};`;
     countSql = `SELECT COUNT(*) as totalCount FROM classification_list;`;
   }
+  else
+  {
+    sql = `SELECT * FROM classification_list WHERE major_name = '${classification_category}' LIMIT 15 OFFSET ${offset};`;
+    countSql = `SELECT COUNT(*) as totalCount FROM classification_list WHERE major_name = '${classification_category}';`
+  }
 
   db.query(countSql, (countErr, countResult) => {
-    if (countErr) {
+    if (countErr) 
+    {
       console.log(countErr);
       res.status(500).json({ error: '' });
-    } else {
+    } 
+    else 
+    {
       const totalCount = countResult[0].totalCount;
 
       db.query(sql, (err, result) => {
@@ -895,19 +898,19 @@ async function getMaxId()
 }
 
 router.post('/add_classification', async (req, res) => {
-  const classification = req.body.tagValue;
-  const classificationArray = classification.split('_');
-  const major = classificationArray[0];
+  const tagValue = req.body.tagValue;
+  const major = req.body.selectedCategory;
   const table = "classification_list";
+  const classification = `${major}_${tagValue}`;
 
   try
   {
     const maxId = await getMaxId();
     const newClassificationId = maxId + 1;
-
+ 
     const sql = `INSERT INTO ${table} VALUES (?, ?, 0, ?)`;
     const values = [newClassificationId, classification, major];
-
+ 
     await db.execute(sql, values);
     res.status(200).json({ message: '문제분류를 등록하였습니다.' });
   }
@@ -940,6 +943,23 @@ router.post('/delete_classification', async (req, res) => {
     console.error('문제분류 삭제 오류:', error);
     res.status(500).json({ error: 'Internal Server Error' });
   }
+});
+
+router.get('/get_majorlist', (req, res) => {
+
+  const sql = `SELECT major_name FROM major_list ORDER BY major_id;`;
+
+  db.query(sql, (err, result) => {
+    if (err) 
+    {
+      console.log(err);
+      res.status(500).json({ error: '' });
+    } 
+    else 
+    {
+      res.status(200).json({ data: result });
+    }
+  });
 });
 
 
