@@ -357,11 +357,11 @@ router.post('/withgrawal', function(req, res) {
     }
   });
 });
-//변경 불필요. 영단어 정보 기반 마지막숫자 가져오기
-async function getLastNumber(selectedLevel) {
+//마지막숫자 가져오기
+async function getLastNumber(target_table, selectedClassification) {
   return new Promise((resolve, reject) => {
-    const sql = `SELECT word_id FROM ${selectedLevel} ORDER BY word_id DESC LIMIT 1`;
-    const params = [];
+    const sql = `SELECT MAX(word_id) AS maxNnumber FROM ${target_table} WHERE word_category = ?;`;
+    const params = [selectedClassification];
 
     db.query(sql, params, function (err, rows) {
       if (err) 
@@ -373,7 +373,7 @@ async function getLastNumber(selectedLevel) {
       {
         if (rows.length > 0)
         {
-          const lastNumber = parseInt(rows[0].word_id.split('_').pop(), 10);
+          const lastNumber = rows[0].maxNnumber;
           resolve(lastNumber);
         } 
         else 
@@ -384,116 +384,22 @@ async function getLastNumber(selectedLevel) {
     });
   });
 };
-//변경 불필요. 영단어 저장하기
-async function saveNewWords(selectedLevel, wordTag, wordSave) {
-  try 
-  {
-    const exist = await isWordTagExists(selectedLevel, wordTag);
-    
-    if(exist > 0)
-    {
-      const lastNumber = await getLastNumber(selectedLevel);
-      for (let i = 0; i < wordSave.length; i++) {
-        const newNumber = (lastNumber + i + 1).toString().padStart(8, '0');
-        const word_id = `${selectedLevel}_${wordTag}_${newNumber}`;
-  
-        const engword = (wordSave[i]?.engWord) || '';
-        const korword = (wordSave[i]?.korWord) || [];
-        const korWords = wordSave[i].korWord.slice(0, 4); // 최대 4개까지만 유지
-        const korword1 = korWords[0] || null;
-        const korword2 = korWords[1] || null;
-        const korword3 = korWords[2] || null;
-        const korword4 = korWords[3] || null;
-  
-        let query;
-        let values;
-  
-        if (selectedLevel === "eng_word_elementary") 
-        {
-          query = `INSERT INTO ${selectedLevel} VALUES (?, ?, ?, ?, ?, ?, '초등')`;
-          values = [word_id, engword, korword1, korword2, korword3, korword4];
-        }
-        else if (selectedLevel === "eng_word_middle") 
-        {
-          query = `INSERT INTO ${selectedLevel} VALUES (?, ?, ?, ?, ?, ?, '중등')`;
-          values = [word_id, engword, korword1, korword2, korword3, korword4];
-        } 
-        else if (selectedLevel === "eng_word_high") 
-        {
-          query = `INSERT INTO ${selectedLevel} VALUES (?, ?, ?, ?, ?, ?, '고등')`;
-          values = [word_id, engword, korword1, korword2, korword3, korword4];
-        } 
-        else if (selectedLevel === "eng_word_toeic") 
-        {
-          query = `INSERT INTO ${selectedLevel} VALUES (?, ?, ?, ?, ?, ?, '토익')`;
-          values = [word_id, engword, korword1, korword2, korword3, korword4];
-        }
-  
-        await db.execute(query, values);
-      }
-    }
-    else
-    {
-      const lastNumber = 0;
-      for (let i = 0; i < wordSave.length; i++) {
-        const newNumber = (lastNumber + i + 1).toString().padStart(8, '0');
-        const word_id = `${selectedLevel}_${wordTag}_${newNumber}`;
-  
-        const engword = (wordSave[i]?.engWord) || '';
-        const korword = (wordSave[i]?.korWord) || [];
-        const korWords = wordSave[i].korWord.slice(0, 4); // 최대 4개까지만 유지
-        const korword1 = korWords[0] || null;
-        const korword2 = korWords[1] || null;
-        const korword3 = korWords[2] || null;
-        const korword4 = korWords[3] || null;
-        let query;
-        let values;
-  
-        if (selectedLevel === "eng_word_elementary") 
-        {
-          query = `INSERT INTO ${selectedLevel} VALUES (?, ?, ?, ?, ?, ?, '초등')`;
-          values = [word_id, engword, korword1, korword2, korword3, korword4];
-        }
-        else if (selectedLevel === "eng_word_middle") 
-        {
-          query = `INSERT INTO ${selectedLevel} VALUES (?, ?, ?, ?, ?, ?, '중등')`;
-          values = [word_id, engword, korword1, korword2, korword3, korword4];
-        } 
-        else if (selectedLevel === "eng_word_high") 
-        {
-          query = `INSERT INTO ${selectedLevel} VALUES (?, ?, ?, ?, ?, ?, '고등')`;
-          values = [word_id, engword, korword1, korword2, korword3, korword4];
-        } 
-        else if (selectedLevel === "eng_word_toeic") 
-        {
-          query = `INSERT INTO ${selectedLevel} VALUES (?, ?, ?, ?, ?, ?, '토익')`;
-          values = [word_id, engword, korword1, korword2, korword3, korword4];
-        }
-  
-        await db.execute(query, values);
-      }
-    }
-    return `${wordSave.length} 단어가 성공적으로 저장되었습니다!`;
-  } 
-  catch (error) 
-  {
-    console.error('단어 저장 오류:', error);
-    throw error;
-  }
-};
 //변경 불필요. 영단어 정보가 포함된 word_id 가져오기
-async function isWordTagExists(selectedLevel, wordTag) {
+async function isWordTagExists(target_table, selectedClassification) {
   try 
   {
-    const query = `SELECT COUNT(*) as count FROM ${selectedLevel} WHERE word_id LIKE ?`;
-    const values = [`%${wordTag}%`];
+    const query = `SELECT COUNT(*) as count FROM ${target_table} WHERE word_category LIKE ?`;
+    const values = [`%${selectedClassification}%`];
 
     return new Promise((resolve, reject) => {
       db.query(query, values, function (err, rows) {
-        if (err) {
+        if (err) 
+        {
           console.error('WordTag 확인 오류:', err);
           reject(err);
-        } else {
+        } 
+        else 
+        {
           resolve(rows[0].count > 0);
         }
       });
@@ -505,35 +411,85 @@ async function isWordTagExists(selectedLevel, wordTag) {
     throw error;
   }
 };
-//변경 불필요.
-router.post('/save_eng_word', async (req, res) => {
-  const { wordSave, selectedLevel, wordTag } = req.body;
-  console.log(wordSave, selectedLevel, wordTag);
-  try 
+//단어 저장 요청받은 백엔드
+router.post('/save_word', async (req, res) => {
+  const { wordSave, selectedClassification, selectedMajor } = req.body;
+  const target_table = `word_${convertKorean(selectedMajor)}`;
+
+  console.log(wordSave, selectedClassification, selectedMajor, target_table);
+
+  const exist = await isWordTagExists(target_table, selectedClassification);
+  try
   {
-    const result = await saveNewWords(selectedLevel, wordTag, wordSave);
-    res.status(200).json({ message: result });
-  } 
+    if(exist)//기존 태그가 존재하는경우
+    {
+      const maxNnumber = await getLastNumber(target_table, selectedClassification) + 1;
+      console.log("마지막일껄",maxNnumber);
+
+      for (let i = 0; i < wordSave.length; i++) 
+      {
+        const newNumber = (maxNnumber + i);
+        const engword = (wordSave[i]?.engWord) || '';
+        const korword = (wordSave[i]?.korWord) || [];
+        const korWords = wordSave[i].korWord.slice(0, 4); // 최대 4개까지만 유지
+        const korword1 = korWords[0] || null;
+        const korword2 = korWords[1] || null;
+        const korword3 = korWords[2] || null;
+        const korword4 = korWords[3] || null;
+        const korword5 = korWords[4] || null;
+
+        const query = `INSERT INTO ${target_table} VALUES (?, ?, ?, ?, ?, ?, ?, ?)`;
+        const values = [selectedClassification, newNumber, engword, korword1, korword2, korword3, korword4, korword5];      
+
+        await db.execute(query, values);
+      }
+    }
+    else//기존 태그가 존재하지 않는 경우
+    {
+      for (let i = 0; i < wordSave.length; i++) 
+      {
+        const newNumber = (1 + i);
+        const engword = (wordSave[i]?.engWord) || '';
+        const korword = (wordSave[i]?.korWord) || [];
+        const korWords = wordSave[i].korWord.slice(0, 4); // 최대 4개까지만 유지
+        const korword1 = korWords[0] || null;
+        const korword2 = korWords[1] || null;
+        const korword3 = korWords[2] || null;
+        const korword4 = korWords[3] || null;
+        const korword5 = korWords[4] || null;
+
+        const query = `INSERT INTO ${target_table} VALUES (?, ?, ?, ?, ?, ?, ?, ?)`;
+        const values = [selectedClassification, newNumber, engword, korword1, korword2, korword3, korword4, korword5];      
+
+        await db.execute(query, values);
+      }
+    }
+    res.status(200).json({ message: `${wordSave.length} 단어가 성공적으로 저장되었습니다!` });
+  }
   catch (error) 
   {
+    console.error('단어 저장 오류:', error);
     res.status(500).json({ message: 'Error saving new words' });
   }
-
 });
 //변경 불필요.
 router.post('/search_table', (req, res) => {
-  const { tagValue, selectedLevel, offset } = req.body;
-  const level = `eng_word_${selectedLevel}`;
+  const { selectedClassification, selectedMajor, offset } = req.body;
+  const target_table = `word_${convertKorean(selectedMajor)}`;
 
   let sql;
   let countSql;
+  console.log(selectedClassification);
   
-  if (tagValue === undefined) {
-    sql = `SELECT word_id, word, word_mean1, word_mean2, word_mean3, word_mean4 FROM ${selectedLevel} LIMIT 15 OFFSET ${offset};`;
-    countSql = `SELECT COUNT(*) as totalCount FROM ${selectedLevel};`;
-  } else {
-    sql = `SELECT word_id, word, word_mean1, word_mean2, word_mean3, word_mean4 FROM ${selectedLevel} WHERE word_id LIKE '%${tagValue}%' LIMIT 15 OFFSET ${offset};`;
-    countSql = `SELECT COUNT(*) as totalCount FROM ${selectedLevel} WHERE word_id LIKE '%${tagValue}%';`;
+  if (selectedClassification === '' || selectedClassification === 'select') 
+  {
+    sql = `SELECT * FROM ${target_table} LIMIT 15 OFFSET ${offset};`;
+    countSql = `SELECT COUNT(*) as totalCount FROM ${target_table};`;
+  } 
+  else 
+  {
+    sql = `SELECT * FROM ${target_table} WHERE word_category = '${selectedClassification}' LIMIT 15 OFFSET ${offset};`;
+    countSql = `SELECT COUNT(*) as totalCount FROM ${target_table} WHERE word_category = '${selectedClassification}';`;
   }
 
   db.query(countSql, (countErr, countResult) => {
@@ -557,32 +513,13 @@ router.post('/search_table', (req, res) => {
     }
   });
 });
-//변경 불필요.
-router.post('/delete_word', async (req, res) => {
-  const selectedRows = req.body.selectedRows;
-  const selectedLevel = req.body.selectedLevel;
-
-  const placeholders = selectedRows.map(() => '?').join(', ');
-  const sql = `DELETE FROM ${selectedLevel} WHERE word_id IN (${placeholders});`;
-
-  try 
-  {
-    const [result] = await db.promise().query(sql, selectedRows);
-    res.status(200).json({ message: 'Rows updated successfully' });
-  } 
-  catch (error) 
-  {
-    console.error('Error executing query:', error);
-    res.status(500).json({ error: 'Error executing query' });
-  }
-});
-//변경 불필요.
+//수정할 단어 불러오기
 router.post('/update_word', async (req, res) => {
   const selectedRows = req.body.selectedRows;
-  const selectedLevel = req.body.selectedLevel;
+  const selectedLevel = `word_${convertKorean(req.body.selectedLevel)}`;
 
   const placeholders = selectedRows.map(() => '?').join(', ');
-  sql = `SELECT word_id, word, word_mean1, word_mean2, word_mean3, word_mean4 FROM ${selectedLevel} WHERE word_id IN (${placeholders});`;
+  sql = `SELECT * FROM ${selectedLevel} WHERE word_id IN (${placeholders});`;
   try 
   {
     const [result] = await db.promise().query(sql, selectedRows);
@@ -594,18 +531,20 @@ router.post('/update_word', async (req, res) => {
     res.status(500).json({ error: 'Error executing query' });
   }
 });
-//변경 불필요.
+//변경 불필요. 개별단어 수정하기
 router.post('/update_word_change', (req, res) => {
   const {updatedData, selectedLevel} = req.body;
+  const selectedMajor = `word_${convertKorean(selectedLevel)}`;
   
   const updateQuery = `
-    UPDATE ${selectedLevel}
+    UPDATE ${selectedMajor}
     SET
     word = CASE WHEN ? IS NOT NULL THEN ? ELSE word END,
     word_mean1 = CASE WHEN ? IS NOT NULL THEN ? ELSE word_mean1 END,
     word_mean2 = CASE WHEN ? IS NOT NULL THEN ? ELSE word_mean2 END,
     word_mean3 = CASE WHEN ? IS NOT NULL THEN ? ELSE word_mean3 END,
-    word_mean4 = CASE WHEN ? IS NOT NULL THEN ? ELSE word_mean4 END
+    word_mean4 = CASE WHEN ? IS NOT NULL THEN ? ELSE word_mean4 END,
+    word_mean5 = CASE WHEN ? IS NOT NULL THEN ? ELSE word_mean5 END
   WHERE word_id = ?;
   `;
   const values = [
@@ -614,6 +553,7 @@ router.post('/update_word_change', (req, res) => {
     updatedData.word_mean2, updatedData.word_mean2,
     updatedData.word_mean3, updatedData.word_mean3,
     updatedData.word_mean4, updatedData.word_mean4,
+    updatedData.word_mean5, updatedData.word_mean5,
     updatedData.word_id
   ];
 
@@ -629,6 +569,27 @@ router.post('/update_word_change', (req, res) => {
     }
   })
 });
+//변경 불필요.
+router.post('/delete_word', async (req, res) => {
+  const selectedRows = req.body.selectedRows;
+  const selectedLevel = `word_${convertKorean(req.body.selectedMajor)}`;
+  
+  const placeholders = selectedRows.map(() => '(?, ?)').join(', ');
+  const sql = `DELETE FROM ${selectedLevel} WHERE (word_category, word_id) IN (${placeholders});`;
+
+  try 
+  {
+    const compoundKeys = selectedRows.flatMap(({ wordCategory, wordId }) => [wordCategory, wordId]);
+
+    const [result] = await db.promise().query(sql, compoundKeys);
+    res.status(200).json({ message: 'Rows deleted successfully' });
+  } 
+  catch (error) 
+  {
+    console.error('Error executing query:', error);
+    res.status(500).json({ error: 'Error executing query' });
+  }
+});
 //한영전환 함수
 function convertKorean(selectedCategory) 
 {
@@ -638,6 +599,8 @@ function convertKorean(selectedCategory)
     '수학' : 'math', 
     '사회' : 'social', 
     '과학' : 'science', 
+    '한문' : 'chinese_character', 
+    '역사' : 'history', 
     '기타' : 'etc', 
   }
 
@@ -835,21 +798,38 @@ router.post('/update_exam', (req, res) => {
 });
 
 router.post('/search_classification', (req, res) => {
+  const formType = req.body.form_type;
   const classification_category = req.body.selectedCategory;
   const offset = req.body.offset;
-  console.log(classification_category);
+  
   let sql;
   let countSql;
 
-  if(classification_category === 'select' || classification_category === '')
+  if(formType === "exam")
   {
-    sql = `SELECT * FROM classification_list LIMIT 15 OFFSET ${offset};`;
-    countSql = `SELECT COUNT(*) as totalCount FROM classification_list;`;
+    if(classification_category === 'select' || classification_category === '')
+    {
+      sql = `SELECT * FROM classification_list LIMIT 15 OFFSET ${offset};`;
+      countSql = `SELECT COUNT(*) as totalCount FROM classification_list;`;
+    }
+    else
+    {
+      sql = `SELECT * FROM classification_list WHERE major_name = '${classification_category}' LIMIT 15 OFFSET ${offset};`;
+      countSql = `SELECT COUNT(*) as totalCount FROM classification_list WHERE major_name = '${classification_category}';`
+    }
   }
-  else
+  else if(formType === "word")
   {
-    sql = `SELECT * FROM classification_list WHERE major_name = '${classification_category}' LIMIT 15 OFFSET ${offset};`;
-    countSql = `SELECT COUNT(*) as totalCount FROM classification_list WHERE major_name = '${classification_category}';`
+    if(classification_category === 'select' || classification_category === '')
+    {
+      sql = `SELECT * FROM word_category ORDER BY word_id LIMIT 15 OFFSET ${offset};`;
+      countSql = `SELECT COUNT(*) as totalCount FROM word_category;`;
+    }
+    else
+    {
+      sql = `SELECT * FROM word_category WHERE major_name = '${classification_category}' ORDER BY word_id LIMIT 15 OFFSET ${offset};`;
+      countSql = `SELECT COUNT(*) as totalCount FROM word_category WHERE major_name = '${classification_category}';`
+    }
   }
 
   db.query(countSql, (countErr, countResult) => {
@@ -870,6 +850,7 @@ router.post('/search_classification', (req, res) => {
         } 
         else 
         {
+          
           res.status(200).json({ data: result, totalCount });
         }
       });
@@ -878,9 +859,21 @@ router.post('/search_classification', (req, res) => {
   
 });
 
-async function getMaxId() 
+async function getMaxId(table) 
 {
-  const maxIdQuery = 'SELECT MAX(classification_id) AS maxId FROM classification_list;';
+  const table_now = table.table;
+  let max_column;
+
+  if(table_now === "word_category")
+  {
+    max_column = "word_id";
+  }
+  else if(table_now === "classification_list")
+  {
+    max_column = "classification_id";
+  }
+
+  const maxIdQuery = `SELECT MAX(${max_column}) AS maxId FROM ${table_now};`;
   return new Promise((resolve, reject) => {
     db.query(maxIdQuery, (error, results) => {
       if (error) 
@@ -900,38 +893,79 @@ async function getMaxId()
 router.post('/add_classification', async (req, res) => {
   const tagValue = req.body.tagValue;
   const major = req.body.selectedCategory;
-  const table = "classification_list";
+  const formType = req.body.form_type;
   const classification = `${major}_${tagValue}`;
 
-  try
+  if(formType === "exam")
   {
-    const maxId = await getMaxId();
-    const newClassificationId = maxId + 1;
- 
-    const sql = `INSERT INTO ${table} VALUES (?, ?, 0, ?)`;
-    const values = [newClassificationId, classification, major];
- 
-    await db.execute(sql, values);
-    res.status(200).json({ message: '문제분류를 등록하였습니다.' });
+    const table = "classification_list";
+    try
+    {
+      const maxId = await getMaxId({table});
+      const newClassificationId = maxId + 1;
+  
+      const sql = `INSERT INTO ${table} VALUES (?, ?, 0, ?)`;
+      const values = [newClassificationId, classification, major];
+  
+      await db.execute(sql, values);
+      res.status(200).json({ message: '문제분류를 등록하였습니다.' });
+    }
+    catch (error) 
+    {
+      console.error('문제분류 등록 오류:', error);
+      res.status(500).json({ error: 'Internal Server Error' });
+    } 
   }
-  catch (error) 
+  else if(formType === "word")
   {
-    console.error('문제분류 등록 오류:', error);
-    res.status(500).json({ error: 'Internal Server Error' });
+    const table = "word_category";
+    try
+    {
+      const maxId = await getMaxId({table});
+      const newClassificationId = maxId + 1;
+  
+      const sql = `INSERT INTO ${table} VALUES (?, ?, 0, ?)`;
+      const values = [newClassificationId, classification, major];
+  
+      await db.execute(sql, values);
+
+      console.log(sql, "ssss");
+      res.status(200).json({ message: '문제분류를 등록하였습니다.' });
+    }
+    catch (error) 
+    {
+      console.error('문제분류 등록 오류:', error);
+      res.status(500).json({ error: 'Internal Server Error' });
+    } 
   }
 });
 
 router.post('/delete_classification', async (req, res) => {
   const target = req.body.checkedRows;
+  const formType = req.body.form_type;
   const target_group = target.map(() => '?').join(', ');
 
-  const sql = `DELETE FROM classification_list WHERE classification_id IN (${target_group});`;
+  let target_table;
+  let change_row;
+
+  if(formType === "exam")
+  {
+    target_table = "classification_list";
+    change_row = "classification_id";
+  }
+  else if(formType === "word")
+  {
+    target_table = "word_category";
+    change_row = "word_id";
+  }
+
+  const sql = `DELETE FROM ${target_table} WHERE ${change_row} IN (${target_group});`;
 
   try
   {
     await db.execute(sql, target);
     const setSql = 'SET @row_number := 0;';
-    const updateSql = 'UPDATE classification_list SET classification_id = (@row_number := @row_number + 1);';
+    const updateSql = `UPDATE ${target_table} SET ${change_row} = (@row_number := @row_number + 1);`;
 
     await db.execute(setSql);
     await db.execute(updateSql);
@@ -948,6 +982,38 @@ router.post('/delete_classification', async (req, res) => {
 router.get('/get_majorlist', (req, res) => {
 
   const sql = `SELECT major_name FROM major_list ORDER BY major_id;`;
+
+  db.query(sql, (err, result) => {
+    if (err) 
+    {
+      console.log(err);
+      res.status(500).json({ error: err });
+    } 
+    else 
+    {
+      res.status(200).json({ data: result });
+    }
+  });
+});
+
+router.post('/get_classification', (req, res) => {
+  const formType = req.body.form_type;
+  const selectedMajor = req.body.selectedMajor;
+  let target_table;
+  let target_row;
+
+  if(formType === "exam")
+  {
+    target_table = "classification_list";
+    target_row = "classification_name";
+  }
+  else if(formType === "word")
+  {
+    target_table = "word_category";
+    target_row = "word_category";
+  }
+
+  const sql = `SELECT ${target_row} FROM ${target_table} WHERE major_name = '${selectedMajor}';`;
 
   db.query(sql, (err, result) => {
     if (err) 

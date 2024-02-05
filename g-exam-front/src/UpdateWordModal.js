@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import Modal from 'react-modal';
 
 const UpdateWordModal = ({ modalIsOpen, closeModal, handleCheckboxChange, checkedRows, selectedLevel }) => {
-    const tableHeaders = ['Word ID', '영단어', '뜻 1', '뜻 2', '뜻 3', '뜻 4', ''];
+    const tableHeaders = ['분류', 'Word ID', '단어', '뜻 1', '뜻 2', '뜻 3', '뜻 4', '뜻5', ''];
     const [tableData, setTableData] = useState([]);
     const [editedData, setEditedData] = useState({
       word : '', 
@@ -12,7 +12,7 @@ const UpdateWordModal = ({ modalIsOpen, closeModal, handleCheckboxChange, checke
       word_mean2 : '',
       word_mean3 : '',
       word_mean4 : '',
-  
+      word_mean5 : '',
     });
     useEffect(() => {
       // 모달이 열릴 때 데이터를 불러오기
@@ -51,6 +51,7 @@ const UpdateWordModal = ({ modalIsOpen, closeModal, handleCheckboxChange, checke
         word_mean2: editedData.word_mean2 ? editedData.word_mean2 : null,
         word_mean3: editedData.word_mean3 ? editedData.word_mean3 : null,
         word_mean4: editedData.word_mean4 ? editedData.word_mean4 : null,
+        word_mean5: editedData.word_mean5 ? editedData.word_mean5 : null,
       };
       fetch('/update_word_change', {
         method : 'POST', 
@@ -79,10 +80,10 @@ const UpdateWordModal = ({ modalIsOpen, closeModal, handleCheckboxChange, checke
       <Modal
         isOpen={modalIsOpen}
         onRequestClose={closeModal}
-        contentLabel="영단어 수정"
+        contentLabel="단어 수정"
         className="modal_design"
       >
-        <h2>영단어 수정</h2>
+        <h2>단어 수정</h2>
         <div className='place'>
           <table className='third_table'>
             <thead>
@@ -94,13 +95,15 @@ const UpdateWordModal = ({ modalIsOpen, closeModal, handleCheckboxChange, checke
             </thead>
             <tbody>
               {tableData.map((row, rowIndex) => (
-                <tr key={rowIndex}>
+                <tr key={`${row.word_category}_${row.word_id}`}>
+                  <td>{row.word_category}</td>
                   <td>{row.word_id}</td>
                   <td><textarea className='textarea_design' defaultValue={row.word} onChange={(e) => setEditedData({ ...editedData, word : e.target.value})}/></td>
                   <td><textarea className='textarea_design' defaultValue={row.word_mean1} onChange={(e) => setEditedData({ ...editedData, word_mean1 : e.target.value})}/></td>
                   <td><textarea className='textarea_design' defaultValue={row.word_mean2} onChange={(e) => setEditedData({ ...editedData, word_mean2 : e.target.value})}/></td>
                   <td><textarea className='textarea_design' defaultValue={row.word_mean3} onChange={(e) => setEditedData({ ...editedData, word_mean3 : e.target.value})}/></td>
                   <td><textarea className='textarea_design' defaultValue={row.word_mean4} onChange={(e) => setEditedData({ ...editedData, word_mean4 : e.target.value})}/></td>
+                  <td><textarea className='textarea_design' defaultValue={row.word_mean5} onChange={(e) => setEditedData({ ...editedData, word_mean5 : e.target.value})}/></td>
                   <td><button className='small_letter_btn' onClick={() => handleEditClick(row)}>수정하기</button></td>
                 </tr>
               ))}

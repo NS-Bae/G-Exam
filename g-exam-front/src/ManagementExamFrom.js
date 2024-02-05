@@ -15,8 +15,6 @@ const ManagementExamForm = ({selectedCategory}) => {
   const [modalIsOpen, setModalIsOpen] = useState(false);
   const [modalExamId, setModalExamId] = useState('');
 
-  console.log(selectedCategory);
-
   const fetchData = (page) => {
     const itemsPerPage = 15; // 페이지당 아이템 수
     const offset = (page - 1) * itemsPerPage;

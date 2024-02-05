@@ -81,7 +81,7 @@ function ChoiceForm1 () {
   };
 
   const renderChoice1 = () => {
-    const handleMajorListChange = (e) => {
+    const handleMajorListChange = (e) => { 
       const selectedMajor = e.target.value;
       setSelectedExamMajor(selectedMajor);
       console.log(selectedMajor);    
@@ -181,6 +181,7 @@ function WorkbookChoiceForm({selectedExamCategory})
   }, []);
 
   useEffect(() => {
+    console.log(selectedExamMajor);
     const fatchTag = async () => {
       try {
         const response = await fetch('/search_classification', {
@@ -189,6 +190,7 @@ function WorkbookChoiceForm({selectedExamCategory})
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
+            form_type:"exam",
             selectedCategory: selectedExamMajor,
             offset: 0,
           }),
@@ -200,7 +202,9 @@ function WorkbookChoiceForm({selectedExamCategory})
   
         const data = await response.json();
         setTagList(data.data);
-      } catch (error) {
+      } 
+      catch (error) 
+      {
         console.error(error);
       }
     };
