@@ -56,8 +56,6 @@ function ExamForm({form_type})
       const itemsPerPage = 15; 
       const offset = (page - 1) * itemsPerPage;
 
-      console.log("Fetching data for page", page);
-
       fetch('/search_classification', {
         method: 'POST',
         headers: {
@@ -171,18 +169,19 @@ function ExamForm({form_type})
       
     };
 
-    const handleCheckboxChange = (event, id) => {
+    const handleCheckboxChange = (event, classificationName) => {
       setCheckedRows(prevRows => {
         const isChecked = event.target.checked;
         if (isChecked) 
         {
-          return [...prevRows, id];
+          return [...prevRows, classificationName];
         } 
         else 
         {
-          return prevRows.filter((rowId) => rowId !== id);
+          return prevRows.filter((name) => name !== classificationName);
         }
       });
+      console.log(checkedRows);
     };
   
     useEffect(() => {
@@ -200,7 +199,6 @@ function ExamForm({form_type})
           }
           const data = await response.json();
           setSubjectList(data.data);
-          console.log(subjectList); 
         } 
         catch (error) 
         {
@@ -255,11 +253,11 @@ function ExamForm({form_type})
                   <td>
                     <input
                       type="checkbox"
-                      onChange={(event) => handleCheckboxChange(event, item.classification_id)}
-                      checked={checkedRows.includes(item.classification_id)}
+                      onChange={(event) => handleCheckboxChange(event, item.classification_name)}
+                      checked={checkedRows.includes(item.classification_name)}
                     />
                   </td>
-                  <td>{item.classification_id}</td>
+                  <td>{index+1}</td>
                   <td>{item.classification_name}</td>
                   <td>{item.major_name}</td>
                   <td>{item.workbook_count}</td>
@@ -296,8 +294,6 @@ function WordForm({form_type})
   const fetchData = (page) => {
     const itemsPerPage = 15; 
     const offset = (page - 1) * itemsPerPage;
-
-    console.log("Fetching data for page", page);
 
     fetch('/search_classification', {
       method: 'POST',
@@ -412,16 +408,16 @@ function WordForm({form_type})
     
   };
 
-  const handleCheckboxChange = (event, id) => {
+  const handleCheckboxChange = (event, wordCategory) => {
     setCheckedRows(prevRows => {
       const isChecked = event.target.checked;
       if (isChecked) 
       {
-        return [...prevRows, id];
+        return [...prevRows, wordCategory];
       } 
       else 
       {
-        return prevRows.filter((rowId) => rowId !== id);
+        return prevRows.filter((category) => category !== wordCategory);
       }
     });
   };
@@ -471,11 +467,11 @@ function WordForm({form_type})
                 <td>
                   <input
                     type="checkbox"
-                    onChange={(event) => handleCheckboxChange(event, item.word_id)}
-                    checked={checkedRows.includes(item.word_id)}
+                    onChange={(event) => handleCheckboxChange(event, item.word_category)}
+                    checked={checkedRows.includes(item.word_category)}
                   />
                 </td>
-                <td>{item.word_id}</td>
+                <td>{index + 1}</td>
                 <td>{item.word_category}</td>
                 <td>{item.major_name}</td>
                 <td>{item.word_count}</td>

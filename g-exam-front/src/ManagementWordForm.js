@@ -219,10 +219,12 @@ function ManagementWordForm()
           <tbody>
           {Array.from({ length: Math.min(result.length, 15) }, (_, i) => (
               <tr key={`${result[i].word_category}_${result[i].word_id}`}>
-                <td><input
+                <td>
+                  <input
                     type="checkbox"
                     onChange={(event) => handleCheckboxChange(event, result[i].word_category, result[i].word_id)}
-                /></td>
+                  />
+                </td>
                 <td>{result[i].word_category}</td>
                 <td>{result[i].word_id}</td>
                 <td>{result[i].word}</td>

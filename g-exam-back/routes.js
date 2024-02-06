@@ -518,11 +518,13 @@ router.post('/update_word', async (req, res) => {
   const selectedRows = req.body.selectedRows;
   const selectedLevel = `word_${convertKorean(req.body.selectedLevel)}`;
 
-  const placeholders = selectedRows.map(() => '?').join(', ');
-  sql = `SELECT * FROM ${selectedLevel} WHERE word_id IN (${placeholders});`;
+  const placeholders = selectedRows.map(() => '(?, ?)').join(', ');
+  const sql = `SELECT * FROM ${selectedLevel} WHERE (word_category, word_id) IN (${placeholders});`;
   try 
   {
-    const [result] = await db.promise().query(sql, selectedRows);
+    const compoundKeys = selectedRows.flatMap(({ wordCategory, wordId }) => [wordCategory, wordId]);
+
+    const [result] = await db.promise().query(sql, compoundKeys);
     res.status(200).json({ result });
   } 
   catch (error) 
@@ -545,7 +547,7 @@ router.post('/update_word_change', (req, res) => {
     word_mean3 = CASE WHEN ? IS NOT NULL THEN ? ELSE word_mean3 END,
     word_mean4 = CASE WHEN ? IS NOT NULL THEN ? ELSE word_mean4 END,
     word_mean5 = CASE WHEN ? IS NOT NULL THEN ? ELSE word_mean5 END
-  WHERE word_id = ?;
+  WHERE word_id = ? AND word_category = ?;
   `;
   const values = [
     updatedData.word, updatedData.word,
@@ -554,8 +556,9 @@ router.post('/update_word_change', (req, res) => {
     updatedData.word_mean3, updatedData.word_mean3,
     updatedData.word_mean4, updatedData.word_mean4,
     updatedData.word_mean5, updatedData.word_mean5,
-    updatedData.word_id
+    updatedData.word_id, updatedData.word_category
   ];
+  console.log(updatedData, 'Executing SQL Query:', updateQuery, 'with values:', values);
 
   db.query(updateQuery, values, (error, result) => {
     if (error)
@@ -822,12 +825,12 @@ router.post('/search_classification', (req, res) => {
   {
     if(classification_category === 'select' || classification_category === '')
     {
-      sql = `SELECT * FROM word_category ORDER BY word_id LIMIT 15 OFFSET ${offset};`;
+      sql = `SELECT * FROM word_category LIMIT 15 OFFSET ${offset};`;
       countSql = `SELECT COUNT(*) as totalCount FROM word_category;`;
     }
     else
     {
-      sql = `SELECT * FROM word_category WHERE major_name = '${classification_category}' ORDER BY word_id LIMIT 15 OFFSET ${offset};`;
+      sql = `SELECT * FROM word_category WHERE major_name = '${classification_category}' LIMIT 15 OFFSET ${offset};`;
       countSql = `SELECT COUNT(*) as totalCount FROM word_category WHERE major_name = '${classification_category}';`
     }
   }
@@ -900,12 +903,9 @@ router.post('/add_classification', async (req, res) => {
   {
     const table = "classification_list";
     try
-    {
-      const maxId = await getMaxId({table});
-      const newClassificationId = maxId + 1;
-  
-      const sql = `INSERT INTO ${table} VALUES (?, ?, 0, ?)`;
-      const values = [newClassificationId, classification, major];
+    { 
+      const sql = `INSERT INTO ${table} VALUES (?, 0, ?)`;
+      const values = [classification, major];
   
       await db.execute(sql, values);
       res.status(200).json({ message: '문제분류를 등록하였습니다.' });
@@ -921,11 +921,8 @@ router.post('/add_classification', async (req, res) => {
     const table = "word_category";
     try
     {
-      const maxId = await getMaxId({table});
-      const newClassificationId = maxId + 1;
-  
-      const sql = `INSERT INTO ${table} VALUES (?, ?, 0, ?)`;
-      const values = [newClassificationId, classification, major];
+      const sql = `INSERT INTO ${table} VALUES (?, 0, ?)`;
+      const values = [classification, major];
   
       await db.execute(sql, values);
 
@@ -951,12 +948,12 @@ router.post('/delete_classification', async (req, res) => {
   if(formType === "exam")
   {
     target_table = "classification_list";
-    change_row = "classification_id";
+    change_row = "classification_name";
   }
   else if(formType === "word")
   {
     target_table = "word_category";
-    change_row = "word_id";
+    change_row = "word_category";
   }
 
   const sql = `DELETE FROM ${target_table} WHERE ${change_row} IN (${target_group});`;
@@ -964,12 +961,6 @@ router.post('/delete_classification', async (req, res) => {
   try
   {
     await db.execute(sql, target);
-    const setSql = 'SET @row_number := 0;';
-    const updateSql = `UPDATE ${target_table} SET ${change_row} = (@row_number := @row_number + 1);`;
-
-    await db.execute(setSql);
-    await db.execute(updateSql);
-
     res.status(200).json({ message: '문제분류를 삭제하였습니다.' });
   }
   catch (error) 

@@ -150,10 +150,13 @@ const ManagementExamForm = ({selectedCategory}) => {
           <tbody>
               {Array.from({ length: Math.min(result.length, 15) }, (_, i) => (
                 <tr key={result[i].exam_id}>
-                  <td><input
+                  <td>
+                    <input
                     type="checkbox"
                     onChange={(event) => handleCheckboxChange(event, result[i].exam_id)}
-                  /></td>
+                    checked={checkedRows.includes(result[i].exam_id)}
+                  />
+                  </td>
                   <td>{result[i].exam_id}</td>
                   <td>{result[i].school_list_school_name}</td>
                   <td>{result[i].semester}</td>
