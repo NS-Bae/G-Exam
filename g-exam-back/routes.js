@@ -424,7 +424,6 @@ router.post('/save_word', async (req, res) => {
     if(exist)//기존 태그가 존재하는경우
     {
       const maxNnumber = await getLastNumber(target_table, selectedClassification) + 1;
-      console.log("마지막일껄",maxNnumber);
 
       for (let i = 0; i < wordSave.length; i++) 
       {
@@ -721,76 +720,170 @@ router.post('/regist_pre_exam', async (req, res) => {
 });
 
 router.post('/search_exam', (req, res) => {
-  const form = req.body;
-  const major = `pre_exam_${convertKorean(req.body.selectedCategory)}`;
-  const search = form.search;
-  const offset = form.offset;
-  
+  const type = req.body.type;
+  const search = req.body.search;
+  const offset = req.body.offset;
+
   let sql;
   let countSql;
-  
-  if (search === undefined) {
-    sql = `SELECT exam_id, school_list_school_name, semester FROM ${major} LIMIT 10 OFFSET ${offset};`;
-    countSql = `SELECT COUNT(*) as totalCount FROM ${major};`;
-  } else {
-    sql = `SELECT exam_id, school_list_school_name, semester FROM ${major} WHERE exam_id LIKE '%${search}%' LIMIT 10 OFFSET ${offset};`;
-    countSql = `SELECT COUNT(*) as totalCount FROM ${major} WHERE exam_id LIKE '%${search}%';`;
-  }
-
-  db.query(countSql, (countErr, countResult) => {
-    if (countErr) {
-      console.log(countErr);
-      res.status(500).json({ error: '' });
-    } else {
-      const totalCount = countResult[0].totalCount;
-
-      db.query(sql, (err, result) => {
-        if (err) {
-          console.log(err);
-          res.status(500).json({ error: '' });
-        } else {
-          res.status(200).json({ data: result, totalCount });
-        }
-      });
+  if(type === "workbook")
+  {
+    const major = `workbook_${convertKorean(req.body.selectedCategory)}`;
+    
+    if (search === 'select' || search === undefined || search === '') 
+    {
+      sql = `SELECT classification_name, exam_id, type FROM ${major} LIMIT 10 OFFSET ${offset};`;
+      countSql = `SELECT COUNT(*) as totalCount FROM ${major};`;
+    } 
+    else 
+    {
+      sql = `SELECT classification_name, exam_id, type FROM ${major} WHERE classification_name = '${search}' LIMIT 10 OFFSET ${offset};`;
+      countSql = `SELECT COUNT(*) as totalCount FROM ${major} WHERE classification_name = '${search}';`;
     }
-  });
+    db.query(countSql, (countErr, countResult) => {
+      if (countErr) {
+        console.log(countErr);
+        res.status(500).json({ error: '' });
+      } else {
+        const totalCount = countResult[0].totalCount;
+  
+        db.query(sql, (err, result) => {
+          if (err) {
+            console.log(err);
+            res.status(500).json({ error: '' });
+          } else {
+            res.status(200).json({ data: result, totalCount });
+          }
+        });
+      }
+    });
+  }
+  else if(type === "pre_exam")
+  {
+    const major = `pre_exam_${convertKorean(req.body.selectedCategory)}`;
+    
+    if (search === undefined) 
+    {
+      sql = `SELECT exam_id, school_list_school_name, semester FROM ${major} LIMIT 10 OFFSET ${offset};`;
+      countSql = `SELECT COUNT(*) as totalCount FROM ${major};`;
+    } 
+    else 
+    {
+      sql = `SELECT exam_id, school_list_school_name, semester FROM ${major} WHERE exam_id LIKE '%${search}%' LIMIT 10 OFFSET ${offset};`;
+      countSql = `SELECT COUNT(*) as totalCount FROM ${major} WHERE exam_id LIKE '%${search}%';`;
+    }
+    db.query(countSql, (countErr, countResult) => {
+      if (countErr) {
+        console.log(countErr);
+        res.status(500).json({ error: '' });
+      } else {
+        const totalCount = countResult[0].totalCount;
+  
+        db.query(sql, (err, result) => {
+          if (err) {
+            console.log(err);
+            res.status(500).json({ error: '' });
+          } else {
+            res.status(200).json({ data: result, totalCount });
+          }
+        });
+      }
+    });
+  }
+  else
+  {
+    return null;
+  }
 });
 
 router.post('/delete_exam', async (req, res) => {
-  const form = req.body;
-  const target = form.selectedRows;
-  const target_table = `pre_exam_${convertKorean(req.body.selectedCategory)}`;
-
-  const target_group = target.map(() => '?').join(', ');
-  const delete_query = `DELETE FROM ${target_table} WHERE exam_id IN (${target_group});`;
-
-  try 
+  const type = req.body.type;
+  if(type === 'workbook')
   {
-    const [result] = await db.promise().query(delete_query, target);
-    res.status(200).json({ message: 'Rows updated successfully' });
-  } 
-  catch (error) 
+    const selectedRows = req.body.selectedRows;
+    const selectedCategory = `workbook_${convertKorean(req.body.selectedCategory)}`;
+    console.log(selectedCategory, 'aa', selectedRows);
+
+    const placeholders = selectedRows.map(() => '(?, ?)').join(', ');
+    const sql = `DELETE FROM ${selectedCategory} WHERE (classification_name, exam_id) IN (${placeholders});`;
+    const compoundKeys = selectedRows.flatMap(({ examCatgory, examId }) => [examCatgory, examId]);
+
+    try 
+    {
+      const [result] = await db.promise().query(sql, compoundKeys);
+      res.status(200).json({ message: 'Rows deleted successfully' });
+    } 
+    catch (error) 
+    {
+      console.error('Error executing query:', error);
+      res.status(500).json({ error: 'Error executing query' });
+    }
+  }
+  else if(type === 'pre_exam')
   {
-    console.error('Error executing query:', error);
-    res.status(500).json({ error: 'Error executing query' });
+    const form = req.body;
+    const target = form.selectedRows;
+    const target_table = `pre_exam_${convertKorean(req.body.selectedCategory)}`;
+
+    const target_group = target.map(() => '?').join(', ');
+    const delete_query = `DELETE FROM ${target_table} WHERE exam_id IN (${target_group});`;
+
+    try 
+    {
+      const [result] = await db.promise().query(delete_query, target);
+      res.status(200).json({ message: 'Rows updated successfully' });
+    } 
+    catch (error) 
+    {
+      console.error('Error executing query:', error);
+      res.status(500).json({ error: 'Error executing query' });
+    }
+  }
+  else
+  {
+    return null;
   }
 });
 
 router.post('/show_exam', async (req, res) => {
-  const form = req.body
+  const type = req.body.type;
   const selectedRows = req.body.selectedRows;
-  const selectedCategory = `pre_exam_${convertKorean(req.body.selectedCategory)}`;
+  if(type === 'workbook')
+  {
+    const selectedClassification = req.body.selectedClassification;
+    const target_table = `workbook_${convertKorean(req.body.selectedCategory)}`;
 
-  sql = `SELECT * FROM ${selectedCategory} WHERE exam_id = '${selectedRows}';`;
-  try 
+    sql = `SELECT * FROM ${target_table} WHERE exam_id = '${selectedRows}' AND classification_name = '${selectedClassification}';`;
+    try 
+    {
+      const [result] = await db.promise().query(sql);
+      res.status(200).json({ result });
+    } 
+    catch (error) 
+    {
+      console.error('Error executing query:', error);
+      res.status(500).json({ error: 'Error executing query' });
+    }
+  }
+  else if(type === 'pre_exam')
   {
-    const [result] = await db.promise().query(sql, selectedRows);
-    res.status(200).json({ result });
-  } 
-  catch (error) 
+    const selectedCategory = `pre_exam_${convertKorean(req.body.selectedCategory)}`;
+
+    sql = `SELECT * FROM ${selectedCategory} WHERE exam_id = '${selectedRows}';`;
+    try 
+    {
+      const [result] = await db.promise().query(sql, selectedRows);
+      res.status(200).json({ result });
+    } 
+    catch (error) 
+    {
+      console.error('Error executing query:', error);
+      res.status(500).json({ error: 'Error executing query' });
+    }
+  }
+  else
   {
-    console.error('Error executing query:', error);
-    res.status(500).json({ error: 'Error executing query' });
+    return null;
   }
 });
 
@@ -1019,5 +1112,58 @@ router.post('/get_classification', (req, res) => {
   });
 });
 
+async function getNumber(classification, target_table) {
+  return new Promise((resolve, reject) => {
+    const sql = `SELECT MAX(exam_id) AS maxNumber FROM ${target_table} WHERE classification_name = ?;`;
+    const params = [classification];
+
+    db.query(sql, params, function (err, rows) {
+      if (err) 
+      {
+        console.error('최신 번호 가져오기 오류:', err);
+        reject('최신 번호 가져오기 오류');
+      } 
+      else
+      {
+        const lastNumber = rows[0].maxNumber || 0;
+        resolve(lastNumber);
+      }
+    });
+  });
+};
+
+router.post('/regist_workbook_exam', async (req, res) => {
+  const formData = req.body.formData;
+  const examMajor = req.body.selectedExamMajor;
+  const classification = req.body.selectedClassification;
+  const type = formData.type;
+  const paragraph = formData.paragraph || null;
+  const question = formData.question || null;
+  const image = formData.image || null;
+  const choice1 = formData.choice1 || null;
+  const choice2 = formData.choice2 || null;
+  const choice3 = formData.choice3 || null;
+  const choice4 = formData.choice4 || null;
+  const choice5 = formData.choice5 || null;
+  const answer = formData.answer || null;
+  const target_table = `workbook_${convertKorean(examMajor)}`
+
+  const problem_number = await getNumber(classification, target_table);
+  
+  console.log(formData, 'aa', examMajor, 'aa', classification, 'aa', target_table, 'aa', problem_number);
+  try
+  {
+    const regist_query = `INSERT INTO ${target_table} VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+    const values = [classification, problem_number + 1, type, paragraph, image, question, choice1, choice2, choice3, choice4, choice5, answer];
+    await db.execute(regist_query, values);
+
+    res.status(200).json({ message: '시험문제를 등록하였습니다.' });
+  } 
+  catch (error) 
+  {
+    console.error('시험문제 등록 오류:', error);
+    throw error;
+  }
+});
 
 module.exports = router;

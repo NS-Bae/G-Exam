@@ -7,6 +7,7 @@ import RegistWordForm from "./RegistWordForm"
 import RegistWorkbookForm from "./RegistWorkbookForm";
 import ManagementExamForm from './ManagementExamFrom';
 import ManagementWordForm from './ManagementWordForm';
+import ManagementWorkbookForm from './ManagementWorkbookForm';
 
 
 function Main()
@@ -65,7 +66,7 @@ function ChoiceForm1 () {
     {
       if(selectedExamCategory === 'workbook')
       {
-
+        return isConfirmButtonClicked && <ManagementWorkbookForm />;
       }
       else if(selectedExamCategory === 'pre_exam')
       {

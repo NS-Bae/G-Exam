@@ -72,16 +72,18 @@ const ManagementExamForm = ({selectedCategory}) => {
 
   const handleDeleteButton = () => {
     const confirmation = window.confirm('선택된 시험문제를 삭제하시겠습니까?');
-    fetch('/delete_exam', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        selectedRows: checkedRows,
-        selectedCategory: selectedCategory,
-      }),
-    })
+    if(confirmation)
+    {
+      fetch('/delete_exam', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          selectedRows: checkedRows,
+          selectedCategory: selectedCategory,
+        }),
+      })
       .then((response) => {
         if (!response.ok) {
           throw new Error(`Network response was not ok, status: ${response.status}`);
@@ -96,6 +98,7 @@ const ManagementExamForm = ({selectedCategory}) => {
       .catch((error) => {
         console.error('Error during fetch operation:', error);
       });
+    }
   };
 
   useEffect(() => {
