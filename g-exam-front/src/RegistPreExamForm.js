@@ -7,7 +7,7 @@ import ImgPreview from './ImagePreview';
 import ReactDOMServer from 'react-dom/client';
 
 const RegistForm = ({selectedCategory}) => {
-    const[schoolsList, setSchoolsList] = useState([]);
+    const [schoolsList, setSchoolsList] = useState([]);
     const [selectedType, setSelectedType] = useState('');
     const [selectedSchooltype, setSelectedSchoolType] = useState('');
 
@@ -65,33 +65,7 @@ const RegistForm = ({selectedCategory}) => {
         })
         .catch((error) => console.error('학교 목록 불러오기 오류:', error));
     };
-    const GradeSelector = ({ value, onChange, schoolType }) => {
-      return (
-          <div className="insert_tag">
-              <h3>학년</h3>
-              <select id='grade' value={value} onChange={onChange}>
-                  <option value="select">선택하세요</option>
-                  {schoolType === '초등' && (
-                      <>
-                          <option value="1">1학년</option>
-                          <option value="2">2학년</option>
-                          <option value="3">3학년</option>
-                          <option value="4">4학년</option>
-                          <option value="5">5학년</option>
-                          <option value="6">6학년</option>
-                      </>
-                  )}
-                  {(schoolType === '중등' || schoolType === '고등') && (
-                      <>
-                          <option value="1">1학년</option>
-                          <option value="2">2학년</option>
-                          <option value="3">3학년</option>
-                      </>
-                  )}
-              </select>
-          </div>
-      );
-    };
+    
     const ImageUploadComponent = () => {
         const [image, setImage] = useState('');
       
@@ -202,59 +176,9 @@ const RegistForm = ({selectedCategory}) => {
             });
     }
 
-    return (
-      <div className='place'>
-        <form onSubmit={handleSubmit}>
-          <div className="upper_button_place">
-            <div className="insert_tag">
-              <h3>년도</h3>
-              <input type="text" id = 'year' placeholder="년도" value={formData.year} onChange={handleInputChange}></input>
-            </div>
-            <div className="insert_tag">
-              <h3>학교</h3>
-              <div className='small_select_place'>
-                <select id='school_grade' onChange={handleSchoolTypeChange}>
-                  <option value={'select'}>선택하세요</option>
-                  <option value={'초등'}>초등학교</option>
-                  <option value={'중등'}>중학교</option>
-                  <option value={'고등'}>고등학교</option>
-                </select>
-                <select id="school_details" value={formData.schoolDetails} onChange={handleInputChange}>
-                  <option value={'select'}>선택하세요</option>
-                  {schoolsList.map((schoolOption, index) => (
-                  <option key={index} value={schoolOption.school_name}>
-                      {schoolOption.school_name}
-                  </option>
-                  ))}
-                </select>
-              </div>
-            </div>
-            <GradeSelector value={formData.grade} onChange={handleInputChange} schoolType={selectedSchooltype} />
-            <div className="insert_tag">
-              <h3>학기</h3>
-              <select id="semester" value={formData.semester} onChange={handleInputChange}>
-                <option value="select">선택하세요</option>
-                <option value="1">1학기</option>
-                <option value="2">2학기</option>
-              </select>
-            </div>
-            <div className="insert_tag">
-              <h3>시기</h3>
-              <select id="period" value={formData.period} onChange={handleInputChange}>
-                <option value="select">선택하세요</option>
-                <option value="중간">중간고사</option>
-                <option value="기말">기말고사</option>
-              </select>
-            </div>
-            <div className="insert_tag">
-              <h3>유형</h3>
-              <select id='type' value={formData.type} onChange={handleTypeChange}>
-                <option value={'select'}>선택하세요</option>
-                <option value={'객관식'}>객관식</option>
-                <option value={'주관식'}>주관식</option>
-              </select>
-            </div>
-        </div>
+  return (
+    <div className='place'>
+      <form onSubmit={handleSubmit}>
         <ImageUploadComponent />
         <div className="question_sub">
           <div className="paragraph_area">
@@ -296,9 +220,9 @@ const RegistForm = ({selectedCategory}) => {
           <button type = 'submit' className="letter_btn" onClick={handleSubmit}>등록</button>
           <button type = 'button' className="letter_btn" onClick={openNewWindow}>OCR하러가기</button>
         </div>
-        </form>
-      </div>
-    );
+      </form>
+    </div>
+  );
 };
   
 export default RegistForm;

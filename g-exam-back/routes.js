@@ -927,6 +927,19 @@ router.post('/search_classification', (req, res) => {
       countSql = `SELECT COUNT(*) as totalCount FROM word_category WHERE major_name = '${classification_category}';`
     }
   }
+  else if(formType === "pre_exam")
+  {
+    if(classification_category === 'select' || classification_category === '')
+    {
+      sql = `SELECT * FROM pre_exam_classification_list LIMIT 15 OFFSET ${offset};`;
+      countSql = `SELECT COUNT(*) as totalCount FROM pre_exam_classification_list;`;
+    }
+    else
+    {
+      sql = `SELECT * FROM pre_exam_classification_list WHERE major_name = '${classification_category}' LIMIT 15 OFFSET ${offset};`;
+      countSql = `SELECT COUNT(*) as totalCount FROM pre_exam_classification_list WHERE major_name = '${classification_category}';`
+    }
+  }
 
   db.query(countSql, (countErr, countResult) => {
     if (countErr) 
@@ -1028,6 +1041,37 @@ router.post('/add_classification', async (req, res) => {
       res.status(500).json({ error: 'Internal Server Error' });
     } 
   }
+  else if(formType === "pre_exam")
+  {
+    const table = "pre_exam_classification_list";
+    const formData = req.body.formData;
+    const formType = req.body.form_type;
+    const classificationForm = `${formData.year}_${formData.school_details}_${formData.grade}_${formData.major}_${formData.semester}_${formData.period}`;
+    let addTagClassification;    
+    const sql = `INSERT INTO ${table} VALUES (?, 0, ?)`;
+    let values;
+
+    if(formData.tag === '')
+    {
+      values = [classificationForm, formData.major];
+    }
+    else
+    {
+      addTagClassification = `${classificationForm} ${formData.tag}`;
+      values = [addTagClassification, formData.major];
+    }
+   
+    try
+    {
+      await db.execute(sql, values);
+      res.status(200).json({ message: '문제분류를 등록하였습니다.' });
+    }
+    catch (error) 
+    {
+      console.error('문제분류 등록 오류:', error);
+      res.status(500).json({ error: 'Internal Server Error' });
+    } 
+  }
 });
 
 router.post('/delete_classification', async (req, res) => {
@@ -1047,6 +1091,11 @@ router.post('/delete_classification', async (req, res) => {
   {
     target_table = "word_category";
     change_row = "word_category";
+  }
+  else if(formType === 'pre_exam')
+  {
+    target_table = "pre_exam_classification_list";
+    change_row = "classification_name";
   }
 
   const sql = `DELETE FROM ${target_table} WHERE ${change_row} IN (${target_group});`;
