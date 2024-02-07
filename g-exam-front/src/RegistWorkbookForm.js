@@ -62,15 +62,14 @@ function WorkbookChoiceForm()
   useEffect(() => {
     const fatchTag = async () => {
       try {
-        const response = await fetch('/search_classification', {
+        const response = await fetch('/get_classification', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
             form_type:"exam",
-            selectedCategory: selectedExamMajor,
-            offset: 0,
+            selectedMajor: selectedExamMajor,
           }),
         });
   
@@ -254,9 +253,9 @@ function WorkbookChoiceForm()
           ))}
         </select>
         <select id='type' value={formData.type} onChange={handleTypeChange}>
-            <option value={'select'}>유형</option>
-            <option value={'객관식'}>객관식</option>
-            <option value={'주관식'}>주관식</option>
+          <option value={'select'}>유형</option>
+          <option value={'객관식'}>객관식</option>
+          <option value={'주관식'}>주관식</option>
         </select>
         <button className='letter_btn' type='button' onClick={handleFirstConfirmButtonClick}>
           확인

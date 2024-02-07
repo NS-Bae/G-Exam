@@ -23,7 +23,7 @@ function RegistForm({ onChangeFormBackClick })
           },
           body: JSON.stringify({
             form_type,
-            selectedMajor,
+            selectedMajor: selectedMajor,
           }),
         })
         .then((response) => {

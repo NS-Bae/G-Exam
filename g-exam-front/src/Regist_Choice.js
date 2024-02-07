@@ -24,11 +24,11 @@ function ChoiceForm1 () {
   const [isConfirmButtonClicked, setConfirmButtonClicked] = useState(false);
 
   const handleFirstConfirmButtonClick = () => {
-    setConfirmButtonClicked(true);
+    setConfirmButtonClicked(true);/* 
     if(selectedExamMajor === '' && selectedExamCategory === 'pre_exam')
     {
       alert("과목을 골라주세요");
-    }
+    } */
   };
 
   const handleExamCategoryChange = (e) => {
@@ -48,10 +48,7 @@ function ChoiceForm1 () {
       }
       else if(selectedExamCategory === 'pre_exam')
       {
-        if(selectedExamMajor !== '')
-        {
-          return isConfirmButtonClicked && <PreExamChoiceForm selectedExamMajor={selectedExamMajor} />;
-        }
+          return isConfirmButtonClicked && <PreExamChoiceForm />;
       }
       else if(selectedExamCategory === 'word')
       {
@@ -80,32 +77,6 @@ function ChoiceForm1 () {
       {
         return null;
       }
-    }
-  };
-
-  const renderChoice1 = () => {
-    const handleMajorListChange = (e) => { 
-      const selectedMajor = e.target.value;
-      setSelectedExamMajor(selectedMajor);
-      console.log(selectedMajor);    
-    };
-    if(selectedExamCategory === 'pre_exam')
-    {
-      return(
-        <select
-          id='majorcategory'
-          onChange={handleMajorListChange}
-          value={selectedExamMajor}
-        >
-            <option value={''}>과목</option>
-            <option value={'국어'}>국어</option>
-            <option value={'영어'}>영어</option>
-            <option value={'수학'}>수학</option>
-            <option value={'사회'}>사회</option>
-            <option value={'과학'}>과학</option>
-            <option value={'기타'}>기타</option>
-        </select>
-      );
     }
   };
 
@@ -139,7 +110,6 @@ function ChoiceForm1 () {
               <option value={'등록'}>등록하기</option>
               <option value={'관리'}>관리하기</option>
           </select>
-          {(renderChoice1())}
           <button className='letter_btn' type='button' onClick={handleFirstConfirmButtonClick}>
             확인
           </button>

@@ -471,7 +471,7 @@ router.post('/save_word', async (req, res) => {
     res.status(500).json({ message: 'Error saving new words' });
   }
 });
-//변경 불필요.
+//변경 불필요. 태그 혹은 과목으로 등록된 모든 단어/문제 가져오기
 router.post('/search_table', (req, res) => {
   const { selectedClassification, selectedMajor, offset } = req.body;
   const target_table = `word_${convertKorean(selectedMajor)}`;
@@ -665,7 +665,7 @@ async function checkExamid(exam_id_pre, major)
   }
 }
 //변경 불필요.
-router.post('/regist_pre_exam', async (req, res) => {
+/* router.post('/regist_pre_exam', async (req, res) => {
   try
   {
     const formData = req.body.formData;
@@ -717,7 +717,7 @@ router.post('/regist_pre_exam', async (req, res) => {
     console.error('시험문제 등록 오류:', error);
     throw error;
   }
-});
+}); */
 
 router.post('/search_exam', (req, res) => {
   const type = req.body.type;
@@ -1046,7 +1046,7 @@ router.post('/add_classification', async (req, res) => {
     const table = "pre_exam_classification_list";
     const formData = req.body.formData;
     const formType = req.body.form_type;
-    const classificationForm = `${formData.year}_${formData.school_details}_${formData.grade}_${formData.major}_${formData.semester}_${formData.period}`;
+    const classificationForm = `${formData.year}_${formData.school_details}_${formData.major}_${formData.grade}학년_${formData.semester}학기_${formData.period}고사`;
     let addTagClassification;    
     const sql = `INSERT INTO ${table} VALUES (?, 0, ?)`;
     let values;
@@ -1132,33 +1132,78 @@ router.get('/get_majorlist', (req, res) => {
 router.post('/get_classification', (req, res) => {
   const formType = req.body.form_type;
   const selectedMajor = req.body.selectedMajor;
+  const detail_school = req.body.detail;
   let target_table;
   let target_row;
+  let sql;
+
+  console.log(formType, selectedMajor);
 
   if(formType === "exam")
   {
     target_table = "classification_list";
     target_row = "classification_name";
+    
+    sql = `SELECT ${target_row} FROM ${target_table} WHERE major_name = '${selectedMajor}';`;
+    
+    db.query(sql, (err, result) => {
+      if (err) 
+      {
+        console.log(err);
+        res.status(500).json({ error: '' });
+      } 
+      else 
+      {
+        console.log(result);
+        res.status(200).json({ data: result });
+      }
+    });
   }
   else if(formType === "word")
   {
     target_table = "word_category";
     target_row = "word_category";
+    
+    sql = `SELECT ${target_row} FROM ${target_table} WHERE major_name = '${selectedMajor}';`;
+    
+    db.query(sql, (err, result) => {
+      if (err) 
+      {
+        console.log(err);
+        res.status(500).json({ error: '' });
+      } 
+      else 
+      {
+        console.log(result);
+        res.status(200).json({ data: result });
+      }
+    });
   }
+  else if(formType === "pre_exam")
+  {
+    console.log(detail_school, 'ss');
+    target_table = "pre_exam_classification_list";
+    target_row = "classification_name";
 
-  const sql = `SELECT ${target_row} FROM ${target_table} WHERE major_name = '${selectedMajor}';`;
-
-  db.query(sql, (err, result) => {
-    if (err) 
-    {
-      console.log(err);
-      res.status(500).json({ error: '' });
-    } 
-    else 
-    {
-      res.status(200).json({ data: result });
-    }
-  });
+    sql = `SELECT ${target_row} FROM ${target_table} WHERE major_name = '${selectedMajor}' AND classification_name LIKE '%${detail_school}%';`;
+    
+    db.query(sql, (err, result) => {
+      if (err) 
+      {
+        console.log(err);
+        res.status(500).json({ error: '' });
+      } 
+      else 
+      {
+        console.log(result);
+        res.status(200).json({ data: result });
+      }
+    });
+  }
+  else
+  {
+    return null;
+  }
 });
 
 async function getNumber(classification, target_table) {
@@ -1199,7 +1244,6 @@ router.post('/regist_workbook_exam', async (req, res) => {
 
   const problem_number = await getNumber(classification, target_table);
   
-  console.log(formData, 'aa', examMajor, 'aa', classification, 'aa', target_table, 'aa', problem_number);
   try
   {
     const regist_query = `INSERT INTO ${target_table} VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
@@ -1214,5 +1258,31 @@ router.post('/regist_workbook_exam', async (req, res) => {
     throw error;
   }
 });
+
+router.post('/regist_pre_exam', async (req, res) => {
+  const classification = req.body.selectedClassification;
+  const major = req.body.selectedExamMajor;
+  const formData = req.body.formData;
+  const target_table = `pre_exam_${convertKorean(major)}`
+
+  const problem_number = await getNumber(classification, target_table);
+
+  console.log(classification, '4', major, '5', formData, '6', target_table, '7', problem_number);
+
+  try
+  {
+    const regist_query = `INSERT INTO ${target_table} VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+    const values = [classification, problem_number + 1, major, formData.school_details, formData.type, formData.paragraph, formData.image, formData.question, formData.choice1, formData.choice2, formData.choice3, formData.choice4, formData.choice5, formData.answer];
+    await db.execute(regist_query, values);
+
+    res.status(200).json({ message: '시험문제를 등록하였습니다.' });
+  } 
+  catch (error) 
+  {
+    console.error('시험문제 등록 오류:', error);
+    throw error;
+  }
+
+}); 
 
 module.exports = router;

@@ -155,7 +155,7 @@
   }
   .small_select_place
   {
-    width: 100%;
+    width: auto;
     height: auto;
     display: flex;
     flex-direction: column;
@@ -426,6 +426,23 @@
   {
     font-size: 0.9rem !important;
   }
+  .long_selection
+  {
+    width: 80%;
+    text-align: center;
+    font-weight: bolder;
+    font-size: 1rem;
+    border-radius: 5px;
+    margin-top: 2%;
+  }
+  .normal_selection
+  {
+    width: 100%;
+    text-align: center;
+    font-weight: bolder;
+    font-size: 1rem;
+    border-radius: 5px;
+  }
   .upper_button_place
   {
     width: 100%;
@@ -564,7 +581,9 @@
   }
   .insert_tag
   {
-    width: 22%;
+    min-width: 22%;
+    max-width: 34%;
+    width: auto;
     text-align: center;
     padding-left: 5px;
     padding-right: 5px;
