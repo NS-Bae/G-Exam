@@ -96,14 +96,14 @@ function ManagementWordForm()
 
   const handleConfirmButtonClick = () => {
     if (!selectedMajor || selectedMajor === "select") {
-      alert('올바른 단어 태그와 레벨을 선택하세요.');
+      alert('올바른 단어 과목을 선택하세요.');
       return;
     }
     fetchData(1);
   };
   // 삭제기능
   const handleDeleteButton = () => {
-    const confirmation = window.confirm('정말로 영단어를 삭제하시겠습니까?');
+    const confirmation = window.confirm('정말로 단어를 삭제하시겠습니까?');
     if(confirmation)
     {
       fetch('/delete_word', {
@@ -124,7 +124,7 @@ function ManagementWordForm()
       })
       .then((data) => {
         console.log('Response data:', data);
-        alert("영단어를 삭제하였습니다");
+        alert("단어를 삭제하였습니다");
         fetchData(1);
       })
       .catch((error) => {
@@ -201,7 +201,7 @@ function ManagementWordForm()
           확인
           </button>
       </div>
-      <p>문제태그 미선택시 전체 영단어가 조회됩니다.</p>
+      <p>문제태그 미선택시 과목별 전체 단어가 조회됩니다.</p>
       <table className='third_table'>
           <thead>
           <tr>

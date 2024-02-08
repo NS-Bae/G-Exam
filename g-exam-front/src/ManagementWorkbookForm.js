@@ -46,15 +46,14 @@ const ManagementWorkbookForm = ({selectedCategory}) => {
   useEffect(() => {
     const fatchTag = async () => {
       try {
-        const response = await fetch('/search_classification', {
+        const response = await fetch('/get_classification', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
             form_type:"exam",
-            selectedCategory: selectedExamMajor,
-            offset: 0,
+            selectedMajor: selectedExamMajor,
           }),
         });
   
@@ -116,13 +115,15 @@ const ManagementWorkbookForm = ({selectedCategory}) => {
     const selectedMajor = e.target.value;
     setSelectedExamMajor(selectedMajor);
   };
-
   const handleFirstConfirmButtonClick = () => {
+    if (!selectedExamMajor || selectedExamMajor === "select") 
+    {
+      alert('올바른 과목을 선택하세요.');
+      return;
+    }
     setConfirmButtonClicked(true);
-    console.log(selectedExamMajor, selectedClassification);
     fetchData(1);
   };
-
   const handleCheckboxChange = (event, examCatgory, examId) => {
     const isChecked = event.target.checked;
     if (isChecked) 
@@ -178,13 +179,11 @@ const ManagementWorkbookForm = ({selectedCategory}) => {
     setModalExamId(examId);
     setModalIsOpen(true);
   };
-
   const closeModal = () => {
     setModalIsOpen(false);
     setModalExamId(null);
     fetchData(1);
   };
-
   const renderModalContent = () => {
     return (
       <UpdateWorkbookModal
@@ -245,8 +244,7 @@ const ManagementWorkbookForm = ({selectedCategory}) => {
                   <td>
                     <input
                     type="checkbox"
-                    onChange={(event) => handleCheckboxChange(event, result[i].classification_name, result[i].exam_id)}/* 
-                    checked={checkedRows.includes(result[i].classification_name, result[i].exam_id)} */
+                    onChange={(event) => handleCheckboxChange(event, result[i].classification_name, result[i].exam_id)}
                   />
                   </td>
                   <td>{result[i].classification_name}</td>

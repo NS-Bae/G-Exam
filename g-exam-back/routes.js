@@ -664,60 +664,6 @@ async function checkExamid(exam_id_pre, major)
     throw error;
   }
 }
-//변경 불필요.
-/* router.post('/regist_pre_exam', async (req, res) => {
-  try
-  {
-    const formData = req.body.formData;
-    const year = formData.year;
-    const school_details = formData.school_details;
-    const grade = formData.grade;
-    const selectedCategory = formData.selectedCategory;
-    const major = `pre_exam_${convertKorean(formData.selectedCategory)}`;
-    const semester = formData.semester;
-    const period = formData.period;
-    const type = formData.type;
-    const paragraph = formData.paragraph || null;
-    const question = formData.question || null;
-    const choice1 = formData.choice1 || null;
-    const choice2 = formData.choice2 || null;
-    const choice3 = formData.choice3 || null;
-    const choice4 = formData.choice4 || null;
-    const choice5 = formData.choice5 || null;
-    const answer = formData.answer || null;
-
-    if (formData.selectedCategory !== "") {
-      const exam_id_pre = `${year}_${school_details}_${selectedCategory}_${grade}학년_${semester}학기_${period}_${type}`;
-      const total_semester = `${grade}_${semester}_${period}`;
-      
-      const existExamId = await checkExamid(exam_id_pre, major);
-      let lastNumber = 0;
-      let newNumber;
-
-      if(!existExamId)
-      {
-        newNumber = (lastNumber + 1).toString().padStart(3, '0');
-      }
-      else
-      {
-        lastNumber = await findExamidNumber(exam_id_pre, major);
-        newNumber = (lastNumber + 1).toString().padStart(3, '0');
-      }
-      let exam_id = `${exam_id_pre}_${newNumber}`;
-
-      const regist_query = `INSERT INTO ${major} VALUES (?, ?, ?, ?, ?, ?, null, ?, ?, ?, ?, ?, ?, ?)`
-      const values = [exam_id, selectedCategory, school_details, total_semester, type, paragraph, question, choice1, choice2, choice3, choice4, choice5, answer];
-
-      await db.execute(regist_query, values);
-    }
-    res.status(200).json({ message: '시험문제를 등록하였습니다.' });
-  }
-  catch (error) 
-  {
-    console.error('시험문제 등록 오류:', error);
-    throw error;
-  }
-}); */
 
 router.post('/search_exam', (req, res) => {
   const type = req.body.type;
@@ -725,7 +671,7 @@ router.post('/search_exam', (req, res) => {
   const offset = req.body.offset;
 
   let sql;
-  let countSql;
+  let countSql; 
   if(type === "workbook")
   {
     const major = `workbook_${convertKorean(req.body.selectedCategory)}`;
@@ -762,15 +708,15 @@ router.post('/search_exam', (req, res) => {
   {
     const major = `pre_exam_${convertKorean(req.body.selectedCategory)}`;
     
-    if (search === undefined) 
+    if (search === 'select' || search === '') 
     {
-      sql = `SELECT exam_id, school_list_school_name, semester FROM ${major} LIMIT 10 OFFSET ${offset};`;
+      sql = `SELECT classification_name, exam_id, type FROM ${major} LIMIT 10 OFFSET ${offset};`;
       countSql = `SELECT COUNT(*) as totalCount FROM ${major};`;
     } 
     else 
     {
-      sql = `SELECT exam_id, school_list_school_name, semester FROM ${major} WHERE exam_id LIKE '%${search}%' LIMIT 10 OFFSET ${offset};`;
-      countSql = `SELECT COUNT(*) as totalCount FROM ${major} WHERE exam_id LIKE '%${search}%';`;
+      sql = `SELECT classification_name, exam_id, type FROM ${major} WHERE classification_name = '${search}' LIMIT 10 OFFSET ${offset};`;
+      countSql = `SELECT COUNT(*) as totalCount FROM ${major} WHERE classification_name = '${search}';`;
     }
     db.query(countSql, (countErr, countResult) => {
       if (countErr) {
@@ -821,17 +767,18 @@ router.post('/delete_exam', async (req, res) => {
   }
   else if(type === 'pre_exam')
   {
-    const form = req.body;
-    const target = form.selectedRows;
-    const target_table = `pre_exam_${convertKorean(req.body.selectedCategory)}`;
+    const selectedRows = req.body.selectedRows;
+    const selectedCategory = `pre_exam_${convertKorean(req.body.selectedCategory)}`;
+    console.log(selectedCategory, 'aa', selectedRows);
 
-    const target_group = target.map(() => '?').join(', ');
-    const delete_query = `DELETE FROM ${target_table} WHERE exam_id IN (${target_group});`;
+    const placeholders = selectedRows.map(() => '(?, ?)').join(', ');
+    const sql = `DELETE FROM ${selectedCategory} WHERE (classification_name, exam_id) IN (${placeholders});`;
+    const compoundKeys = selectedRows.flatMap(({ examCatgory, examId }) => [examCatgory, examId]);
 
     try 
     {
-      const [result] = await db.promise().query(delete_query, target);
-      res.status(200).json({ message: 'Rows updated successfully' });
+      const [result] = await db.promise().query(sql, compoundKeys);
+      res.status(200).json({ message: 'Rows deleted successfully' });
     } 
     catch (error) 
     {
@@ -888,9 +835,48 @@ router.post('/show_exam', async (req, res) => {
 });
 
 router.post('/update_exam', (req, res) => {
-  const {updatedData, selectedLevel} = req.body;
+  const newFormData = req.body.newFormData;
+  const type = req.body.type;
+  const classification = req.body.classification;
+  const examId = req.body.examId;
+  const major = req.body.major;
+  const setColumns = Object.keys(newFormData).map(column => `${column} = ?`).join(', ');
+  let target_table;
   
-   
+  if(type === 'workbook')
+  {
+    target_table = `workbook_${convertKorean(major)}`;
+  }
+  else if(type === 'pre_exam')
+  {
+    target_table = `pre_exam_${convertKorean(major)}`;
+  }
+  else
+  {
+    return null;
+  }
+  const updateQuery = `
+    UPDATE ${target_table}
+    SET
+      ${setColumns}
+    WHERE exam_id = ? AND classification_name = ?;
+  `;
+  const values = [...Object.values(newFormData), examId, classification];
+
+  console.log(setColumns, 'a', updateQuery, 'a', values);
+
+  db.query(updateQuery, values, (error, result) => {
+    if (error)
+    {
+      console.error('업데이트 쿼리 실핼중에 문제가 발생했습니다.', error);
+      res.status(500).json({ error : '업데이트에 실패했습니다.' });
+    }
+    else
+    {
+      console.log('업데이트에 성공했습니다.');
+      res.status(200).json({ message : '업데이트에 성공했습니다.' });
+    }
+  })
 });
 
 router.post('/search_classification', (req, res) => {
@@ -1185,7 +1171,14 @@ router.post('/get_classification', (req, res) => {
     target_table = "pre_exam_classification_list";
     target_row = "classification_name";
 
-    sql = `SELECT ${target_row} FROM ${target_table} WHERE major_name = '${selectedMajor}' AND classification_name LIKE '%${detail_school}%';`;
+    if(detail_school !== undefined)
+    {
+      sql = `SELECT ${target_row} FROM ${target_table} WHERE major_name = '${selectedMajor}' AND classification_name LIKE '%${detail_school}%';`;
+    }
+    else
+    {
+      sql = `SELECT ${target_row} FROM ${target_table} WHERE major_name = '${selectedMajor}';`;
+    }
     
     db.query(sql, (err, result) => {
       if (err) 

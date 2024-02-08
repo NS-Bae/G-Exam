@@ -9,12 +9,17 @@ const ManagementExamForm = ({selectedCategory}) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [totalCount, setTotalCount] = useState(0);
+  const [schoolDetail, setSchoolDetail] = useState('');
+  const [modalExamId, setModalExamId] = useState('');
+  const [selectedExamMajor, setSelectedExamMajor] = useState(''); // 기출문제용 과목 선택
+  const [selectedClassificationName, setSelectedClassificationName] = useState('');
+  const [selectedClassification, setSelectedClassification] = useState('select');
+  const [tagList, setTagList] = useState([]);
   const [result, setResult] = useState([]);
   const [checkedRows, setCheckedRows] = useState([]);
-  const [search, setSearch] = useState('');
+  const [isConfirmButtonClicked, setConfirmButtonClicked] = useState(false);
   const [modalIsOpen, setModalIsOpen] = useState(false);
-  const [modalExamId, setModalExamId] = useState('');
-
+  //
   const fetchData = (page) => {
     const itemsPerPage = 15; // 페이지당 아이템 수
     const offset = (page - 1) * itemsPerPage;
@@ -25,9 +30,10 @@ const ManagementExamForm = ({selectedCategory}) => {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        selectedCategory,
+        type: 'pre_exam',
+        selectedCategory: selectedExamMajor,
+        search: selectedClassification,
         offset,
-        search,
       }),
     })
       .then((response) => {
@@ -45,31 +51,63 @@ const ManagementExamForm = ({selectedCategory}) => {
         console.log('데이터 처리과정에서 문제가 발생하였습니다.', error);
       });
   };
+  //과목별 분류 불러오기
+  const fetchTag = async (major) => {
+    try {
+      const response = await fetch('/get_classification', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          form_type:"pre_exam",
+          selectedMajor: major,
+        }),
+      });
 
+      if (!response.ok)
+      {
+        throw new Error('tagList를 불러오지 못했습니다');
+      }
+      const data = await response.json();
+      setTagList(data.data);
+    } 
+    catch (error) 
+    {
+      console.error(error);
+    }
+  };
+
+  const handleMajorListChange = (e) => { 
+    const major = e.target.value
+    setSelectedExamMajor(e.target.value);
+    console.log(major);
+    fetchTag(major);    
+  };
+  const handleConfirmButtonClick = () =>{
+    if (!selectedExamMajor || selectedExamMajor === "select") 
+    {
+      alert('올바른 과목을 선택하세요.');
+      return;
+    }
+    setConfirmButtonClicked(true);
+    fetchData(1);
+  };
   const handlePageClick = (page) => {
     setCurrentPage(page);
     fetchData(page);
   };
-
-  const handleInputChange = (event) => {
-    setSearch(event.target.value);
-    console.log(event.target.value);
-  };
-
-  const handleSearchClick = () => {
-    fetchData(1);
-    console.log('검색어:', search);
-  };
-
-  const handleCheckboxChange = (event, examId) => {
+  const handleCheckboxChange = (event, examCatgory, examId) => {
     const isChecked = event.target.checked;
-    if (isChecked) {
-      setCheckedRows((prevCheckedRows) => [...prevCheckedRows, examId]);
-    } else {
-      setCheckedRows((prevCheckedRows) => prevCheckedRows.filter((id) => id !== examId));
+    if (isChecked) 
+    {
+      setCheckedRows((prevCheckedRows) => [...prevCheckedRows, {examCatgory, examId}]);
+    } 
+    else 
+    {
+      setCheckedRows((prevCheckedRows) => prevCheckedRows.filter((row) => row.examId !== examId));
     }
   };
-
   const handleDeleteButton = () => {
     const confirmation = window.confirm('선택된 시험문제를 삭제하시겠습니까?');
     if(confirmation)
@@ -80,8 +118,9 @@ const ManagementExamForm = ({selectedCategory}) => {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
+          type:'pre_exam',
           selectedRows: checkedRows,
-          selectedCategory: selectedCategory,
+          selectedCategory: selectedExamMajor,
         }),
       })
       .then((response) => {
@@ -93,6 +132,7 @@ const ManagementExamForm = ({selectedCategory}) => {
       .then((data) => {
         console.log('Response data:', data);
         alert("선택된 시험문제를 삭제하였습니다");
+        setSelectedClassification('select');
         fetchData(1);
       })
       .catch((error) => {
@@ -100,12 +140,8 @@ const ManagementExamForm = ({selectedCategory}) => {
       });
     }
   };
-
-  useEffect(() => {
-    fetchData(currentPage);
-  }, [currentPage]);
-
   const handleUpdateClick = (row) => {
+    setSelectedClassificationName(row.classification_name);
     openModal(row.exam_id);
   };
 
@@ -114,39 +150,66 @@ const ManagementExamForm = ({selectedCategory}) => {
     setModalExamId(examId);
     setModalIsOpen(true);
   };
-
   const closeModal = () => {
     setModalIsOpen(false);
     setModalExamId(null);
     fetchData(1);
   };
-
   const renderModalContent = () => {
     return (
       <UpdateExamModal
       modalIsOpen={modalIsOpen}
       closeModal={closeModal}
       modalExamId={modalExamId}
-      selectedCategory={selectedCategory}
+      classification={selectedClassificationName}
+      selectedCategory={selectedExamMajor}
       />
     );
   };
 
   return (
     <div className='place'>
-      <p>여러조건 입력 시 "년도_학교_과목_학년_학기_시기(중간/기말)_유형_번호" 처럼 입력해주세요</p>
       <div className='upper_button_place'>
-        <input type="text" id = 'search' value={search} onChange={handleInputChange} placeholder="검색"></input>
-        <button type='button' className='letter_btn' onClick={handleSearchClick}>찾기</button>
+        <select
+          id='majorcategory'
+          onChange={handleMajorListChange}
+          value={selectedExamMajor}
+        >
+          <option value={''}>과목</option>
+          <option value={'국어'}>국어</option>
+          <option value={'영어'}>영어</option>
+          <option value={'수학'}>수학</option>
+          <option value={'사회'}>사회</option>
+          <option value={'과학'}>과학</option>
+          <option value={'기타'}>기타</option>
+        </select>
+        <select 
+          id="classificationList"
+          onChange={(e)=> setSelectedClassification(e.target.value)}
+          value={selectedClassification}
+        >
+          <option value={'select'}>선택하세요</option>
+          {tagList.map((tagOption, index) => (
+            <option key={index} value={tagOption.classification_name}>
+              {tagOption.classification_name}
+            </option>
+          ))}
+        </select>
+        <button className='letter_btn' type='button' onClick={handleConfirmButtonClick}>
+          확인
+        </button>
+      </div>
+      <div className='place'>
+        
       </div>
       <div className='place'>
         <table className='third_table_exam'>
           <thead>
             <tr>
               <td>체크</td>
-              <td>시험 정보</td>
-              <td>학교</td>
-              <td>학기</td>
+              <td>분류 정보</td>
+              <td>문제 번호</td>
+              <td>유형</td>
               <td>버튼</td>
             </tr>
           </thead>
@@ -156,13 +219,13 @@ const ManagementExamForm = ({selectedCategory}) => {
                   <td>
                     <input
                     type="checkbox"
-                    onChange={(event) => handleCheckboxChange(event, result[i].exam_id)}
-                    checked={checkedRows.includes(result[i].exam_id)}
+                    onChange={(event) => handleCheckboxChange(event, result[i].classification_name, result[i].exam_id)}
+                    
                   />
                   </td>
+                  <td>{result[i].classification_name}</td>
                   <td>{result[i].exam_id}</td>
-                  <td>{result[i].school_list_school_name}</td>
-                  <td>{result[i].semester}</td>
+                  <td>{result[i].type}</td>
                   <td><button className='small_letter_btn' onClick={() => handleUpdateClick(result[i])}>수정하기</button></td>
                 </tr>
               ))}
