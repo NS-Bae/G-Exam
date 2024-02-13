@@ -34,7 +34,7 @@ function MyApp()
     <div className = "background">
       <div className = "wrap">
         <Main/>
-        <h2> 국어 기출문제 풀기</h2>
+        <h2>기타 단어 시험</h2>
       </div>
     </div>
   );

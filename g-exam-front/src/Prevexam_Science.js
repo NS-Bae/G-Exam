@@ -1,6 +1,7 @@
 import './App.css';
 import React from 'react';
-import { Link } from "react-router-dom";
+import { useState, useEffect } from 'react';
+import { Link, Navigate, useNavigate } from "react-router-dom";
 
 function Main()
 {
@@ -8,7 +9,27 @@ function Main()
     <h1><Link to ='/'>G-PLAN</Link></h1>
   )
 }
-function MyApp() {
+function MyApp() 
+{
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const navigate = useNavigate();
+
+  useEffect(()=> {
+    fetch('/checksession')
+      .then(response => response.json())
+      .then(data => {
+        if (data.isLoggedIn) 
+        {
+          setIsLoggedIn(true);
+        }
+        else
+        {
+          navigate('/');
+          alert('로그인이 필요합니다.');
+        }
+      });
+  }, [isLoggedIn, navigate]);
+  
   return (
     <div className = "background">
       <div className = "wrap">

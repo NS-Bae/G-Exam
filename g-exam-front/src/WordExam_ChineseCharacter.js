@@ -30,11 +30,11 @@ function MyApp()
       });
   }, [isLoggedIn, navigate]);
   
-  return (
+    return (
     <div className = "background">
       <div className = "wrap">
         <Main/>
-        <h2> 국어 기출문제 풀기</h2>
+        <h2>한문 단어 시험</h2>
       </div>
     </div>
   );

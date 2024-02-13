@@ -62,8 +62,10 @@ function LoginControl()
   );
 }
 //임시 함수
-function TestBtn(props)
+function TestBtn(props, isLoggedIn)
 {
+  const navigate = useNavigate();
+  console.log(props, isLoggedIn);
   return (
     <ul>
       {props.btntype.map((btn, index) => (
@@ -71,11 +73,19 @@ function TestBtn(props)
           <button className="test_btn"
             onClick={() => 
               {
-              props.onChangeMode(btn.id);
+                if (isLoggedIn) 
+                {
+                  props.onChangeMode(btn.id);
+                  navigate(`/${btn.id}`);
+                } 
+                else 
+                {
+                  alert('로그인이 필요합니다.');
+                }
               }
             }
           >
-            <Link to ={`/${btn.id}`}>{btn.title}</Link>
+            {btn.title}
           </button>
         </li>
       ))}
@@ -84,11 +94,24 @@ function TestBtn(props)
 }
 function MyApp() 
 {
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const exambtntype = [
     {id : "prevtest", title : "기출문제 풀기"}, 
-    {id : "wordtest", title : "영단어 시험 보기"}, 
+    {id : "workbookexam", title : "일반문제 풀기"}, 
+    {id : "wordtest", title : "단어 시험"}, 
     {id : "record", title : "시험결과 보기"}
   ];
+
+  useEffect(()=> {
+    fetch('/checksession')
+      .then(response => response.json())
+      .then(data => {
+        if (data.isLoggedIn) 
+        {
+          setIsLoggedIn(true);
+        }
+      });
+  }, [isLoggedIn]);
   return (
     <div className = "background">
       <div className = "wrap">
@@ -97,14 +120,12 @@ function MyApp()
           <LoginControl/>
         </div>
         <div className='btnsection'>
-          <TestBtn btntype = {exambtntype} onChangeMode = {(id)=>{
-
-          }}></TestBtn>
+          <TestBtn btntype = {exambtntype} isLoggedIn={isLoggedIn} onChangeMode = {(id)=>{}} />
         </div>
       </div>
     </div>
   );
-}
+} 
 
 export default MyApp;
 

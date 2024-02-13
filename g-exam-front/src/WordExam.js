@@ -1,9 +1,11 @@
 import './App.css';
 import React from 'react';
-import { Link } from "react-router-dom";
+import { useState, useEffect } from 'react';
+import { Link, Navigate, useNavigate } from "react-router-dom";
 
-function TestBtn(props)
+function TestBtn(props, isLoggedIn)
 {
+  const navigate = useNavigate();
   return (
     <ul>
       {props.btntype.map((btn, index) => (
@@ -11,11 +13,19 @@ function TestBtn(props)
           <button className="test_btn"
             onClick={() => 
               {
-              props.onChangeMode(btn.id);
+                if (isLoggedIn) 
+                {
+                  props.onChangeMode(btn.id);
+                  navigate(`/wordtest/${btn.id}`);
+                } 
+                else 
+                {
+                  alert('로그인이 필요합니다.');
+                }
               }
             }
           >
-            <Link to ={`/wordtest/${btn.id}`}>{btn.title}</Link>
+            {btn.title}
           </button>
         </li>
       ))}
@@ -29,18 +39,39 @@ function Main()
   )
 }
 function MyApp() {
-  const wordtype = [
-    {id : "element", title : "초등 영단어"}, 
-    {id : "middle", title : "중등 영단어"}, 
-    {id : "high", title : "고등 영단어"}, 
-    {id : "toeic", title : "토익 영단어"}
+  const exambtntype = [
+    {id : "korean", title : "국어 단어시험"}, 
+    {id : "english", title : "영어 단어시험"}, 
+    {id : "chinesecharacter", title : "한문 단어시험"}, 
+    {id : "history", title : "역사 단어시험"}, 
+    {id : "science", title : "과학 단어시험"}, 
+    {id : "etc", title : "기타 기출문제"}
   ]
-    return (
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const navigate = useNavigate();
+
+  useEffect(()=> {
+    fetch('/checksession')
+      .then(response => response.json())
+      .then(data => {
+        if (data.isLoggedIn) 
+        {
+          setIsLoggedIn(true);
+        }
+        else
+        {
+          navigate('/');
+          alert('로그인이 필요합니다.');
+        }
+      });
+  }, [isLoggedIn, navigate]);
+
+  return (
     <div className = "background">
       <div className = "wrap">
         <Main/>
         <div className='btnsection'>
-          <TestBtn btntype = {wordtype} onChangeMode = {(id)=>{
+          <TestBtn btntype = {exambtntype} onChangeMode = {(id)=>{
             console.log(id);
           }}></TestBtn>
         </div>

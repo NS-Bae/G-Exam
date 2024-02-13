@@ -16,7 +16,7 @@ function TestBtn(props, isLoggedIn)
                 if (isLoggedIn) 
                 {
                   props.onChangeMode(btn.id);
-                  navigate(`/prevtest/${btn.id}`);
+                  navigate(`/workbookexam/${btn.id}`);
                 } 
                 else 
                 {
