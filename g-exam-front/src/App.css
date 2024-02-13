@@ -686,3 +686,45 @@
     align-items: center;
     margin: 0 auto;
   }
+
+  .value_place
+  {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    width: 100%;    
+  }
+  .value
+  {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    width: auto;
+    margin-top: 2%;
+    margin-left: 5%;
+    margin-right: 5%;
+  }
+  .value > p
+  {
+    width: auto;
+    white-space: nowrap;
+  }
+  .remove_button
+  {
+    border: 0;
+    background-color: white;
+    margin-left: 2%;
+    margin-right: 2%;
+  }
+  .remove_button:hover
+  {
+    color: red;
+  }
+  .small_input
+  {
+    width : 25%;
+    text-align: center;
+    border-radius: 5px;
+    font-size: 1.2rem;
+    border: 0;
+  }

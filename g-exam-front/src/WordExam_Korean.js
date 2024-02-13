@@ -1,7 +1,7 @@
 import './App.css';
 import React from 'react';
 import { useState, useEffect } from 'react';
-import { Link, Navigate, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation  } from "react-router-dom";
 
 function Main()
 {
@@ -9,10 +9,17 @@ function Main()
     <h1><Link to ='/'>G-PLAN</Link></h1>
   )
 }
+
 function MyApp() 
 {
+  const location = useLocation();
+  const searchParams = new URLSearchParams(location.search);
+  const examDetails = JSON.parse(decodeURIComponent(searchParams.get('examDetails')));
+  
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const navigate = useNavigate();
+
+  console.log(examDetails);
 
   useEffect(()=> {
     fetch('/checksession')
@@ -34,7 +41,14 @@ function MyApp()
     <div className = "background">
       <div className = "wrap">
         <Main/>
-        <h2>국어 단어 시험</h2>
+        <p>국어단어시험</p>
+        <div>
+          <p>시험 종류: {examDetails.examType}</p>
+          <p>과목: {examDetails.subject}</p>
+          <p>문항 수: {examDetails.questionCount}</p>
+          <p>랜덤 출제 여부: {examDetails.selectedTag}</p>
+          {/* 시험 화면 구성 및 시험 진행 */}
+        </div>
       </div>
     </div>
   );

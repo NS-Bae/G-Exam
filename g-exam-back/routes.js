@@ -206,7 +206,7 @@ router.post('/get_exam_record', (req, res) => {
     if(user.user_type === '학생')
     {
       try {
-        const sql = 'SELECT * FROM word_record WHERE user_student_id = ?;';
+        const sql = 'SELECT * FROM exam_word_record WHERE user_student_id = ?;';
         db.promise()
           .query(sql, [user.id])
           .then(([rows]) => {
@@ -608,63 +608,6 @@ function convertKorean(selectedCategory)
 
   return conversion[selectedCategory] || selectedCategory;
 }
-//exam_id_pre값이 DB에 자장되어 있을 때 가장 큰 숫자 찾기
-async function findExamidNumber(exam_id_pre, major)
-{
-  return new Promise((resolve, reject) => {
-    const sql = `SELECT exam_id FROM ${major} WHERE exam_id LIKE ? ORDER BY exam_id DESC LIMIT 1`;
-    const params = [`${exam_id_pre}%`];
-
-    db.query(sql, params, function (err, rows) {
-      if (err) 
-      {
-        console.error('최신 번호 가져오기 오류:', err);
-        reject('최신 번호 가져오기 오류');
-      } 
-      else 
-      {
-        if (rows.length > 0) 
-        {
-          const lastNumber = parseInt(rows[0].exam_id.split('_').pop(), 10);
-          resolve(lastNumber);
-        } 
-        else 
-        {
-          resolve(0);
-        }
-      }
-    });
-  });
-}
-//exam_id_pre값이 DB에 자장되어 있을 때 가장 큰 숫자 찾기
-async function checkExamid(exam_id_pre, major)
-{
-  try 
-  {
-    const query = `SELECT COUNT(*) as count FROM ${major} WHERE exam_id LIKE ?`;
-    const values = [`${exam_id_pre}%`];
-
-    return new Promise((resolve, reject) => {
-      db.query(query, values, function (err, rows) {
-        if (err) 
-        {
-          console.error('시험정보 확인 오류:', err);
-          reject(err);
-        } 
-        else 
-        {
-          resolve(rows[0].count > 0);
-        }
-      });
-    });
-  } 
-  catch (error) 
-  {
-    console.error('WordTag 확인 오류:', error);
-    throw error;
-  }
-}
-
 router.post('/search_exam', (req, res) => {
   const type = req.body.type;
   const search = req.body.search;

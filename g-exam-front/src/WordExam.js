@@ -1,36 +1,21 @@
 import './App.css';
 import React from 'react';
 import { useState, useEffect } from 'react';
-import { Link, Navigate, useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import QRCode from 'qrcode.react';
 
-function TestBtn(props, isLoggedIn)
+function convertKorean(selectedCategory) 
 {
-  const navigate = useNavigate();
-  return (
-    <ul>
-      {props.btntype.map((btn, index) => (
-        <li key={index}>
-          <button className="test_btn"
-            onClick={() => 
-              {
-                if (isLoggedIn) 
-                {
-                  props.onChangeMode(btn.id);
-                  navigate(`/wordtest/${btn.id}`);
-                } 
-                else 
-                {
-                  alert('로그인이 필요합니다.');
-                }
-              }
-            }
-          >
-            {btn.title}
-          </button>
-        </li>
-      ))}
-    </ul>
-  );
+  const conversion = {
+    '국어' : 'korean', 
+    '영어' : 'english', 
+    '과학' : 'science', 
+    '한문' : 'chinesecharacter', 
+    '역사' : 'history', 
+    '기타' : 'etc', 
+  }
+
+  return conversion[selectedCategory] || selectedCategory;
 }
 function Main()
 {
@@ -38,48 +23,265 @@ function Main()
     <h1><Link to ='/'>G-PLAN</Link></h1>
   )
 }
-function MyApp() {
+function MajorSelection({ isLoggedIn }) {
+  const [showChoiceRandom, setShowChoiceRandom] = useState(false);
+  const [selectedMajor, setSelectedMajor] = useState('');
   const exambtntype = [
-    {id : "korean", title : "국어 단어시험"}, 
-    {id : "english", title : "영어 단어시험"}, 
-    {id : "chinesecharacter", title : "한문 단어시험"}, 
-    {id : "history", title : "역사 단어시험"}, 
-    {id : "science", title : "과학 단어시험"}, 
-    {id : "etc", title : "기타 기출문제"}
-  ]
+    { id: '국어', title: '국어 단어시험' },
+    { id: '영어', title: '영어 단어시험' },
+    { id: '한문', title: '한문 단어시험' },
+    { id: '역사', title: '역사 단어시험' },
+    { id: '과학', title: '과학 단어시험' },
+    { id: '기타', title: '기타 단어시험' },
+  ];
+
+  const handleMajorSelection = (id) => {
+    setSelectedMajor(id);
+    setShowChoiceRandom(true);
+  };
+  const handleBackButtonClick = () => {
+    setShowChoiceRandom(false);
+    setSelectedMajor('');
+  };
+
+  return (
+    <div className='place'>
+      {selectedMajor ? (
+        <ChoiceRandom selectedMajor={selectedMajor} onBackButtonClick={handleBackButtonClick}/>
+      ) : (
+        <div className='btnsection'>
+          <ul>
+            {exambtntype.map((btn, index) => (
+              <li key={index}>
+                <button
+                  className="test_btn"
+                  onClick={() => {
+                    if (isLoggedIn) {
+                      handleMajorSelection(btn.id);
+                    } else {
+                      alert('로그인이 필요합니다.');
+                    }
+                  }}
+                >
+                  {btn.title}
+                </button>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+    </div>
+  );
+}
+function ChoiceRandom({selectedMajor, onBackButtonClick})
+{
+  const [formType, setFormType] = useState('');
+  const [saveNumber, setSaveNumber] = useState(0);
+  const [isExamButtonEnabled, setIsExamButtonEnabled] = useState(false);
+  const [selectedValues, setSelectedValues] = useState([]); 
+  const navigate = useNavigate();
+  const major = selectedMajor;
+  const examDetails = {
+    examType: formType,
+    subject: major,
+    questionCount: saveNumber,
+    selectedTag: selectedValues,
+  };
+  const qrCodeValue = JSON.stringify({
+    path: `192.168.1.149:3000/wordtest/korean?examDetails=${encodeURIComponent(JSON.stringify(examDetails))}`, 
+    
+  });
+  
+  const handleFormTypeChange = (e) => {
+    setFormType(e.target.value);
+  };
+  const handleInputNumber = (e) => {
+    const numberOfQuestion = e.target.value;
+    setSaveNumber(numberOfQuestion);
+  };
+  const clickConfirmButton = () => {
+    setIsExamButtonEnabled(true);
+    console.log("입력된 정보", saveNumber, major, selectedValues, examDetails);
+  };
+  const handleGoExam = () => {
+    const conversion = convertKorean(major);
+    navigate(`/wordtest/${conversion}?examDetails=${encodeURIComponent(JSON.stringify(examDetails))}`);
+  };
+  const handleSelectedValuesUpdate = (values) => {
+    setSelectedValues(values);
+  };
+  const handleGoBack = () => {
+    if (onBackButtonClick) {
+      onBackButtonClick();
+    }
+  };
+
+  return (
+    <div className="place">
+      <div className="radiobtn_place">
+        <label>
+          <input
+            type="radio"
+            value="random"
+            checked={formType === 'random'}
+            onChange={handleFormTypeChange}
+          />
+          랜덤 출제
+        </label>
+        <label>
+          <input
+            type="radio"
+            value="sequential"
+            checked={formType === 'sequential'}
+            onChange={handleFormTypeChange}
+          />
+          순차 출제
+        </label>
+      </div>
+      <ChoiceTag selectedMajor = {major} onSelectedValuesUpdate={handleSelectedValuesUpdate}/>
+      <div className='value'>
+        <h3>문항 수 :&nbsp;&nbsp;</h3>
+        <input type='number' className='small_input' onChange={handleInputNumber} />
+        <button className='letter_btn' onClick={clickConfirmButton}>
+          확인
+        </button>
+      </div>
+      <div className='btn_section'>
+        <button
+          className='letter_btn'
+          disabled={!isExamButtonEnabled}
+          onClick={handleGoExam}
+        >
+          시험보러가기
+        </button>
+        <button className='letter_btn' onClick={handleGoBack}>
+          뒤로가기
+        </button>
+      </div>
+      <QRCode value={`http://192.168.1.149:3000/wordtest/korean?examDetails=${encodeURIComponent(JSON.stringify(examDetails))}`} />
+    </div>
+  );
+}
+function ChoiceTag({ selectedMajor, onSelectedValuesUpdate })
+{
+  const major = selectedMajor;
+  const [selectedClassification, setSelectedClassification] = useState('');
+  const [isLoaded, setIsLoaded] = useState(false);
+  const [classificationList, setClassificationList] = useState([]);
+  const [selectedValues, setSelectedValues] = useState([]);
+  //분류 불러오기
+  const fetchClassification = async () => {
+    try 
+    {
+      fetch('/get_classification', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          form_type: 'word',
+          selectedMajor: major,
+        }),
+      })
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error('네트워크의 응답이 좋지 않습니다.');
+        }
+        return response.json();
+      })
+      .then((data) => {
+        setClassificationList(data.data);
+        setIsLoaded(true);
+      })
+      .catch((error) => {
+        console.log('데이터 처리과정에서 문제가 발생하였습니다.', error);
+      });;
+    } 
+    catch (error) 
+    {
+      console.error('과목 리스트를 불러오는 중 오류 발생:', error);
+    }
+  };
+  const handleSelectChange = (e) => {
+    const selectedValue = e.target.value;
+
+    // 선택된 값이 새로운 배열에 없으면 추가
+    if (!selectedValues.includes(selectedValue)) {
+      setSelectedValues([...selectedValues, selectedValue]);
+    }
+    setSelectedClassification(selectedValue);
+  };
+  const handleRemoveButton = (valueToRemove) => {
+    const updatedValues = selectedValues.filter(value => value !== valueToRemove);
+    setSelectedValues(updatedValues);
+  };
+  useEffect(() => {
+    if (onSelectedValuesUpdate) {
+      onSelectedValuesUpdate(selectedValues);
+    }
+  }, [selectedValues, onSelectedValuesUpdate ]);
+
+  useEffect(() => {
+    if(!isLoaded)
+    {
+      fetchClassification();
+    }
+  }, [isLoaded]);
+
+  return (
+    <div className='place'>
+      <select
+        id='classification'
+        onChange = {handleSelectChange}
+        value = {selectedClassification}
+        className = 'long_selection'
+        >
+        <option value = {'select'}>선택하세요</option>
+        {classificationList.map((item) => (
+          <option
+          key = {item.word_category}
+          value = {item.word_category}
+          >
+            {item.word_category}
+          </option>
+        ))}
+      </select>
+      <div className='value_place'>
+        {selectedValues.map((value) => (
+          <div className='value' key={value}>
+            <p>{value}</p>
+            <button className='remove_button' onClick={() => handleRemoveButton(value)}> X </button>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+function MyApp() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const navigate = useNavigate();
 
-  useEffect(()=> {
-    fetch('/checksession')
-      .then(response => response.json())
-      .then(data => {
-        if (data.isLoggedIn) 
-        {
+  useEffect(() => {
+    fetch("/checksession")
+      .then((response) => response.json())
+      .then((data) => {
+        if (data.isLoggedIn) {
           setIsLoggedIn(true);
-        }
-        else
-        {
-          navigate('/');
-          alert('로그인이 필요합니다.');
+        } else {
+          navigate("/");
+          alert("로그인이 필요합니다.");
         }
       });
   }, [isLoggedIn, navigate]);
 
   return (
-    <div className = "background">
-      <div className = "wrap">
-        <Main/>
-        <div className='btnsection'>
-          <TestBtn btntype = {exambtntype} onChangeMode = {(id)=>{
-            console.log(id);
-          }}></TestBtn>
-        </div>
+    <div className='background'>
+      <div className='wrap'>
+        <Main />
+        <MajorSelection isLoggedIn />
       </div>
     </div>
   );
 }
 
 export default MyApp;
-
-
