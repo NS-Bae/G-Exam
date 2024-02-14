@@ -87,10 +87,6 @@ function ChoiceRandom({selectedMajor, onBackButtonClick})
     questionCount: saveNumber,
     selectedTag: selectedValues,
   };
-  const qrCodeValue = JSON.stringify({
-    path: `192.168.1.149:3000/wordtest/korean?examDetails=${encodeURIComponent(JSON.stringify(examDetails))}`, 
-    
-  });
   
   const handleFormTypeChange = (e) => {
     setFormType(e.target.value);
@@ -100,8 +96,32 @@ function ChoiceRandom({selectedMajor, onBackButtonClick})
     setSaveNumber(numberOfQuestion);
   };
   const clickConfirmButton = () => {
-    setIsExamButtonEnabled(true);
-    console.log("입력된 정보", saveNumber, major, selectedValues, examDetails);
+    if(saveNumber === 0 || saveNumber === '' || formType === '' || selectedValues === '' || selectedValues.length === 0)
+    {
+      setIsExamButtonEnabled(false);
+      let alertMessage1='', alertMessage2='', alertMessage3='';
+      if(saveNumber === 0 || saveNumber === '' )
+      {
+        alertMessage1 = "문항 수를 입력해주세요";
+      }
+      if(formType === '')
+      {
+        alertMessage2 = "랜덤인지 순차출제인지 선택해주세요";
+      }
+      if(selectedValues === '' || selectedValues.length === 0)
+      {
+        alertMessage3 = "출제될 문제의 태그를 선택해주세요";
+      }
+      const alertMessage = [alertMessage1, alertMessage2, alertMessage3]
+        .filter(message => message !== '')
+        .join(', ');
+      alert(alertMessage);
+      console.log(alertMessage1, ', ', alertMessage2, ', ', alertMessage3);
+    }
+    else
+    {
+      setIsExamButtonEnabled(true);
+    }
   };
   const handleGoExam = () => {
     const conversion = convertKorean(major);

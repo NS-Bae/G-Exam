@@ -478,7 +478,7 @@ router.post('/search_table', (req, res) => {
 
   let sql;
   let countSql;
-  console.log(selectedClassification);
+  console.log(selectedClassification, offset);
   
   if (selectedClassification === '' || selectedClassification === 'select') 
   {
@@ -1221,4 +1221,28 @@ router.post('/regist_pre_exam', async (req, res) => {
 
 }); 
 
+router.post('/start_word_exam', async (req, res) => {
+  const examInfo = req.body.examDetails;
+  const target_table = `word_${convertKorean(examInfo.subject)}`;
+  const questionCount = examInfo.questionCount;
+  const selectedTag = examInfo.selectedTag;
+  const joinTag = selectedTag.join(', ');
+
+  console.log(examInfo.selectedTag, target_table, joinTag);
+
+  const query = `SELECT * FROM ${target_table} WHERE word_category IN (?) ORDER BY RAND() LIMIT ${questionCount};`
+  const values = [joinTag];
+
+  db.query(query, values, (err, result) => {
+    if (err) 
+    {
+      console.log(err);
+      res.status(500).json({ error: '' });
+    } 
+    else 
+    {
+      res.status(200).json({ data: result });
+    }
+  });
+});
 module.exports = router;
