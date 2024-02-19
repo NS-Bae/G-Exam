@@ -1245,4 +1245,95 @@ router.post('/start_word_exam', async (req, res) => {
     }
   });
 });
+router.post('/submit_word_answer', async (req, res) => {
+  const answer = req.body.answer;
+  const major = req.body.major;
+  const user = req.body.user;
+  const target_table = `word_${major}`;
+  const values = Object.values(answer);
+  const valueArray = values.map((item) => item.value);
+  const keyArray = values.map((item) => item.key);
+  const filteredKey = keyArray.filter((item) => { return item;});
+  const splitKeyArray = filteredKey.map((str) => {
+    const parts = str.split('/');
+    const numberPart = Number(parts[1]);
+    return [parts[0], numberPart];
+  });
+  const formData = {
+    word_id: splitKeyArray.map((item) => item[1]), 
+    word_category: splitKeyArray.map((item) => item[0]),
+    values: valueArray,
+  }
+  if(filteredKey.length !== 0)
+  {
+    try 
+    {
+      const { correct, wrong, wrongAnswers } = await getCorrect(target_table, splitKeyArray, formData, user);
+  
+      console.log('a', correct, wrong, wrongAnswers); 
+      res.status(200).json({ correct, wrong });
+    } 
+    catch (err) 
+    {
+      res.status(500).json({ error: err });
+    }
+  }
+  else
+  {
+    const correct = 0, wrong = keyArray.length;
+    res.status(200).json({ correct, wrong });
+  }
+});
+//채점
+function getCorrect(target_table, splitKeyArray, formData)
+{
+  const placeholder = splitKeyArray.map(() => '(?)').join(', ');
+  const query = `
+    SELECT * FROM ${target_table} 
+    WHERE (word_category, word_id) IN (${placeholder})`;
+  return new Promise((resolve, reject) => {
+    let correct = 0, wrong = 0;
+    let wrongAnswers = [];
+    db.query(query, splitKeyArray, (err, results) => {
+      if (err) 
+      {
+        reject(err);
+        console.log(err);
+      } 
+      else 
+      {
+        for(const i in splitKeyArray)
+        {
+          for(const j in formData.word_category)
+          {
+            if(results[i].word_category === formData.word_category[j] && results[i].word_id === formData.word_id[j])
+            {
+              if(results[i].word_mean1 === formData.values[j] || results[i].word_mean2 === formData.values[j] || results[i].word_mean3 === formData.values[j] || results[i].word_mean4 === formData.values[j] || results[i].word_mean5 === formData.values[j])
+              {
+                console.log('정답입니다');
+                correct++;
+              }
+              else
+              {
+                wrongAnswers.push({
+                  word_category: formData.word_category[j],
+                  word_id: formData.word_id[j],
+                });
+                console.log('오답입니다');
+                wrong++;
+              } 
+            }
+          }
+        }
+        console.log('aaaa', correct, wrong, wrongAnswers);
+        resolve({ correct, wrong, wrongAnswers });
+      }
+    });
+  });
+};
+//시험기록
+function writeExamRecord()
+{
+
+}
 module.exports = router;

@@ -11,10 +11,31 @@ function Main()
 }
 function RenderForm({examType})
 {
+  const [user, setUser] = useState([]);
+  const fetchUserInfo = async () => {
+    try 
+    {
+      const response = await fetch('/profile');
+      if (!response.ok) 
+      {
+        throw new Error('HTTP 오류 ' + response.status);
+      }
+      const data = await response.json();
+      setUser(data.user);
+    } 
+    catch (error) 
+    {
+      console.error('로그인이 되어있지 않습니다.', error);
+    }
+  };
+  
+  useEffect(() => {
+    fetchUserInfo();
+  }, []);
   if(examType === 'random')
   {
     return(
-      <RandomExam />
+      <RandomExam user = {user}/>
     );
   }
   else if(examType === 'sequential')
@@ -30,8 +51,9 @@ function RenderForm({examType})
     return null;
   }
 }
-function RandomExam()
+function RandomExam({user})
 {
+  console.log(user);
   const location = useLocation();
   const searchParams = new URLSearchParams(location.search);
   const examDetails = JSON.parse(decodeURIComponent(searchParams.get('examDetails')));
@@ -66,18 +88,83 @@ function RandomExam()
         console.log('데이터 처리과정에서 문제가 발생하였습니다.', error);
       });
   };
+  const SubmitAnswer = () =>{
+    fetch('/submit_word_answer', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        answer: inputValues,
+        major: 'chinese_character',
+        user, 
+      }),
+    })
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error('네트워크의 응답이 좋지 않습니다.');
+        }
+        return response.json();
+      })
+      .then((data) => {
+        alert(`정답 : ${data.correct}개, 오답 : ${data.wrong}개`);
+      })
+      .catch((error) => {
+        console.log('데이터 처리과정에서 문제가 발생하였습니다.', error);
+      });
+  }
   useEffect(() => {
     fetchData(1);
   }, []);
   const handleInputChange = (row, index, e) => {
     const newInputValues = [...inputValues];
     newInputValues[index].value = e.target.value;
-    const key = `${row.word_category}_${row.word_id}`;
-    newInputValues[index].key = key;
+    if (!e.target.value) {
+      newInputValues[index].key = '';
+    } else {
+      const key = `${row.word_category}/${row.word_id}`;
+      newInputValues[index].key = key;
+    }
     setInputValues(newInputValues);
   };
   const handleFinish = () => {
-    console.log('Input values:', inputValues);
+    let empty = 0;
+    for(const i in inputValues)
+    {
+      if(inputValues[i].value === '')
+      {
+        empty++;
+        console.log(empty);
+      }
+    }
+    if(empty>0)
+    {
+      const confirmation = window.confirm('답이 전부 입력되지 않았습니다. 시험을 종료하시겠습니까?');
+      if(confirmation === true)
+      {
+        console.log('시험중단', confirmation);
+        SubmitAnswer();
+      }
+      else
+      {
+        console.log('시험재개', confirmation);
+      }
+    }
+    else
+    {
+      const confirmation = window.confirm('답안을 제출하시겠습니까?');
+      if(confirmation === true)
+      {
+        //시험종료
+        console.log('시험종료', confirmation);
+        SubmitAnswer();
+      }
+      else
+      {
+        //시험재개
+        console.log('시험재개', confirmation);
+      }
+    }
   };
   return(
     <div className='place'>
