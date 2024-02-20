@@ -8,6 +8,9 @@ const passport = require('passport');
 const flash = require('connect-flash');
 const mysql = require('mysql2/promise');
 const morgan = require('morgan');
+const moment = require('moment');
+const fs = require('fs');
+const path = require('path');
 
 router.use(bodyParser.urlencoded({ extended: false }));
 router.use(bodyParser.json());
@@ -604,6 +607,21 @@ function convertKorean(selectedCategory)
     '한문' : 'chinese_character', 
     '역사' : 'history', 
     '기타' : 'etc', 
+  }
+
+  return conversion[selectedCategory] || selectedCategory;
+}
+function convertEnglish(selectedCategory) 
+{
+  const conversion = {
+    'korean' : '국어', 
+    'english' : '영어', 
+    'math' : '수학', 
+    'social' : '사회', 
+    'science' : '과학', 
+    'chinese_character' : '한문', 
+    'history' : '역사', 
+    'etc' : '기타', 
   }
 
   return conversion[selectedCategory] || selectedCategory;
@@ -1225,13 +1243,23 @@ router.post('/start_word_exam', async (req, res) => {
   const examInfo = req.body.examDetails;
   const target_table = `word_${convertKorean(examInfo.subject)}`;
   const questionCount = examInfo.questionCount;
+  const startNumber = examInfo.startNumber;
   const selectedTag = examInfo.selectedTag;
   const joinTag = selectedTag.join(', ');
+  let query, values;
+  console.log(examInfo);
 
-  console.log(examInfo.selectedTag, target_table, joinTag);
-
-  const query = `SELECT * FROM ${target_table} WHERE word_category IN (?) ORDER BY RAND() LIMIT ${questionCount};`
-  const values = [joinTag];
+  if(examInfo.examType === 'random')
+  {
+    query = `SELECT * FROM ${target_table} WHERE word_category IN (?) ORDER BY RAND() LIMIT ${questionCount};`;
+    values = [joinTag];
+  }
+  else if(examInfo.examType === 'sequential')
+  {
+    query = `SELECT * FROM ${target_table} WHERE word_category = ? ORDER BY word_id LIMIT ${startNumber}, ${questionCount};`;
+    values = [selectedTag];
+  }
+  
 
   db.query(query, values, (err, result) => {
     if (err) 
@@ -1253,8 +1281,7 @@ router.post('/submit_word_answer', async (req, res) => {
   const values = Object.values(answer);
   const valueArray = values.map((item) => item.value);
   const keyArray = values.map((item) => item.key);
-  const filteredKey = keyArray.filter((item) => { return item;});
-  const splitKeyArray = filteredKey.map((str) => {
+  const splitKeyArray = keyArray.map((str) => {
     const parts = str.split('/');
     const numberPart = Number(parts[1]);
     return [parts[0], numberPart];
@@ -1264,24 +1291,15 @@ router.post('/submit_word_answer', async (req, res) => {
     word_category: splitKeyArray.map((item) => item[0]),
     values: valueArray,
   }
-  if(filteredKey.length !== 0)
+  try 
   {
-    try 
-    {
-      const { correct, wrong, wrongAnswers } = await getCorrect(target_table, splitKeyArray, formData, user);
-  
-      console.log('a', correct, wrong, wrongAnswers); 
-      res.status(200).json({ correct, wrong });
-    } 
-    catch (err) 
-    {
-      res.status(500).json({ error: err });
-    }
-  }
-  else
+    const { correct, wrong, wrongAnswers, correctAnswer } = await getCorrect(target_table, splitKeyArray, formData);
+    writeWordExamRecord(correct, wrong, wrongAnswers, user, major, correctAnswer);
+    res.status(200).json({ correct, wrong, wrongAnswers, user, major });
+  } 
+  catch (err) 
   {
-    const correct = 0, wrong = keyArray.length;
-    res.status(200).json({ correct, wrong });
+    res.status(500).json({ error: err });
   }
 });
 //채점
@@ -1294,6 +1312,7 @@ function getCorrect(target_table, splitKeyArray, formData)
   return new Promise((resolve, reject) => {
     let correct = 0, wrong = 0;
     let wrongAnswers = [];
+    let correctAnswer = [];
     db.query(query, splitKeyArray, (err, results) => {
       if (err) 
       {
@@ -1308,6 +1327,16 @@ function getCorrect(target_table, splitKeyArray, formData)
           {
             if(results[i].word_category === formData.word_category[j] && results[i].word_id === formData.word_id[j])
             {
+              correctAnswer.push({
+                word_category: results[j].word_category,
+                word_id: results[j].word_id,
+                word: results[j].word,
+                word_mean1: results[j].word_mean1,
+                word_mean2: results[j].word_mean2,
+                word_mean3: results[j].word_mean3,
+                word_mean4: results[j].word_mean4,
+                word_mean5: results[j].word_mean5,
+              });
               if(results[i].word_mean1 === formData.values[j] || results[i].word_mean2 === formData.values[j] || results[i].word_mean3 === formData.values[j] || results[i].word_mean4 === formData.values[j] || results[i].word_mean5 === formData.values[j])
               {
                 console.log('정답입니다');
@@ -1318,6 +1347,8 @@ function getCorrect(target_table, splitKeyArray, formData)
                 wrongAnswers.push({
                   word_category: formData.word_category[j],
                   word_id: formData.word_id[j],
+                  word: results[j].word, 
+                  word_mean: formData.values[j],
                 });
                 console.log('오답입니다');
                 wrong++;
@@ -1325,15 +1356,66 @@ function getCorrect(target_table, splitKeyArray, formData)
             }
           }
         }
-        console.log('aaaa', correct, wrong, wrongAnswers);
-        resolve({ correct, wrong, wrongAnswers });
+        resolve({ correct, wrong, wrongAnswers, correctAnswer });
       }
     });
   });
 };
 //시험기록
-function writeExamRecord()
+function writeWordExamRecord(correct, wrong, wrongAnswers, user, major, correctAnswer)
 {
+  const now = moment();
+  const dayFormat = now.format('YY-MM-DD-HH-mm-ss');
+  const majorName = convertEnglish(major);
+  const wordTestInfo = `${user.name}_${majorName}_${dayFormat}`;
+  const record_score = (correct/(correct+wrong))*100;
 
-}
+  const data = [`${user.name}학생의 ${majorName} 시험 오답모음`]; // 결과값
+
+  for(const i in wrongAnswers)
+  {
+    for(const j in correctAnswer)
+    {
+      if(wrongAnswers[i].word_category === correctAnswer[j].word_category && wrongAnswers[i].word_id === correctAnswer[j].word_id)
+      {
+        data.push([
+          wrongAnswers[i].word_category, wrongAnswers[i].word_id, wrongAnswers[i].word, wrongAnswers[i].word_mean, correctAnswer[j].word_mean1
+        ]);
+      }
+    }
+  }
+  data.push([`정답 : ${correct}개, 오답 : ${wrong}개, 점수 : ${record_score}점`])
+
+  fs.exists(wordTestInfo, (exists) => {
+    if (exists) {
+      // 파일이 존재하면 덮어쓰기
+      fs.writeFile(`${wordTestInfo}.txt`, data.join('\n'), (err) => {
+        if (err) throw err;
+        console.log('파일 저장 완료');
+      });
+    } else {
+      // 파일이 없으면 새로 생성
+      fs.writeFile(`${wordTestInfo}.txt`, data.join('\n'), (err) => {
+        if (err) throw err;
+        console.log('파일 저장 완료');
+      });
+    }
+  });
+  const absolutePath = path.resolve(__dirname, '../output', `${wordTestInfo}.txt`);
+
+  const query = `INSERT INTO exam_word_record VALUES ('${user.id}', '${wordTestInfo}', ${record_score}, '${absolutePath}')`;
+
+  console.log(query);
+
+  db.query(query, (err, results) => {
+    if (err) 
+    {
+      console.log(err);
+    }
+    else
+    {
+      console.log(results);
+    }
+  });
+};
 module.exports = router;

@@ -11,59 +11,53 @@ function Main()
 }
 function RenderForm({examType})
 {
-  if(examType === 'random')
-  {
-    return(
-      <RandomExam />
-    );
-  }
-  else if(examType === 'sequential')
-  {
-    return(
-      <div className='place'>
-        <p>순차입니다</p>
-      </div>
-    );
-  }
-  else
-  {
-    return null;
-  }
+  const [user, setUser] = useState([]);
+  const fetchUserInfo = async () => {
+    try 
+    {
+      const response = await fetch('/profile');
+      if (!response.ok) 
+      {
+        throw new Error('HTTP 오류 ' + response.status);
+      }
+      const data = await response.json();
+      setUser(data.user);
+    } 
+    catch (error) 
+    {
+      console.error('로그인이 되어있지 않습니다.', error);
+    }
+  };
+  
+  useEffect(() => {
+    fetchUserInfo();
+  }, []);
+  return(
+    <RandomExam user = {user}/>
+  );
 }
-function RandomExam()
+function RandomExam({user})
 {
   const location = useLocation();
+  const navigate = useNavigate();
   const searchParams = new URLSearchParams(location.search);
   const examDetails = JSON.parse(decodeURIComponent(searchParams.get('examDetails')));
   const [result, setResult] = useState([]);
-  const [totalCount, setTotalCount] = useState(0);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
-  const [checkedRows, setCheckedRows] = useState([]);
+  const [inputValues, setInputValues] = useState(
+    Array.from({ length: examDetails.questionCount }, (_, i) => ({
+      key: '',
+      value: '',
+    }))
+  );
 
-  const handleCheckboxChange = (event, wordCategory , wordId) => {
-    const isChecked = event.target.checked;
-    if (isChecked) {
-      setCheckedRows((prevCheckedRows) => [...prevCheckedRows, { wordCategory, wordId }]);
-    } else {
-      setCheckedRows((prevCheckedRows) => prevCheckedRows.filter((row) => row.wordId !== wordId));
-    }
-  };
-  const handlePageClick = (page) => {
-    setCurrentPage(page);
-    fetchData(page);
-  };
-  const fetchData = (page) => {
-    const itemsPerPage = 15; // 페이지당 아이템 수
-    const offset = (page - 1) * itemsPerPage;
-
-    fetch('/', {
+  const fetchData = () => {
+    fetch('/start_word_exam', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        offset,
+        examDetails,
       }),
     })
       .then((response) => {
@@ -73,13 +67,96 @@ function RandomExam()
         return response.json();
       })
       .then((data) => {
+        const testData = data.data;
         setResult(data.data);
-        setTotalCount(data.totalCount);
-        setTotalPages(Math.ceil(data.totalCount / itemsPerPage));
+        console.log(data.data.length, testData.length);
+        const newInputValues = [...inputValues];
+        for(const i in testData)
+        {
+          const key = `${testData[i].word_category}/${testData[i].word_id}`;
+          console.log(key);
+          newInputValues[i].key = key;
+          setInputValues(newInputValues);
+        }
       })
       .catch((error) => {
         console.log('데이터 처리과정에서 문제가 발생하였습니다.', error);
       });
+  };
+  const SubmitAnswer = () =>{
+    fetch('/submit_word_answer', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        answer: inputValues,
+        major: 'korean',
+        user, 
+      }),
+    })
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error('네트워크의 응답이 좋지 않습니다.');
+        }
+        return response.json();
+      })
+      .then((data) => {
+        alert(`정답 : ${data.correct}개, 오답 : ${data.wrong}개`);
+        navigate('/');
+      })
+      .catch((error) => {
+        console.log('데이터 처리과정에서 문제가 발생하였습니다.', error);
+      });
+  }
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  const handleInputChange = (row, index, e) => {
+    const newInputValues = [...inputValues];
+    newInputValues[index].value = e.target.value;
+    const key = `${row.word_category}/${row.word_id}`;
+    newInputValues[index].key = key;
+    setInputValues(newInputValues);
+  };
+  const handleFinish = () => {
+    let empty = 0;
+    for(const i in inputValues)
+    {
+      if(inputValues[i].value === '')
+      {
+        empty++;
+      }
+    }
+    if(empty>0)
+    {
+      const confirmation = window.confirm('답이 전부 입력되지 않았습니다. 시험을 종료하시겠습니까?');
+      if(confirmation === true)
+      {
+        console.log('시험중단', confirmation);
+        SubmitAnswer();
+      }
+      else
+      {
+        console.log('시험재개', confirmation);
+      }
+    }
+    else
+    {
+      const confirmation = window.confirm('답안을 제출하시겠습니까?');
+      if(confirmation === true)
+      {
+        //시험종료
+        console.log('시험종료', confirmation);
+        SubmitAnswer();
+      }
+      else
+      {
+        //시험재개
+        console.log('시험재개', confirmation);
+      }
+    }
   };
   return(
     <div className='place'>
@@ -88,43 +165,21 @@ function RandomExam()
           <tr>
             <td>문제 번호</td>
             <td>단어</td>
-            <td>뜻1</td>
-            <td>뜻2</td>
-            <td>뜻3</td>
-            <td>뜻4</td>
-            <td>뜻5</td>
+            <td>뜻</td>
           </tr>
           </thead>
           <tbody>
-          {Array.from({ length: Math.min(result.length, 15) }, (_, i) => (
+          {Array.from({ length: result.length }, (_, i) => (
             <tr key={`${result[i].word_category}_${result[i].word_id}`}>
-              <td>{i}</td>
+              <td>{i+1}</td>
               <td>{result[i].word}</td>
-              <td>{result[i].word_mean1}</td>
-              <td>{result[i].word_mean2}</td>
-              <td>{result[i].word_mean3}</td>
-              <td>{result[i].word_mean4}</td>
-              <td>{result[i].word_mean5}</td>
+              <td><input value={inputValues[i].value} onChange={(e) => handleInputChange(result[i], i, e)}></input></td>
             </tr>
           ))}
           </tbody>
       </table>
-      <div className="paging_number_place">
-        {currentPage > 1 && (
-          <button className="paging_number" onClick={() => handlePageClick(currentPage - 1)}>
-            이전
-          </button>
-        )}
-
-        <button className="paging_number" key={currentPage} onClick={() => handlePageClick(currentPage)}>
-          {currentPage}
-        </button>
-
-        {currentPage < totalPages && (
-          <button className="paging_number" onClick={() => handlePageClick(currentPage + 1)}>
-            다음
-          </button>
-        )}
+      <div className='upper_btn_place'>
+        <button className='letter_btn' onClick={handleFinish}>시험종료</button>
       </div>
     </div>
   );
@@ -138,8 +193,6 @@ function MyApp()
   
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const navigate = useNavigate();
-
-  console.log(examDetails);
 
   useEffect(()=> {
     fetch('/checksession')
@@ -161,7 +214,7 @@ function MyApp()
     <div className = "background">
       <div className = "wrap">
         <Main/>
-        <p>국어단어시험</p>
+        <p>한문 단어시험</p>
         <RenderForm examType={examType}/> 
       </div>
     </div>
@@ -169,5 +222,3 @@ function MyApp()
 }
 
 export default MyApp;
-
-

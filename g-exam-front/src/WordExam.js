@@ -77,7 +77,9 @@ function ChoiceRandom({selectedMajor, onBackButtonClick})
 {
   const [formType, setFormType] = useState('');
   const [saveNumber, setSaveNumber] = useState(0);
+  const [startNumber, setStartNumber] = useState(0);
   const [isExamButtonEnabled, setIsExamButtonEnabled] = useState(false);
+  const [showStartNumberInput, setShowStartNumberInput] = useState(false);
   const [selectedValues, setSelectedValues] = useState([]); 
   const navigate = useNavigate();
   const major = selectedMajor;
@@ -85,17 +87,29 @@ function ChoiceRandom({selectedMajor, onBackButtonClick})
     examType: formType,
     subject: major,
     questionCount: saveNumber,
+    startNumber: startNumber,
     selectedTag: selectedValues,
   };
   
   const handleFormTypeChange = (e) => {
     setFormType(e.target.value);
+    setShowStartNumberInput(e.target.value === 'sequential');
   };
   const handleInputNumber = (e) => {
     const numberOfQuestion = e.target.value;
     setSaveNumber(numberOfQuestion);
   };
+  const handleInputStartNumber = (e) => {
+    const numberOfQuestion = e.target.value;
+    setStartNumber(numberOfQuestion);
+  };
   const clickConfirmButton = () => {
+    console.log(selectedValues.length, formType);
+    if(formType === 'sequential' && selectedValues.length > 1) 
+    {
+      alert('순차 출제에서는 태그를 하나만 선택할 수 있습니다.');
+      return;
+    }
     if(saveNumber === 0 || saveNumber === '' || formType === '' || selectedValues === '' || selectedValues.length === 0)
     {
       setIsExamButtonEnabled(false);
@@ -162,6 +176,12 @@ function ChoiceRandom({selectedMajor, onBackButtonClick})
       <div className='value'>
         <h3>문항 수 :&nbsp;&nbsp;</h3>
         <input type='number' className='small_input' onChange={handleInputNumber} />
+        {showStartNumberInput && (
+          <>
+            <h3>시작 번호 :&nbsp;&nbsp;</h3>
+            <input type="number" className="small_input" onChange={handleInputStartNumber} />
+          </>
+        )}
         <button className='letter_btn' onClick={clickConfirmButton}>
           확인
         </button>

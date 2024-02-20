@@ -32,29 +32,14 @@ function RenderForm({examType})
   useEffect(() => {
     fetchUserInfo();
   }, []);
-  if(examType === 'random')
-  {
-    return(
-      <RandomExam user = {user}/>
-    );
-  }
-  else if(examType === 'sequential')
-  {
-    return(
-      <div className='place'>
-        <p>순차입니다</p>
-      </div>
-    );
-  }
-  else
-  {
-    return null;
-  }
+  return(
+    <RandomExam user = {user}/>
+  );
 }
 function RandomExam({user})
 {
-  console.log(user);
   const location = useLocation();
+  const navigate = useNavigate();
   const searchParams = new URLSearchParams(location.search);
   const examDetails = JSON.parse(decodeURIComponent(searchParams.get('examDetails')));
   const [result, setResult] = useState([]);
@@ -82,7 +67,17 @@ function RandomExam({user})
         return response.json();
       })
       .then((data) => {
+        const testData = data.data;
         setResult(data.data);
+        console.log(data.data.length, testData.length);
+        const newInputValues = [...inputValues];
+        for(const i in testData)
+        {
+          const key = `${testData[i].word_category}/${testData[i].word_id}`;
+          console.log(key);
+          newInputValues[i].key = key;
+          setInputValues(newInputValues);
+        }
       })
       .catch((error) => {
         console.log('데이터 처리과정에서 문제가 발생하였습니다.', error);
@@ -108,23 +103,21 @@ function RandomExam({user})
       })
       .then((data) => {
         alert(`정답 : ${data.correct}개, 오답 : ${data.wrong}개`);
+        navigate('/');
       })
       .catch((error) => {
         console.log('데이터 처리과정에서 문제가 발생하였습니다.', error);
       });
   }
   useEffect(() => {
-    fetchData(1);
+    fetchData();
   }, []);
+
   const handleInputChange = (row, index, e) => {
     const newInputValues = [...inputValues];
     newInputValues[index].value = e.target.value;
-    if (!e.target.value) {
-      newInputValues[index].key = '';
-    } else {
-      const key = `${row.word_category}/${row.word_id}`;
-      newInputValues[index].key = key;
-    }
+    const key = `${row.word_category}/${row.word_id}`;
+    newInputValues[index].key = key;
     setInputValues(newInputValues);
   };
   const handleFinish = () => {
@@ -134,7 +127,6 @@ function RandomExam({user})
       if(inputValues[i].value === '')
       {
         empty++;
-        console.log(empty);
       }
     }
     if(empty>0)
