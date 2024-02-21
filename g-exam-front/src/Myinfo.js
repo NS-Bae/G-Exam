@@ -121,7 +121,7 @@ const ApprovalModal = ({ modalIsOpen, closeModal, studentInfo, handleCheckboxCha
           disabled={isUpdateButtonDisabled}
           className="exam_register"
         >
-          선택한 로우 업데이트
+          회원가입 승인
         </button>
         <button onClick={closeModal} className="exam_register">닫기</button>
       </div>

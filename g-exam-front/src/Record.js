@@ -31,7 +31,7 @@ function ChangeForm({ onFormTypeChange }) {
           onClick={() => handleButtonClick('eng_word')}
           className={formType === 'eng_word' ? 'active' : ''}
         >
-          영단어 시험 결과
+          단어 시험 결과
         </button>
       </div>
     </div>

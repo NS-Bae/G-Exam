@@ -73,7 +73,7 @@ const UpdateWorkbookModal = ({ modalIsOpen, closeModal, modalExamId, classificat
       },
       body: JSON.stringify({
         newFormData: updatedData, 
-        type: 'pre_exam', 
+        type: 'workbook', 
         classification: classification,
         examId: modalExamId, 
         major: selectedCategory,

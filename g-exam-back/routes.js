@@ -227,7 +227,7 @@ router.post('/get_exam_record', (req, res) => {
     else if(user.user_type === '선생')
     {
       try {
-        const sql = 'SELECT * FROM word_record;';
+        const sql = 'SELECT * FROM exam_word_record;';
         db.promise()
           .query(sql)
           .then(([rows]) => {
@@ -834,7 +834,7 @@ router.post('/update_exam', (req, res) => {
     }
     else
     {
-      console.log('업데이트에 성공했습니다.');
+      console.log('업데이트에 성공했습니다.', result);
       res.status(200).json({ message : '업데이트에 성공했습니다.' });
     }
   })
@@ -914,37 +914,6 @@ router.post('/search_classification', (req, res) => {
   });
   
 });
-
-async function getMaxId(table) 
-{
-  const table_now = table.table;
-  let max_column;
-
-  if(table_now === "word_category")
-  {
-    max_column = "word_id";
-  }
-  else if(table_now === "classification_list")
-  {
-    max_column = "classification_id";
-  }
-
-  const maxIdQuery = `SELECT MAX(${max_column}) AS maxId FROM ${table_now};`;
-  return new Promise((resolve, reject) => {
-    db.query(maxIdQuery, (error, results) => {
-      if (error) 
-      {
-        console.error('Failed to get maxId:', error);
-        reject(error);
-      } 
-      else 
-      {
-        const maxId = results && results.length > 0 ? results[0].maxId || 0 : 0;
-        resolve(maxId);
-      }
-    });
-  });
-}
 
 router.post('/add_classification', async (req, res) => {
   const tagValue = req.body.tagValue;
@@ -1245,14 +1214,12 @@ router.post('/start_word_exam', async (req, res) => {
   const questionCount = examInfo.questionCount;
   const startNumber = examInfo.startNumber;
   const selectedTag = examInfo.selectedTag;
-  const joinTag = selectedTag.join(', ');
   let query, values;
-  console.log(examInfo);
 
   if(examInfo.examType === 'random')
   {
     query = `SELECT * FROM ${target_table} WHERE word_category IN (?) ORDER BY RAND() LIMIT ${questionCount};`;
-    values = [joinTag];
+    values = [selectedTag];
   }
   else if(examInfo.examType === 'sequential')
   {
@@ -1269,6 +1236,7 @@ router.post('/start_word_exam', async (req, res) => {
     } 
     else 
     {
+      console.log(query, values, result);
       res.status(200).json({ data: result });
     }
   });
