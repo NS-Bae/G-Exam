@@ -1086,7 +1086,7 @@ router.post('/get_classification', (req, res) => {
       if (err) 
       {
         console.log(err);
-        res.status(500).json({ error: '' });
+        res.status(500).json({ error: err });
       } 
       else 
       {
@@ -1386,4 +1386,107 @@ function writeWordExamRecord(correct, wrong, wrongAnswers, user, major, correctA
     }
   });
 };
+router.post('/start_exam', async (req, res) => {
+  const examInfo = req.body.examDetails;
+  const examCategory = examInfo.examSection;
+  const examType = examInfo.examControl;
+  const examMethod = examInfo.examType;
+  const classification = examInfo.selectedTag;
+  const questionCount = examInfo.questionCount;
+  const target_table = `${examCategory}_${convertKorean(examInfo.subject)}`;
+
+  let query='', values=[];
+
+  if(examCategory === 'workbook')
+  {
+    if(examType === 'choice')
+    {
+      if(examMethod === 'random')
+      {
+        console.log(examCategory, examType, examMethod, target_table);
+        query = `SELECT * FROM ${target_table} WHERE classification_name IN (?) AND type = '객관식' ORDER BY RAND() LIMIT ${questionCount};`;
+        values = [classification];
+      }
+      else if(examMethod === 'sequential')
+      {
+
+      }
+    }
+    else if(examType === 'essay')
+    {
+      if(examMethod === 'random')
+      {
+
+      }
+      else if(examMethod === 'sequential')
+      {
+        
+      }
+    }
+    else if(examType === 'all')
+    {
+      if(examMethod === 'random')
+      {
+
+      }
+      else if(examMethod === 'sequential')
+      {
+        
+      }
+    }
+    else return null;
+  }
+  else if(examCategory === 'pre_exam')
+  {
+    if(examType === 'choice')
+    {
+      if(examMethod === 'random')
+      {
+
+      }
+      else if(examMethod === 'sequential')
+      {
+
+      }
+    }
+    else if(examType === 'essay')
+    {
+      if(examMethod === 'random')
+      {
+
+      }
+      else if(examMethod === 'sequential')
+      {
+        
+      }
+    }
+    else if(examType === 'all')
+    {
+      if(examMethod === 'random')
+      {
+
+      }
+      else if(examMethod === 'sequential')
+      {
+        
+      }
+    }
+    else return null;
+  }
+
+  console.log(query, values);
+
+  db.query(query, values, (err, result) => {
+    if (err) 
+    {
+      console.log(err);
+      res.status(500).json({ error: '' });
+    } 
+    else 
+    {
+      console.log(result);
+      res.status(200).json({ data: result });
+    }
+  });
+});
 module.exports = router;

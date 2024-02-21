@@ -9,9 +9,9 @@ function convertKorean(selectedCategory)
   const conversion = {
     '국어' : 'korean', 
     '영어' : 'english', 
-    '수학' : 'math', 
-    '사회' : 'social', 
     '과학' : 'science', 
+    '한문' : 'chinesecharacter', 
+    '역사' : 'history', 
     '기타' : 'etc', 
   }
 
@@ -76,30 +76,47 @@ function MajorSelection({ isLoggedIn }) {
 function ChoiceRandom({selectedMajor, onBackButtonClick})
 {
   const [formType, setFormType] = useState('');
+  const [nowExamType, setNowExamType] = useState('select');
   const [saveNumber, setSaveNumber] = useState(0);
+  const [startNumber, setStartNumber] = useState(0);
   const [isExamButtonEnabled, setIsExamButtonEnabled] = useState(false);
+  const [showStartNumberInput, setShowStartNumberInput] = useState(false);
   const [selectedValues, setSelectedValues] = useState([]); 
   const navigate = useNavigate();
   const major = selectedMajor;
   const examDetails = {
+    examSection: 'pre_exam',
+    examControl: nowExamType,
     examType: formType,
     subject: major,
     questionCount: saveNumber,
+    startNumber: startNumber,
     selectedTag: selectedValues,
   };
   
   const handleFormTypeChange = (e) => {
     setFormType(e.target.value);
+    setShowStartNumberInput(e.target.value === 'sequential');
   };
   const handleInputNumber = (e) => {
     const numberOfQuestion = e.target.value;
     setSaveNumber(numberOfQuestion);
   };
+  const handleInputStartNumber = (e) => {
+    const numberOfQuestion = e.target.value;
+    setStartNumber(numberOfQuestion);
+  };
   const clickConfirmButton = () => {
-    if(saveNumber === 0 || saveNumber === '' || formType === '' || selectedValues === '' || selectedValues.length === 0)
+    console.log(selectedValues.length, formType);
+    if(formType === 'sequential' && selectedValues.length > 1) 
+    {
+      alert('순차 출제에서는 태그를 하나만 선택할 수 있습니다.');
+      return;
+    }
+    if(nowExamType === 'select' || saveNumber === 0 || saveNumber === '' || formType === '' || selectedValues === '' || selectedValues.length === 0)
     {
       setIsExamButtonEnabled(false);
-      let alertMessage1='', alertMessage2='', alertMessage3='';
+      let alertMessage1 = '', alertMessage2 = '', alertMessage3 = '', alertMessage4 = '';
       if(saveNumber === 0 || saveNumber === '' )
       {
         alertMessage1 = "문항 수를 입력해주세요";
@@ -112,11 +129,15 @@ function ChoiceRandom({selectedMajor, onBackButtonClick})
       {
         alertMessage3 = "출제될 문제의 태그를 선택해주세요";
       }
-      const alertMessage = [alertMessage1, alertMessage2, alertMessage3]
+      if(nowExamType === 'select')
+      {
+        alertMessage4 = "문제가 객관식인지 주관식인지 선택해주세요";
+      }
+      const alertMessage = [alertMessage1, alertMessage2, alertMessage3, alertMessage4]
         .filter(message => message !== '')
         .join(', ');
       alert(alertMessage);
-      console.log(alertMessage1, ', ', alertMessage2, ', ', alertMessage3);
+      console.log(alertMessage1, ', ', alertMessage2, ', ', alertMessage3, ', ', alertMessage4);
     }
     else
     {
@@ -135,6 +156,11 @@ function ChoiceRandom({selectedMajor, onBackButtonClick})
       onBackButtonClick();
     }
   };
+  const handleExamTypeChange = (e) =>{
+    const examType = e.target.value;
+    console.log(examType);
+    setNowExamType(examType);
+  }
 
   return (
     <div className="place">
@@ -160,8 +186,23 @@ function ChoiceRandom({selectedMajor, onBackButtonClick})
       </div>
       <ChoiceTag selectedMajor = {major} onSelectedValuesUpdate={handleSelectedValuesUpdate}/>
       <div className='value'>
+        <h3>시험 방식 : &nbsp;&nbsp;</h3>
+        <select className='short_selection' value={nowExamType} onChange={handleExamTypeChange}>
+          <option value = {'select'}>선택하세요</option>
+          <option value = {'choice'}>객관식</option>
+          <option value = {'essay'}>주관식</option>
+          <option value = {'all'}>객관식 + 주관식</option>
+        </select>
+      </div>
+      <div className='value'>
         <h3>문항 수 :&nbsp;&nbsp;</h3>
         <input type='number' className='small_input' onChange={handleInputNumber} />
+        {showStartNumberInput && (
+          <>
+            <h3>시작 번호 :&nbsp;&nbsp;</h3>
+            <input type="number" className="small_input" onChange={handleInputStartNumber} />
+          </>
+        )}
         <button className='letter_btn' onClick={clickConfirmButton}>
           확인
         </button>
@@ -178,7 +219,7 @@ function ChoiceRandom({selectedMajor, onBackButtonClick})
           뒤로가기
         </button>
       </div>
-      <QRCode value={`http://192.168.1.149:3000/wordtest/korean?examDetails=${encodeURIComponent(JSON.stringify(examDetails))}`} />
+      <QRCode value={`http://192.168.1.149:3000/prevexam/korean?examDetails=${encodeURIComponent(JSON.stringify(examDetails))}`} />
     </div>
   );
 }
@@ -193,7 +234,7 @@ function ChoiceTag({ selectedMajor, onSelectedValuesUpdate })
   const fetchClassification = async () => {
     try 
     {
-      fetch('/get_classification', {
+      fetch('/get_classification', {   
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -305,5 +346,3 @@ function MyApp() {
 }
 
 export default MyApp;
-
-

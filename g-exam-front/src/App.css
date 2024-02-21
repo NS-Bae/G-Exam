@@ -92,9 +92,15 @@
     margin-top: 50px;
     width: 90%;
   }
+  .btnsection > ul > li
+  {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
   .test_btn
   {
-    width: 100%;
+    width: 80%;
     height: 50px;
     border: 0;
     outline: none;
@@ -429,6 +435,16 @@
   .long_selection
   {
     width: 80%;
+    text-align: center;
+    font-weight: bolder;
+    font-size: 1rem;
+    border-radius: 5px;
+    margin-top: 2%;
+  }
+  .short_selection
+  {
+    width: 60%;
+    max-height: 1.5rem;
     text-align: center;
     font-weight: bolder;
     font-size: 1rem;
