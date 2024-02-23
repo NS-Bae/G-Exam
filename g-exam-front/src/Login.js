@@ -71,7 +71,9 @@ function LoginForm(props) {
             required
           />
         </div>
-        <button className='test_btn' type="submit" value="로그인">로그인</button>
+        <div className='place'>
+          <button className='test_btn' type="submit" value="로그인">로그인</button>
+        </div>
       </form>
     </AuthContent>
   );

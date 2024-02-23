@@ -106,21 +106,20 @@ const RegistForm = () => {
   
     const handleImageChange = (e) => {
       const imageFile = e.target.files[0];
-      if(imageFile)
-      {
-        const reader = new FileReader();
+      if (imageFile) {
+        const formData = new FormData();
+        formData.append('image', imageFile);
 
-        reader.onload = () => {
-            setImage(reader.result);
-        };
-        reader.readAsDataURL(imageFile);
+        Object.entries(formData).forEach(([key, value]) => {
+          formData.append(key, value);
+        });
       }
     };
     const openImagePreview = () => {
-        const imagePreviewWindow = window.open('', '_blank', 'width=600,height=400');
-        const imagePreviewPage = <ImgPreview image={image} />;
+      const imagePreviewWindow = window.open('', '_blank', 'width=600,height=400');
+      const imagePreviewPage = <ImgPreview image={image} />;
       
-        imagePreviewWindow.document.write(ReactDOMServer.renderToStaticMarkup(imagePreviewPage));
+      ReactDOM.render(imagePreviewPage, imagePreviewWindow.document.body);
     };
     
   

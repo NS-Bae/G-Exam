@@ -11,6 +11,7 @@ const morgan = require('morgan');
 const moment = require('moment');
 const fs = require('fs');
 const path = require('path');
+const multer = require('multer');
 
 router.use(bodyParser.urlencoded({ extended: false }));
 router.use(bodyParser.json());
@@ -1165,6 +1166,7 @@ router.post('/regist_workbook_exam', async (req, res) => {
   const answer = formData.answer || null;
   const target_table = `workbook_${convertKorean(examMajor)}`
 
+  console.log('a', image);
   const problem_number = await getNumber(classification, target_table);
   
   try
@@ -1357,13 +1359,13 @@ function writeWordExamRecord(correct, wrong, wrongAnswers, user, major, correctA
   fs.exists(wordTestInfo, (exists) => {
     if (exists) {
       // 파일이 존재하면 덮어쓰기
-      fs.writeFile(`${wordTestInfo}.txt`, data.join('\n'), (err) => {
+      fs.writeFile(`C:\\Users\\USER\\G-Exam\\시험결과 상세정보\\${wordTestInfo}.txt`, data.join('\n'), (err) => {
         if (err) throw err;
         console.log('파일 저장 완료');
       });
     } else {
       // 파일이 없으면 새로 생성
-      fs.writeFile(`${wordTestInfo}.txt`, data.join('\n'), (err) => {
+      fs.writeFile(`C:\\Users\\USER\\G-Exam\\시험결과 상세정보\\${wordTestInfo}.txt`, data.join('\n'), (err) => {
         if (err) throw err;
         console.log('파일 저장 완료');
       });
@@ -1416,7 +1418,9 @@ router.post('/start_exam', async (req, res) => {
     {
       if(examMethod === 'random')
       {
-
+        console.log(examCategory, examType, examMethod, target_table);
+        query = `SELECT * FROM ${target_table} WHERE classification_name IN (?) AND type = '주관식' ORDER BY RAND() LIMIT ${questionCount};`;
+        values = [classification];
       }
       else if(examMethod === 'sequential')
       {
@@ -1427,7 +1431,9 @@ router.post('/start_exam', async (req, res) => {
     {
       if(examMethod === 'random')
       {
-
+        console.log(examCategory, examType, examMethod, target_table);
+        query = `SELECT * FROM ${target_table} WHERE classification_name IN (?) ORDER BY RAND() LIMIT ${questionCount};`;
+        values = [classification];
       }
       else if(examMethod === 'sequential')
       {
@@ -1442,7 +1448,9 @@ router.post('/start_exam', async (req, res) => {
     {
       if(examMethod === 'random')
       {
-
+        console.log(examCategory, examType, examMethod, target_table);
+        query = `SELECT * FROM ${target_table} WHERE classification_name IN (?) AND type = '객관식' ORDER BY RAND() LIMIT ${questionCount};`;
+        values = [classification];
       }
       else if(examMethod === 'sequential')
       {
@@ -1453,7 +1461,9 @@ router.post('/start_exam', async (req, res) => {
     {
       if(examMethod === 'random')
       {
-
+        console.log(examCategory, examType, examMethod, target_table);
+        query = `SELECT * FROM ${target_table} WHERE classification_name IN (?) AND type = '주관식' ORDER BY RAND() LIMIT ${questionCount};`;
+        values = [classification];
       }
       else if(examMethod === 'sequential')
       {
@@ -1464,7 +1474,9 @@ router.post('/start_exam', async (req, res) => {
     {
       if(examMethod === 'random')
       {
-
+        console.log(examCategory, examType, examMethod, target_table);
+        query = `SELECT * FROM ${target_table} WHERE classification_name IN (?) ORDER BY RAND() LIMIT ${questionCount};`;
+        values = [classification];
       }
       else if(examMethod === 'sequential')
       {
@@ -1488,5 +1500,8 @@ router.post('/start_exam', async (req, res) => {
       res.status(200).json({ data: result });
     }
   });
+});
+router.post('/submit_exam_answer', async (req, res) =>{
+  console.log(req.body.answer, 'a'); 
 });
 module.exports = router;

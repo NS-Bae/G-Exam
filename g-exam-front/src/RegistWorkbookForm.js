@@ -4,7 +4,6 @@ import ReactDOM from 'react-dom';
 import { useState, useEffect } from 'react';
 import OcrRequest  from './OCR_Request';
 import ImgPreview from './ImagePreview';
-import ReactDOMServer from 'react-dom/client';
 
 function WorkbookChoiceForm() 
 {
@@ -108,35 +107,34 @@ function WorkbookChoiceForm()
     } else {
       console.error('새 창을 열 수 없습니다.');
     }
-};
+  };
 
   const ImageUploadComponent = () => {
     const [image, setImage] = useState('');
-  
+
     const handleImageChange = (e) => {
       const imageFile = e.target.files[0];
-      if(imageFile)
-      {
-        const reader = new FileReader();
+      if (imageFile) {
+        const formData = new FormData();
+        formData.append('image', imageFile);
 
-        reader.onload = () => {
-            setImage(reader.result);
-        };
-        reader.readAsDataURL(imageFile);
+        Object.entries(formData).forEach(([key, value]) => {
+          formData.append(key, value);
+        });
       }
     };
     const openImagePreview = () => {
-        const imagePreviewWindow = window.open('', '_blank', 'width=600,height=400');
-        const imagePreviewPage = <ImgPreview image={image} />;
+      const imagePreviewWindow = window.open('', '_blank', 'width=600,height=400');
+      const imagePreviewPage = <ImgPreview image={image} />;
       
-        imagePreviewWindow.document.write(ReactDOMServer.renderToStaticMarkup(imagePreviewPage));
+      ReactDOM.render(imagePreviewPage, imagePreviewWindow.document.body);
     };
     
   
     return (
       <div className='upper_button_place'>
-        <input type="file" onChange={handleImageChange} accept="image/*" className='img_input'/>
-        {image && <button type = 'button' className='letter_btn' onClick={openImagePreview}>미리보기</button> }
+        <input type="file" id = 'image' onChange={handleImageChange} accept="image/*" className='img_input'/>
+        {image && <button type='button' className='letter_btn' onClick={openImagePreview}>미리보기</button>}
       </div>
     );
   };
@@ -157,7 +155,7 @@ function WorkbookChoiceForm()
 
   const handleSubmit = (e) => {
     e.preventDefault();
-
+    
     console.log(formData);
 
     if (!validateForm()) {
@@ -168,6 +166,7 @@ function WorkbookChoiceForm()
     Object.entries(formData).forEach(([key, value]) => {
       formDataObject.append(key, value);
     });
+    formDataObject.append('imagePath', formData.image);
 
     // 나머지 코드는 유효성 검사를 통과한 경우의 로직
     handleButton(); 

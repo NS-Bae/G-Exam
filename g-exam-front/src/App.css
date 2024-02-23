@@ -101,6 +101,7 @@
   .test_btn
   {
     width: 80%;
+    max-width: 1000px;
     height: 50px;
     border: 0;
     outline: none;
@@ -743,4 +744,43 @@
     border-radius: 5px;
     font-size: 1.2rem;
     border: 0;
+  }
+  .exam_info_place
+  {
+    display: flex;
+    width : 95%;
+    justify-content: center;
+    flex-direction: row;
+    align-items: center;
+  }
+  .exam_info_place > p 
+  {
+    width: auto;
+    max-width: 1200px;
+    display: flex;
+    flex-direction: center;
+    align-items: center;
+  }
+  .answer_place
+  {
+    margin-top: 20px;
+    width: 85%;
+    display: flex;
+    justify-content: left;
+    flex-direction: column;
+  }
+  .answer_place > p
+  {
+    margin-bottom: 10px;
+    font-size: 1rem;
+    font-weight: bold;
+  }
+  .move_button_place
+  {
+    display: flex;
+    width: 80%;
+    max-width: 1000px;
+    margin-top: 30px;
+    flex-direction: row;
+    justify-content: space-around;
   }
