@@ -12,7 +12,7 @@ function Main()
 function RenderQuestion({examDetails})
 {
   const [result, setResult] = useState([]);
-  const [formData, setFormData] = useState({});
+  const [formData, setFormData] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [prevButtonIsDisable, setPrevButtonIsDisalee] = useState(true);
   const [nextButtonIsDisable, setNextButtonIsDisalee] = useState(false);
@@ -36,7 +36,14 @@ function RenderQuestion({examDetails})
     })
     .then((data) => {
       setResult(data.data);
-      console.log(data.data);
+      const initialFormData = data.data.map((item) => ({
+        classification_name: item.classification_name,
+        exam_id: item.exam_id,
+        user_answer: '',
+        choiceNumber:'',
+      }));
+  
+      setFormData(initialFormData);
     })
     .catch((error) => {
       console.log('데이터를 불러오는 과정에서 문제가 발생했습니다.', error)
@@ -71,25 +78,44 @@ function RenderQuestion({examDetails})
   const handleCheckAnswer = (e) => {
     const key = e.target.dataset.key;
     const value = e.target.value;
+  
+    const [classificationName, examId, choiceNumber] = key.split("/");
+  
+    const updatedFormData = [...formData];
 
-    setFormData((prevFormData) => ({
-      ...prevFormData,
-      [key]: value, // 선택된 값을 key-value 형태로 저장
-    }));
-  }
+    if (updatedFormData[currentIndex].classification_name === classificationName && parseInt(updatedFormData[currentIndex].exam_id) === parseInt(examId))    
+    {
+      updatedFormData[currentIndex].user_answer = value;
+      updatedFormData[currentIndex].choiceNumber = choiceNumber;
+      setFormData(updatedFormData);
+    } 
+    else 
+    {
+      console.log('실패1!!');
+    }
+  };
+
   const handleCheckAnswer1 = (props) => {
-    console.log(props);
     const key = props.key;
     const value = props.value;
 
-    setFormData((prevFormData) => ({
-      ...prevFormData,
-      [key]: value, // 선택된 값을 key-value 형태로 저장
-    }));
+    const [classificationName, examId] = key.split("/");
+  
+    const updatedFormData = [...formData];
+
+    if (updatedFormData[currentIndex].classification_name === classificationName && parseInt(updatedFormData[currentIndex].exam_id) === parseInt(examId))    
+    {
+      updatedFormData[currentIndex].user_answer = value;
+      setFormData(updatedFormData);
+    } 
+    else 
+    {
+      console.log('실패1!!');
+    }
   }
   const handleClickPaging = (e) => {
     const pageMove = e.target.value;
-    console.log(result.length);
+    console.log("alpha",result.length, formData);
     if (pageMove === 'next') 
     {
       if (currentIndex < result.length) 
@@ -114,6 +140,7 @@ function RenderQuestion({examDetails})
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
+        question: result,
         answer: formData,
         major: 'korean',
         examCategory: 'workbook',
@@ -142,17 +169,13 @@ function RenderQuestion({examDetails})
             <ImgPlace result={result[currentIndex]} />
             <ParagraphPlace result={result[currentIndex]} />
           </div>
-          <div className='place'>
-            <ChoiceExamForm result={result[currentIndex]} onCheckAnswer={handleCheckAnswer} />
-          </div>
-          <div className='move_button_place'>
-            <button className='letter_btn' value={'prev'} disabled={prevButtonIsDisable} onClick={handleClickPaging}>
-              이전
-            </button>
-            <button className='letter_btn' value={'next'} disabled={nextButtonIsDisable} onClick={handleClickPaging}>
-              다음
-            </button>
-          </div>
+          <ChoiceExamForm 
+            result={result[currentIndex]} 
+            nextButtonIsDisable={nextButtonIsDisable}
+            prevButtonIsDisable={prevButtonIsDisable}
+            onClickPaging={handleClickPaging}
+            onCheckAnswer={handleCheckAnswer} 
+          />
           <div className='move_button_place'>
             <button className='letter_btn' onClick={handleFinishExam}>
               시험종료
@@ -167,17 +190,13 @@ function RenderQuestion({examDetails})
             <ImgPlace result={result[currentIndex]} />
             <ParagraphPlace result={result[currentIndex]} />
           </div>
-          <div className='place'>
-            <EssayExamForm result={result[currentIndex]} onCheckAnswer={handleCheckAnswer1}/>
-          </div>
-          <div className='move_button_place'>
-            <button className='letter_btn' value={'prev'} disabled={prevButtonIsDisable} onClick={handleClickPaging}>
-              이전
-            </button>
-            <button className='letter_btn' value={'next'} disabled={nextButtonIsDisable} onClick={handleClickPaging}>
-              다음
-            </button>
-          </div>
+          <EssayExamForm 
+            result={result[currentIndex]} 
+            nextButtonIsDisable={nextButtonIsDisable}
+            prevButtonIsDisable={prevButtonIsDisable}
+            onClickPaging={handleClickPaging}
+            onCheckAnswer={handleCheckAnswer} 
+          />
           <div className='move_button_place'>
             <button className='letter_btn' onClick={handleFinishExam}>
               시험종료
@@ -204,33 +223,42 @@ function ParagraphPlace({result})
     <p>{paragraph}</p>
   )
 }
-function ChoiceExamForm({result, onCheckAnswer })
+function ChoiceExamForm({ result, nextButtonIsDisable, prevButtonIsDisable, onClickPaging, onCheckAnswer })
 {
-  console.log(result.choice1);
   const answerChoice = [];
 
   for (let i = 1; i <= 5; i++) {
     const choice = `choice${i}`;
-    const key = `${result.classification_name}_${result.exam_id}_${choice}`;
+    const key = `${result.classification_name}/${result.exam_id}/${choice}`;
     if (result[choice] && result[choice] !== '') {
       answerChoice.push({ key, value: result[choice] });
     }
   }
-  console.log(answerChoice);
+  console.log('Delta',answerChoice);
   
   return (
-    <div className='answer_place'>
-      <p>{result.question}</p>
-      {answerChoice.map((item) => (
-        <div>
-          <input type='radio' id={item.key} key={item.key} name = 'answer' data-key={item.key} value={item.value} onChange={onCheckAnswer}/>{item.value}
-        </div>
-      ))}
-    </div>
+    <>
+      <div className='answer_place'>
+        <p>{result.question}</p>
+        {answerChoice.map((item) => (
+          <div>
+            <input type='radio' id={item.key} key={item.key} name = 'answer' data-key={item.key} value={item.value} onChange={onCheckAnswer}/>{item.value}
+          </div>
+        ))}
+      </div>
+      <div className='move_button_place'>
+        <button className='letter_btn' value={'prev'} disabled={prevButtonIsDisable} onClick={onClickPaging}>
+          이전
+        </button>
+        <button className='letter_btn' value={'next'} disabled={nextButtonIsDisable} onClick={onClickPaging}>
+          다음
+        </button>
+      </div>
+    </>
   );  
 }
-function EssayExamForm({ result, onCheckAnswer }) {
-  const key = `${result.classification_name}_${result.exam_id}`;
+function EssayExamForm({ result, nextButtonIsDisable, prevButtonIsDisable, onClickPaging, onCheckAnswer }) {
+  const key = `${result.classification_name}/${result.exam_id}`;
   const [inputValue, setInputValue] = useState('');
 
   const handleInputChange = (e) => {
@@ -242,17 +270,27 @@ function EssayExamForm({ result, onCheckAnswer }) {
   console.log(result);
 
   return (
-    <div className='answer_place'>
-      <p>{result.question}</p>
-      <input
-        type='text'
-        key={key}
-        name='answer'
-        data-key={key}
-        value={inputValue}
-        onChange={handleInputChange}
-      />
-    </div>
+    <>
+      <div className='answer_place'>
+        <p>{result.question}</p>
+        <input
+          type='text'
+          key={key}
+          name='answer'
+          data-key={key}
+          value={inputValue}
+          onChange={handleInputChange}
+        />
+      </div>
+      <div className='move_button_place'>
+        <button className='letter_btn' value={'prev'} disabled={prevButtonIsDisable} onClick={onClickPaging}>
+          이전
+        </button>
+        <button className='letter_btn' value={'next'} disabled={nextButtonIsDisable} onClick={onClickPaging}>
+          다음
+        </button>
+      </div>
+    </>
   );
 }
 function MyApp() 

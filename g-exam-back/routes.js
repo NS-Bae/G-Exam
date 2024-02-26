@@ -1501,7 +1501,21 @@ router.post('/start_exam', async (req, res) => {
     }
   });
 });
-router.post('/submit_exam_answer', async (req, res) =>{
-  console.log(req.body.answer, 'a'); 
+router.post('/submit_exam_answer', async (req, res) => {
+  const question = req.body.question;
+  const answer = req.body.answer;
+  const major = req.body.major;
+  const examCategory = req.body.examCategory;
+  const target_table = `${examCategory}_${major}`;
+
+  console.log(target_table, answer, question);
+
+  let query = '', value = [];
+
+
+  if(examCategory === 'workbook')
+  {
+    
+  }
 });
 module.exports = router;
