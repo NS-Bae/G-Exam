@@ -1394,97 +1394,55 @@ router.post('/start_exam', async (req, res) => {
   const examType = examInfo.examControl;
   const examMethod = examInfo.examType;
   const classification = examInfo.selectedTag;
+  const startNumber = examInfo.startNumber;
   const questionCount = examInfo.questionCount;
   const target_table = `${examCategory}_${convertKorean(examInfo.subject)}`;
 
   let query='', values=[];
 
-  if(examCategory === 'workbook')
+  if(examType === 'choice')
   {
-    if(examType === 'choice')
+    if(examMethod === 'random')
     {
-      if(examMethod === 'random')
-      {
-        console.log(examCategory, examType, examMethod, target_table);
-        query = `SELECT * FROM ${target_table} WHERE classification_name IN (?) AND type = '객관식' ORDER BY RAND() LIMIT ${questionCount};`;
-        values = [classification];
-      }
-      else if(examMethod === 'sequential')
-      {
-
-      }
+      console.log(examCategory, examType, examMethod, target_table);
+      query = `SELECT * FROM ${target_table} WHERE classification_name IN (?) AND type = '객관식' ORDER BY RAND() LIMIT ${questionCount};`;
+      values = [classification];
     }
-    else if(examType === 'essay')
+    else if(examMethod === 'sequential')
     {
-      if(examMethod === 'random')
-      {
-        console.log(examCategory, examType, examMethod, target_table);
-        query = `SELECT * FROM ${target_table} WHERE classification_name IN (?) AND type = '주관식' ORDER BY RAND() LIMIT ${questionCount};`;
-        values = [classification];
-      }
-      else if(examMethod === 'sequential')
-      {
-        
-      }
+      query = `SELECT * FROM ${target_table} WHERE classification_name = ? AND type = '객관식' ORDER BY exam_id LIMIT ${startNumber}, ${questionCount};`;
+      values = [classification];
     }
-    else if(examType === 'all')
-    {
-      if(examMethod === 'random')
-      {
-        console.log(examCategory, examType, examMethod, target_table);
-        query = `SELECT * FROM ${target_table} WHERE classification_name IN (?) ORDER BY RAND() LIMIT ${questionCount};`;
-        values = [classification];
-      }
-      else if(examMethod === 'sequential')
-      {
-        
-      }
-    }
-    else return null;
   }
-  else if(examCategory === 'pre_exam')
+  else if(examType === 'essay')
   {
-    if(examType === 'choice')
+    if(examMethod === 'random')
     {
-      if(examMethod === 'random')
-      {
-        console.log(examCategory, examType, examMethod, target_table);
-        query = `SELECT * FROM ${target_table} WHERE classification_name IN (?) AND type = '객관식' ORDER BY RAND() LIMIT ${questionCount};`;
-        values = [classification];
-      }
-      else if(examMethod === 'sequential')
-      {
-
-      }
+      console.log(examCategory, examType, examMethod, target_table);
+      query = `SELECT * FROM ${target_table} WHERE classification_name IN (?) AND type = '주관식' ORDER BY RAND() LIMIT ${questionCount};`;
+      values = [classification];
     }
-    else if(examType === 'essay')
+    else if(examMethod === 'sequential')
     {
-      if(examMethod === 'random')
-      {
-        console.log(examCategory, examType, examMethod, target_table);
-        query = `SELECT * FROM ${target_table} WHERE classification_name IN (?) AND type = '주관식' ORDER BY RAND() LIMIT ${questionCount};`;
-        values = [classification];
-      }
-      else if(examMethod === 'sequential')
-      {
-        
-      }
+      query = `SELECT * FROM ${target_table} WHERE classification_name = ? AND type = '주관식' ORDER BY exam_id LIMIT ${startNumber}, ${questionCount};`;
+      values = [classification];
     }
-    else if(examType === 'all')
-    {
-      if(examMethod === 'random')
-      {
-        console.log(examCategory, examType, examMethod, target_table);
-        query = `SELECT * FROM ${target_table} WHERE classification_name IN (?) ORDER BY RAND() LIMIT ${questionCount};`;
-        values = [classification];
-      }
-      else if(examMethod === 'sequential')
-      {
-        
-      }
-    }
-    else return null;
   }
+  else if(examType === 'all')
+  {
+    if(examMethod === 'random')
+    {
+      console.log(examCategory, examType, examMethod, target_table);
+      query = `SELECT * FROM ${target_table} WHERE classification_name IN (?) ORDER BY RAND() LIMIT ${questionCount};`;
+      values = [classification];
+    }
+    else if(examMethod === 'sequential')
+    {
+      query = `SELECT * FROM ${target_table} WHERE classification_name = ? ORDER BY exam_id LIMIT ${startNumber}, ${questionCount};`;
+      values = [classification];
+    }
+  }
+  else return null;
 
   console.log(query, values);
 
@@ -1502,20 +1460,201 @@ router.post('/start_exam', async (req, res) => {
   });
 });
 router.post('/submit_exam_answer', async (req, res) => {
-  const question = req.body.question;
   const answer = req.body.answer;
   const major = req.body.major;
+  const user = req.body.user;
   const examCategory = req.body.examCategory;
   const target_table = `${examCategory}_${major}`;
 
-  console.log(target_table, answer, question);
+  const convertAnswer = Object.values(answer);
+  const classificationArray = convertAnswer.map((item) => item.classification_name);
+  const examIdArray = convertAnswer.map((item) => item.exam_id);
+  const userAnswerArray  = convertAnswer.map((item) => item.user_answer);
+  const userChoiceArray  = convertAnswer.map((item) => item.choiceNumber);
+  const combinedInfoArray = classificationArray.map((item, index) => [item, examIdArray[index]]);
+  const userChoiceNumberArray = userChoiceArray.reduce((acc, choice) => {
+    if (choice !== '' ) {
+      const number = parseInt(choice.match(/\d+/)[0]);
+      if (!isNaN(number)) {
+        acc.push(number);
+      }
+    }
+    else if( choice === '' )
+    {
+      acc.push('');
+    }
+    return acc;
+  }, []);
+  const updatedAnswer = convertAnswer.map((row, index) => {
+    const userChoiceNumber = userChoiceNumberArray[index];
+    return { ...row, choiceNumber: userChoiceNumber };
+  });
+  
+  const query = `
+    SELECT classification_name, exam_id, paragraph, question, answer, type FROM ${target_table} 
+    WHERE (classification_name, exam_id) IN (?)`;
+  const value = [combinedInfoArray];
 
-  let query = '', value = [];
-
-
-  if(examCategory === 'workbook')
-  {
-    
-  }
+  db.query(query, value, (err, result) => {
+    if (err) 
+    {
+      console.log(err);
+      res.status(500).json({ error: err });
+    } 
+    else 
+    {
+      const objectiveQuestions = result.filter((item) => item.type === '객관식');
+      const updatedObjectiveQuestions = objectiveQuestions.map((question) => {
+        const answerNumber = parseInt(question.answer);
+        return { ...question, answer: answerNumber };
+      });
+      const subjectiveQuestions = result.filter((item) => item.type === '주관식');
+      const {correct, wrong, wrongAnswer} = MarkingAnswer({updatedObjectiveQuestions, subjectiveQuestions, updatedAnswer});
+      console.log('a',correct, wrong, wrongAnswer);
+      writeExamRecord(correct, wrong, user, wrongAnswer, major);
+      res.status(200).json({ correct, wrong });
+    }
+  });
 });
+function MarkingAnswer({updatedObjectiveQuestions, subjectiveQuestions, updatedAnswer})
+{
+  let wrong=0, correct = 0;
+  let wrongAnswer = [];
+
+  for(const answer in updatedAnswer)
+  {
+    if(updatedAnswer[answer].choiceNumber === '' && updatedAnswer[answer].user_answer === '')
+    {
+      for(const question in subjectiveQuestions)
+      {
+        if(updatedAnswer[answer].classification_name === subjectiveQuestions[question].classification_name && updatedAnswer[answer].exam_id === subjectiveQuestions[question].exam_id)
+        {
+          wrong++;
+          wrongAnswer.push({
+            classification : subjectiveQuestions[question].classification_name,
+            examId : subjectiveQuestions[question].exam_id,
+            paragraph : subjectiveQuestions[question].paragraph,
+            question : subjectiveQuestions[question].question,
+            wrongAnswer : updatedAnswer[answer].user_answer,
+            correctAnswer : subjectiveQuestions[question].answer,
+          });
+        }
+      }
+      for(const question in updatedObjectiveQuestions)
+      {
+        if(updatedAnswer[answer].classification_name === updatedObjectiveQuestions[question].classification_name && updatedAnswer[answer].exam_id === updatedObjectiveQuestions[question].exam_id)
+        {
+          wrong++;
+          wrongAnswer.push({
+            classification : updatedObjectiveQuestions[question].classification_name,
+            examId : updatedObjectiveQuestions[question].exam_id,
+            paragraph : updatedObjectiveQuestions[question].paragraph,
+            question : updatedObjectiveQuestions[question].question,
+            wrongAnswer : updatedAnswer[answer].user_answer,
+            correctAnswer : updatedObjectiveQuestions[question].answer,
+          });
+        }
+      }
+    }
+    else if(updatedAnswer[answer].choiceNumber === '' && updatedAnswer[answer].user_answer !== '')//주관식
+    {
+      for(const question in subjectiveQuestions)
+      {
+        if(updatedAnswer[answer].classification_name === subjectiveQuestions[question].classification_name && updatedAnswer[answer].exam_id === subjectiveQuestions[question].exam_id)
+        {
+          if(updatedAnswer[answer].user_answer === subjectiveQuestions[question].answer)
+          {
+            correct++;
+          }
+          else
+          {
+            wrong++;
+            wrongAnswer.push({
+              classification : subjectiveQuestions[question].classification_name,
+              examId : subjectiveQuestions[question].exam_id,
+              paragraph : subjectiveQuestions[question].paragraph,
+              question : subjectiveQuestions[question].question,
+              wrongAnswer : updatedAnswer[answer].user_answer,
+              correctAnswer : subjectiveQuestions[question].answer,
+            });
+          }
+        
+        }
+      }
+    }
+    else
+    {
+      for(const j in updatedObjectiveQuestions)
+      {
+        if(updatedAnswer[answer].classification_name === updatedObjectiveQuestions[j].classification_name && updatedAnswer[answer].exam_id === updatedObjectiveQuestions[j].exam_id)
+        {
+          if(updatedAnswer[answer].choiceNumber === updatedObjectiveQuestions[j].answer)
+          {
+            correct++;
+          }
+          else
+          {
+            wrong++;
+            wrongAnswer.push({
+              classification : updatedObjectiveQuestions[j].classification_name,
+              examId : updatedObjectiveQuestions[j].exam_id,
+              paragraph : updatedObjectiveQuestions[j].paragraph,
+              question : updatedObjectiveQuestions[j].question,
+              wrongAnswer : updatedAnswer[answer].user_answer,
+              correctAnswer : updatedObjectiveQuestions[j].answer,
+            });
+          }
+        }
+      }
+    }
+  }
+  return {correct, wrong, wrongAnswer};
+}
+function writeExamRecord(correct, wrong, user, wrongAnswers, major)
+{
+  const now = moment();
+  const dayFormat = now.format('YY-MM-DD-HH-mm-ss');
+  const majorName = convertEnglish(major);
+  const wordTestInfo = `${user.name}_${majorName}_${dayFormat}`;
+  const record_score = (correct/(correct+wrong))*100;
+
+  const data = [`${user.name}학생의 ${majorName} 시험 오답모음`]; // 결과값
+
+  data.push(wrongAnswers);
+  data.push([`정답 : ${correct}개, 오답 : ${wrong}개, 점수 : ${record_score}점`])
+
+  console.log(data);
+
+  fs.exists(wordTestInfo, (exists) => {
+    if (exists) {
+      // 파일이 존재하면 덮어쓰기
+      fs.writeFile(`C:\\Users\\USER\\G-Exam\\시험결과 상세정보\\${wordTestInfo}.txt`, data.join('\n'), (err) => {
+        if (err) throw err;
+        console.log('파일 저장 완료');
+      });
+    } else {
+      // 파일이 없으면 새로 생성
+      fs.writeFile(`C:\\Users\\USER\\G-Exam\\시험결과 상세정보\\${wordTestInfo}.txt`, data.join('\n'), (err) => {
+        if (err) throw err;
+        console.log('파일 저장 완료');
+      });
+    }
+  });
+  const absolutePath = path.resolve(__dirname, '../output', `${wordTestInfo}.txt`);
+
+  const query = `INSERT INTO exam_record VALUES ('${user.id}', '${wordTestInfo}', ${record_score}, '${absolutePath}')`;
+
+  console.log(query);
+
+  db.query(query, (err, results) => {
+    if (err) 
+    {
+      console.log(err);
+    }
+    else
+    {
+      console.log(results);
+    }
+  });
+};
 module.exports = router;

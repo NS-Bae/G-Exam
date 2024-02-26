@@ -16,6 +16,27 @@ function RenderQuestion({examDetails})
   const [currentIndex, setCurrentIndex] = useState(0);
   const [prevButtonIsDisable, setPrevButtonIsDisalee] = useState(true);
   const [nextButtonIsDisable, setNextButtonIsDisalee] = useState(false);
+  const [user, setUser] = useState([]);
+  const fetchUserInfo = async () => {
+    try 
+    {
+      const response = await fetch('/profile');
+      if (!response.ok) 
+      {
+        throw new Error('HTTP 오류 ' + response.status);
+      }
+      const data = await response.json();
+      setUser(data.user);
+    } 
+    catch (error) 
+    {
+      console.error('로그인이 되어있지 않습니다.', error);
+    }
+  };
+  
+  useEffect(() => {
+    fetchUserInfo();
+  }, []);
 
   const fetchExam = () =>{
     fetch('/start_exam', {
@@ -94,7 +115,6 @@ function RenderQuestion({examDetails})
       console.log('실패1!!');
     }
   };
-
   const handleCheckAnswer1 = (props) => {
     const key = props.key;
     const value = props.value;
@@ -140,10 +160,10 @@ function RenderQuestion({examDetails})
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        question: result,
         answer: formData,
         major: 'korean',
         examCategory: 'workbook',
+        user,
       }),
     })
       .then((response) => {
@@ -195,7 +215,7 @@ function RenderQuestion({examDetails})
             nextButtonIsDisable={nextButtonIsDisable}
             prevButtonIsDisable={prevButtonIsDisable}
             onClickPaging={handleClickPaging}
-            onCheckAnswer={handleCheckAnswer} 
+            onCheckAnswer={handleCheckAnswer1} 
           />
           <div className='move_button_place'>
             <button className='letter_btn' onClick={handleFinishExam}>
