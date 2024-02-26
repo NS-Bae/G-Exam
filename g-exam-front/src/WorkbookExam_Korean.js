@@ -173,8 +173,8 @@ function RenderQuestion({examDetails})
         return response.json();
       })
       .then((data) => {
-        alert(`정답 : ${data.correct}개, 오답 : ${data.wrong}개`);/* 
-        navigate('/'); */
+        alert(`정답 : ${data.correct}개, 오답 : ${data.wrong}개`);
+        navigate('/');
       })
       .catch((error) => {
         console.log('데이터 처리과정에서 문제가 발생하였습니다.', error);
@@ -332,8 +332,8 @@ function MyApp()
           setIsLoggedIn(true);
         }
         else
-        {/* 
-          navigate('/'); */
+        {
+          navigate('/');
           alert('로그인이 필요합니다.');
         }
       });
