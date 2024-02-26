@@ -17,6 +17,8 @@ function RenderQuestion({examDetails})
   const [prevButtonIsDisable, setPrevButtonIsDisalee] = useState(true);
   const [nextButtonIsDisable, setNextButtonIsDisalee] = useState(false);
   const [user, setUser] = useState([]);
+  const navigate = useNavigate();
+  
   const fetchUserInfo = async () => {
     try 
     {
