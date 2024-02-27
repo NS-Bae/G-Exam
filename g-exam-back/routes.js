@@ -1469,13 +1469,14 @@ router.post('/submit_exam_answer', async (req, res) => {
   const convertAnswer = Object.values(answer);
   const classificationArray = convertAnswer.map((item) => item.classification_name);
   const examIdArray = convertAnswer.map((item) => item.exam_id);
-  const userAnswerArray  = convertAnswer.map((item) => item.user_answer);
   const userChoiceArray  = convertAnswer.map((item) => item.choiceNumber);
   const combinedInfoArray = classificationArray.map((item, index) => [item, examIdArray[index]]);
   const userChoiceNumberArray = userChoiceArray.reduce((acc, choice) => {
-    if (choice !== '' ) {
+    if (choice !== '' ) 
+    {
       const number = parseInt(choice.match(/\d+/)[0]);
-      if (!isNaN(number)) {
+      if (!isNaN(number)) 
+      {
         acc.push(number);
       }
     }
@@ -1491,7 +1492,7 @@ router.post('/submit_exam_answer', async (req, res) => {
   });
   
   const query = `
-    SELECT classification_name, exam_id, paragraph, question, answer, type FROM ${target_table} 
+    SELECT classification_name, exam_id, paragraph, question, choice1, choice2, choice3, choice4, choice5, answer, type FROM ${target_table} 
     WHERE (classification_name, exam_id) IN (?)`;
   const value = [combinedInfoArray];
 
@@ -1510,7 +1511,7 @@ router.post('/submit_exam_answer', async (req, res) => {
       });
       const subjectiveQuestions = result.filter((item) => item.type === '주관식');
       const {correct, wrong, wrongAnswer} = MarkingAnswer({updatedObjectiveQuestions, subjectiveQuestions, updatedAnswer});
-      console.log('a',correct, wrong, wrongAnswer);
+/*       console.log('a',correct, wrong, wrongAnswer); */
       writeExamRecord(correct, wrong, user, wrongAnswer, major);
       res.status(200).json({ correct, wrong });
     }
@@ -1523,40 +1524,7 @@ function MarkingAnswer({updatedObjectiveQuestions, subjectiveQuestions, updatedA
 
   for(const answer in updatedAnswer)
   {
-    if(updatedAnswer[answer].choiceNumber === '' && updatedAnswer[answer].user_answer === '')
-    {
-      for(const question in subjectiveQuestions)
-      {
-        if(updatedAnswer[answer].classification_name === subjectiveQuestions[question].classification_name && updatedAnswer[answer].exam_id === subjectiveQuestions[question].exam_id)
-        {
-          wrong++;
-          wrongAnswer.push({
-            classification : subjectiveQuestions[question].classification_name,
-            examId : subjectiveQuestions[question].exam_id,
-            paragraph : subjectiveQuestions[question].paragraph,
-            question : subjectiveQuestions[question].question,
-            wrongAnswer : updatedAnswer[answer].user_answer,
-            correctAnswer : subjectiveQuestions[question].answer,
-          });
-        }
-      }
-      for(const question in updatedObjectiveQuestions)
-      {
-        if(updatedAnswer[answer].classification_name === updatedObjectiveQuestions[question].classification_name && updatedAnswer[answer].exam_id === updatedObjectiveQuestions[question].exam_id)
-        {
-          wrong++;
-          wrongAnswer.push({
-            classification : updatedObjectiveQuestions[question].classification_name,
-            examId : updatedObjectiveQuestions[question].exam_id,
-            paragraph : updatedObjectiveQuestions[question].paragraph,
-            question : updatedObjectiveQuestions[question].question,
-            wrongAnswer : updatedAnswer[answer].user_answer,
-            correctAnswer : updatedObjectiveQuestions[question].answer,
-          });
-        }
-      }
-    }
-    else if(updatedAnswer[answer].choiceNumber === '' && updatedAnswer[answer].user_answer !== '')//주관식
+    if(updatedAnswer[answer].exam_type === '주관식')
     {
       for(const question in subjectiveQuestions)
       {
@@ -1578,17 +1546,16 @@ function MarkingAnswer({updatedObjectiveQuestions, subjectiveQuestions, updatedA
               correctAnswer : subjectiveQuestions[question].answer,
             });
           }
-        
         }
       }
     }
-    else
+    else if(updatedAnswer[answer].exam_type === '객관식')
     {
-      for(const j in updatedObjectiveQuestions)
+      for(const question in updatedObjectiveQuestions)
       {
-        if(updatedAnswer[answer].classification_name === updatedObjectiveQuestions[j].classification_name && updatedAnswer[answer].exam_id === updatedObjectiveQuestions[j].exam_id)
+        if(updatedAnswer[answer].classification_name === updatedObjectiveQuestions[question].classification_name && updatedAnswer[answer].exam_id === updatedObjectiveQuestions[question].exam_id)
         {
-          if(updatedAnswer[answer].choiceNumber === updatedObjectiveQuestions[j].answer)
+          if(updatedAnswer[answer].user_answer === updatedObjectiveQuestions[question].answer)
           {
             correct++;
           }
@@ -1596,12 +1563,17 @@ function MarkingAnswer({updatedObjectiveQuestions, subjectiveQuestions, updatedA
           {
             wrong++;
             wrongAnswer.push({
-              classification : updatedObjectiveQuestions[j].classification_name,
-              examId : updatedObjectiveQuestions[j].exam_id,
-              paragraph : updatedObjectiveQuestions[j].paragraph,
-              question : updatedObjectiveQuestions[j].question,
+              classification : updatedObjectiveQuestions[question].classification_name,
+              examId : updatedObjectiveQuestions[question].exam_id,
+              paragraph : updatedObjectiveQuestions[question].paragraph,
+              question : updatedObjectiveQuestions[question].question,
+              choice1 : updatedObjectiveQuestions[question].choice1,
+              choice2 : updatedObjectiveQuestions[question].choice2,
+              choice3 : updatedObjectiveQuestions[question].choice3,
+              choice4 : updatedObjectiveQuestions[question].choice4,
+              choice5 : updatedObjectiveQuestions[question].choice5,
               wrongAnswer : updatedAnswer[answer].user_answer,
-              correctAnswer : updatedObjectiveQuestions[j].answer,
+              correctAnswer : updatedObjectiveQuestions[question].answer,
             });
           }
         }
@@ -1620,10 +1592,20 @@ function writeExamRecord(correct, wrong, user, wrongAnswers, major)
 
   const data = [`${user.name}학생의 ${majorName} 시험 오답모음`]; // 결과값
 
-  data.push(wrongAnswers);
   data.push([`정답 : ${correct}개, 오답 : ${wrong}개, 점수 : ${record_score}점`])
 
-  console.log(data);
+  for(const i in wrongAnswers)
+  {
+    data.push([`정보 : ${wrongAnswers[i].classification} ${wrongAnswers[i].examId}번 문제`]);
+    data.push([`지문 : ${wrongAnswers[i].paragraph}`]);
+    data.push([`문제 : ${wrongAnswers[i].question}`]);
+    data.push([`선지1 : ${wrongAnswers[i].choice1}`]);
+    data.push([`선지2 : ${wrongAnswers[i].choice2}`]);
+    data.push([`선지3 : ${wrongAnswers[i].choice3}`]);
+    data.push([`선지4 : ${wrongAnswers[i].choice4}`]);
+    data.push([`선지5 : ${wrongAnswers[i].choice5}`]);
+    data.push([`선택한 답 : ${wrongAnswers[i].wrongAnswer} ,  정답 : ${wrongAnswers[i].correctAnswer}`])
+  }
 
   fs.exists(wordTestInfo, (exists) => {
     if (exists) {
@@ -1641,10 +1623,7 @@ function writeExamRecord(correct, wrong, user, wrongAnswers, major)
     }
   });
   const absolutePath = path.resolve(__dirname, '../output', `${wordTestInfo}.txt`);
-
   const query = `INSERT INTO exam_record VALUES ('${user.id}', '${wordTestInfo}', ${record_score}, '${absolutePath}')`;
-
-  console.log(query);
 
   db.query(query, (err, results) => {
     if (err) 

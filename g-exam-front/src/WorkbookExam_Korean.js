@@ -18,7 +18,7 @@ function RenderQuestion({examDetails})
   const [nextButtonIsDisable, setNextButtonIsDisalee] = useState(false);
   const [user, setUser] = useState([]);
   const navigate = useNavigate();
-  
+       
   const fetchUserInfo = async () => {
     try 
     {
@@ -64,6 +64,7 @@ function RenderQuestion({examDetails})
         exam_id: item.exam_id,
         user_answer: '',
         choiceNumber:'',
+        exam_type: item.type,
       }));
   
       setFormData(initialFormData);
@@ -74,22 +75,18 @@ function RenderQuestion({examDetails})
   }
   useEffect(() => {
     fetchExam();
-    console.log(result);
   }, []);
   useEffect(() => {
-    console.log(currentIndex, prevButtonIsDisable, nextButtonIsDisable, result.length);
     if(currentIndex<result.length-1)
     {
       setNextButtonIsDisalee(false);
     }
     else
     {
-      console.log('NEXT END');
       setNextButtonIsDisalee(true);
     }
     if(currentIndex === 0)
     {
-      console.log('PREV END');
       setPrevButtonIsDisalee(true);
     }
     else
@@ -137,7 +134,7 @@ function RenderQuestion({examDetails})
   }
   const handleClickPaging = (e) => {
     const pageMove = e.target.value;
-    console.log("alpha",result.length, formData);
+
     if (pageMove === 'next') 
     {
       if (currentIndex < result.length) 
@@ -154,8 +151,6 @@ function RenderQuestion({examDetails})
     }
   };  
   const handleFinishExam = (e) => {
-    console.log(formData);
-
     fetch('/submit_exam_answer', {
       method: 'POST',
       headers: {
@@ -229,6 +224,7 @@ function RenderQuestion({examDetails})
     </>
   );
 }
+//작업필요
 function ImgPlace({result})
 {
   const image = result.image;
@@ -249,14 +245,15 @@ function ChoiceExamForm({ result, nextButtonIsDisable, prevButtonIsDisable, onCl
 {
   const answerChoice = [];
 
-  for (let i = 1; i <= 5; i++) {
+  for (let i = 1; i <= 5; i++) 
+  {
     const choice = `choice${i}`;
     const key = `${result.classification_name}/${result.exam_id}/${choice}`;
-    if (result[choice] && result[choice] !== '') {
+    if (result[choice] && result[choice] !== '') 
+    {
       answerChoice.push({ key, value: result[choice] });
     }
   }
-  console.log('Delta',answerChoice);
   
   return (
     <>
@@ -289,8 +286,6 @@ function EssayExamForm({ result, nextButtonIsDisable, prevButtonIsDisable, onCli
     onCheckAnswer({ key, value });
   };
 
-  console.log(result);
-
   return (
     <>
       <div className='answer_place'>
@@ -319,9 +314,7 @@ function MyApp()
 {
   const location = useLocation();
   const searchParams = new URLSearchParams(location.search);
-  const examDetails = JSON.parse(decodeURIComponent(searchParams.get('examDetails')));
-  const examType = examDetails.examType;
-  
+  const examDetails = JSON.parse(decodeURIComponent(searchParams.get('examDetails')));  
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const navigate = useNavigate();
 
@@ -340,7 +333,7 @@ function MyApp()
         }
       });
   }, [isLoggedIn, navigate]);
-  console.log(examDetails);
+  
   return (
     <div className = "background">
       <div className = "wrap">
