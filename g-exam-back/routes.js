@@ -166,7 +166,7 @@ router.post('/get_exam_record', (req, res) => {
     return res.status(400).json({ error: 'Invalid request parameters' });
   }
 
-  if(formType === "pre_exam")
+  if(formType === "exam")
   {
     if(user.user_type === '학생')
     {
@@ -205,7 +205,7 @@ router.post('/get_exam_record', (req, res) => {
       }
     }
   }
-  else if(formType === "eng_word")
+  else if(formType === "word")
   {
     if(user.user_type === '학생')
     {
@@ -248,6 +248,27 @@ router.post('/get_exam_record', (req, res) => {
   {
     console.log("옳바르지 않은 요청입니다.");
   }
+});
+router.post('/read_txt_file', (req, res) => {
+  const path = req.body.recordInfo3;
+
+  const filePath = path;
+  console.log(filePath);
+
+  fs.readFile(filePath, 'utf8', (err, data) => {
+    if (err) 
+    {
+      console.error(err);
+      return res.status(500).send({ message: '파일 읽기 실패' });
+    }
+
+    const lines = data.split('\n');
+
+    const response = {
+      lines,
+    };
+    res.json(response);
+  });
 });
 //변경 불필요.
 router.post('/change_state', (req, res) => {
@@ -1356,28 +1377,28 @@ function writeWordExamRecord(correct, wrong, wrongAnswers, user, major, correctA
   }
   data.push([`정답 : ${correct}개, 오답 : ${wrong}개, 점수 : ${record_score}점`])
 
-  fs.exists(wordTestInfo, (exists) => {
+  const filePath = `C:\\Users\\USER\\G-Exam\\시험결과_상세정보\\${wordTestInfo}.txt`;
+
+  fs.exists(filePath, (exists) => {
     if (exists) {
       // 파일이 존재하면 덮어쓰기
-      fs.writeFile(`C:\\Users\\USER\\G-Exam\\시험결과 상세정보\\${wordTestInfo}.txt`, data.join('\n'), (err) => {
+      fs.writeFile(filePath, data.join('\n'), (err) => {
         if (err) throw err;
-        console.log('파일 저장 완료');
+        console.log('파일 저장 완료', filePath);
       });
     } else {
       // 파일이 없으면 새로 생성
-      fs.writeFile(`C:\\Users\\USER\\G-Exam\\시험결과 상세정보\\${wordTestInfo}.txt`, data.join('\n'), (err) => {
+      fs.writeFile(filePath, data.join('\n'), (err) => {
         if (err) throw err;
-        console.log('파일 저장 완료');
+        console.log('파일 저장 완료', filePath);
       });
     }
   });
-  const absolutePath = path.resolve(__dirname, '../output', `${wordTestInfo}.txt`);
 
-  const query = `INSERT INTO exam_word_record VALUES ('${user.id}', '${wordTestInfo}', ${record_score}, '${absolutePath}')`;
+  const query = `INSERT INTO exam_record VALUES (?, ?, ?, ?)`;
+  const values = [user.id, wordTestInfo, record_score, filePath];
 
-  console.log(query);
-
-  db.query(query, (err, results) => {
+  db.query(query, values, (err, results) => {
     if (err) 
     {
       console.log(err);
@@ -1607,25 +1628,27 @@ function writeExamRecord(correct, wrong, user, wrongAnswers, major)
     data.push([`선택한 답 : ${wrongAnswers[i].wrongAnswer} ,  정답 : ${wrongAnswers[i].correctAnswer}`])
   }
 
-  fs.exists(wordTestInfo, (exists) => {
+  const filePath = `C:\\Users\\USER\\G-Exam\\시험결과_상세정보\\${wordTestInfo}.txt`;
+
+  fs.exists(filePath, (exists) => {
     if (exists) {
       // 파일이 존재하면 덮어쓰기
-      fs.writeFile(`C:\\Users\\USER\\G-Exam\\시험결과 상세정보\\${wordTestInfo}.txt`, data.join('\n'), (err) => {
+      fs.writeFile(filePath, data.join('\n'), (err) => {
         if (err) throw err;
         console.log('파일 저장 완료');
       });
     } else {
       // 파일이 없으면 새로 생성
-      fs.writeFile(`C:\\Users\\USER\\G-Exam\\시험결과 상세정보\\${wordTestInfo}.txt`, data.join('\n'), (err) => {
+      fs.writeFile(filePath, data.join('\n'), (err) => {
         if (err) throw err;
         console.log('파일 저장 완료');
       });
     }
   });
-  const absolutePath = path.resolve(__dirname, '../output', `${wordTestInfo}.txt`);
-  const query = `INSERT INTO exam_record VALUES ('${user.id}', '${wordTestInfo}', ${record_score}, '${absolutePath}')`;
 
-  db.query(query, (err, results) => {
+  const query = `INSERT INTO exam_record VALUES (?, ?, ?, ?)`;
+  const values = [user.id, wordTestInfo, record_score, filePath];
+  db.query(query, values, (err, results) => {
     if (err) 
     {
       console.log(err);

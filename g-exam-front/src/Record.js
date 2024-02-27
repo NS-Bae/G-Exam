@@ -2,6 +2,8 @@ import './App.css';
 import React from 'react';
 import { useState, useEffect } from 'react';
 import { Link } from "react-router-dom";
+import Modal from 'react-modal';
+import RecordModal from './RecordModal';
 
 function Main()
 {
@@ -22,16 +24,16 @@ function ChangeForm({ onFormTypeChange }) {
     <div className="input_place">
       <div className="radiobtn_place">
         <button
-          onClick={() => handleButtonClick('pre_exam')}
-          className={formType === 'pre_exam' ? 'active' : ''}
+          onClick={() => handleButtonClick('exam')}
+          className={formType === 'exam' ? 'active' : ''}
         >
-          기출시험 결과
+          일반시험 결과
         </button>
         <button
-          onClick={() => handleButtonClick('eng_word')}
-          className={formType === 'eng_word' ? 'active' : ''}
+          onClick={() => handleButtonClick('word')}
+          className={formType === 'word' ? 'active' : ''}
         >
-          단어 시험 결과
+          단어시험 결과
         </button>
       </div>
     </div>
@@ -43,19 +45,19 @@ function Check({ formType, user })
   console.log(formType);
   if(user.user_type === "학생")
   {
-    if(formType === 'eng_word')
+    if(formType === 'word')
     {
       return (
         <div>
-          <p>{user.name}의 영단어 시험 결과</p>
+          <p>{user.name}의 단어 시험 결과</p>
         </div>
       );
     }
-    if(formType === 'pre_exam')
+    else if(formType === 'exam')
     {
       return (
         <div>
-          <p>{user.name}의 기출문제 시험 결과</p>
+          <p>{user.name}의 시험문제 결과</p>
         </div>
       );
     }
@@ -70,12 +72,23 @@ function Check({ formType, user })
   }
   else if(user.user_type === "선생")
   {
+    if(formType === 'word')
+    {
+      return (
+        <div>
+          <p>전체 학생 단어 시험 결과</p>
+        </div>
+      );
+    }
+    else if(formType === 'exam')
+    {
+      return (
+        <div>
+          <p>전체 학생 일반 시험 결과</p>
+        </div>
+      );
+    }
     
-    return (
-      <div>
-        <p >전체학생 {formType} 시험 결과</p>
-      </div>
-    );
   }
   else
   {
@@ -88,6 +101,11 @@ function Check({ formType, user })
 function RecordTable({ formType, user })
 {
   const [examRecords, setExamRecords] = useState([]);
+  const [modalIsOpen, setModalIsOpen] = useState(false);
+  const [recordInfo1, setRecordInfo1] = useState('');
+  const [recordInfo2, setRecordInfo2] = useState('');
+  const [recordInfo3, setRecordInfo3] = useState('');
+
 
   useEffect(() => {
     const fetchData = async () => {
@@ -115,57 +133,88 @@ function RecordTable({ formType, user })
         console.log("데이터를 가져오는 과정에서 문제가 발생하였습니다.", error);
       }
     };
-    if(formType === 'eng_word' || formType === 'pre_exam')
+    if(formType === 'word' || formType === 'exam')
     {
       fetchData();
     }
   }, [formType, user]);
 
+  const handleUpdateClick = (row) => {
+    console.log(row)
+    setRecordInfo1(row.user_student_id);
+    setRecordInfo2(row.exam_info);
+    setRecordInfo3(row.record_info);
+    openModal({row});
+  };
+  const openModal = () => {
+    Modal.setAppElement('#root');
+    setModalIsOpen(true);
+  };
+  const closeModal = () => {
+    setModalIsOpen(false);
+  };
+  const renderModalContent = () => {
+    return (
+      <RecordModal
+        modalIsOpen={modalIsOpen}
+        closeModal={closeModal}
+        recordInfo1 = {recordInfo1}
+        recordInfo2 = {recordInfo2}
+        recordInfo3 = {recordInfo3}
+      />
+    )
+  };
   
   if(user.user_type === '학생' && formType !== '')
   {
     return (
-      <table className='record_table'>
-        <thead>
-          <tr>
-            <th>시험 정보</th>
-            <th>점수</th>
-          </tr>
-        </thead>
-        <tbody>
-          {examRecords.map((record, index) => (
-            <tr key = {index}>
-              <td>{record.exam_info}</td>
-              <td>{record.score}</td>
-              <td><p className='details'>자세히 보기</p></td>
+      <>
+        <table className='record_table'>
+          <thead>
+            <tr>
+              <th>시험 정보</th>
+              <th>점수</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {examRecords.map((record, index) => (
+              <tr key = {index}>
+                <td>{record.exam_info}</td>
+                <td>{record.score}</td>
+                <td><p className='details' onClick={(e) => handleUpdateClick(record)}>자세히 보기</p></td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        {renderModalContent()}
+      </>
     );
   }
   else if(user.user_type === '선생' && formType !== '')
   {
     return (
-      <table className='record_table'>
-        <thead>
-          <tr>
-            <th>학생 아이디</th>
-            <th>시험 정보</th>
-            <th>점수</th>
-          </tr>
-        </thead>
-        <tbody>
-          {examRecords.map((record, index) => (
-            <tr key = {index}>
-              <td>{record.user_student_id}</td>
-              <td>{record.exam_info}</td>
-              <td>{record.score}</td>
-              <td><p className='details'>자세히 보기</p></td>
+      <>
+        <table className='record_table'>
+          <thead>
+            <tr>
+              <th>학생 아이디</th>
+              <th>시험 정보</th>
+              <th>점수</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {examRecords.map((record, index) => (
+              <tr key = {index}>
+                <td>{record.user_student_id}</td>
+                <td>{record.exam_info}</td>
+                <td>{record.score}</td>
+                <td><p className='details' onClick={handleUpdateClick(record.record_info)}>자세히 보기</p></td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        {renderModalContent()}
+      </>
     );
   }
   if(formType === '')
