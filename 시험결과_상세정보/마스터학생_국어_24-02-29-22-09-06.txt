@@ -1,0 +1,38 @@
+마스터학생학생의 국어 시험 오답모음
+정답 : 0개, 오답 : 4개, 점수 : 0점
+정보 : 국어_공통_부정표현 6번 문제
+지문 : 
+문제 : ㅁㅁㅁㅁㅁㅁㅁㅁ
+선지1 : ㅎ
+선지2 : ㅎ
+선지3 : ㅎ
+선지4 : g
+선지5 : ㅎ
+선택한 답 : g ,  정답 : 4
+정보 : 국어_공통_부정표현 12번 문제
+지문 : null
+문제 : ssssssssssssssssssssf
+선지1 : undefined
+선지2 : undefined
+선지3 : undefined
+선지4 : undefined
+선지5 : undefined
+선택한 답 : aaaaaaaa ,  정답 : fffffffffff
+정보 : 국어_공통_부정표현 8번 문제
+지문 : 
+문제 : ㅁㅁㅁㅁ
+선지1 : ㄷ
+선지2 : ㄷ
+선지3 : ㄷ
+선지4 : ㄷㄷ
+선지5 : ㄷㄷㄷㄷ
+선택한 답 : ㄷㄷ ,  정답 : 4
+정보 : 국어_공통_부정표현 10번 문제
+지문 : null
+문제 : aaaaaaaaaa
+선지1 : undefined
+선지2 : undefined
+선지3 : undefined
+선지4 : undefined
+선지5 : undefined
+선택한 답 : aaaaaaaa ,  정답 : aaaaaaaaaaaaaa

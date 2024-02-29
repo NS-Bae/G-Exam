@@ -527,7 +527,7 @@ function TeacherBtn()
         회원가입 승인
       </button>
       <button onClick={() => openModal('delete')} className="exam_register" id="delete">
-        회원 삭제
+        회원 관리
       </button>
       {renderModalContent()}
       <button className="exam_register"><Link to ='/regist_choice'>시험문제 관리</Link></button>

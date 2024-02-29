@@ -1,7 +1,7 @@
 import './App.css';
 import React from 'react';
 import { useState, useEffect } from 'react';
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import RegistPreExamForm from "./RegistPreExamForm";
 import RegistWordForm from "./RegistWordForm"
 import RegistWorkbookForm from "./RegistWorkbookForm";
@@ -140,6 +140,7 @@ function WordChoiceForm({selectedExamMajor})
 function MyApp() 
 {
   const [user, setUser] = useState([]);
+  const navigate = useNavigate();
 
   useEffect(() => {
     fetch('/profile')
@@ -151,11 +152,19 @@ function MyApp()
       })
       .then((data) => {
         setUser(data.user);
+        if(data.user.user_type !== '선생')
+        {
+          alert('교사용 페이지입니다.');
+          navigate('/');
+        }
       })
       .catch((error) => {
         console.error('세션 정보를 가져오는 중 오류 발생:', error);
+        alert('교사용 페이지입니다.');
+        navigate('/');
       });
   }, []);
+
     if(user.user_type === "학생")
     {
         return (

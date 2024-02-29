@@ -16,7 +16,6 @@ const RecordModal = ({ modalIsOpen, closeModal, recordInfo1, recordInfo2, record
     })
     .then(response => response.json())
     .then(data => {
-      console.log(data.lines);
       setResult(data.lines);
     })
     .catch(error => {

@@ -1,7 +1,7 @@
 import './App.css';
 import React from 'react';
 import { useState, useEffect } from 'react';
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import Modal from 'react-modal';
 import RecordModal from './RecordModal';
 
@@ -42,7 +42,6 @@ function ChangeForm({ onFormTypeChange }) {
 
 function Check({ formType, user })
 {
-  console.log(formType);
   if(user.user_type === "학생")
   {
     if(formType === 'word')
@@ -140,7 +139,6 @@ function RecordTable({ formType, user })
   }, [formType, user]);
 
   const handleUpdateClick = (row) => {
-    console.log(row)
     setRecordInfo1(row.user_student_id);
     setRecordInfo2(row.exam_info);
     setRecordInfo3(row.record_info);
@@ -154,15 +152,22 @@ function RecordTable({ formType, user })
     setModalIsOpen(false);
   };
   const renderModalContent = () => {
-    return (
-      <RecordModal
-        modalIsOpen={modalIsOpen}
-        closeModal={closeModal}
-        recordInfo1 = {recordInfo1}
-        recordInfo2 = {recordInfo2}
-        recordInfo3 = {recordInfo3}
-      />
-    )
+    if (modalIsOpen) 
+    {
+      return (
+        <RecordModal
+          modalIsOpen={modalIsOpen}
+          closeModal={closeModal}
+          recordInfo1={recordInfo1}
+          recordInfo2={recordInfo2}
+          recordInfo3={recordInfo3}
+        />
+      );
+    } 
+    else 
+    {
+      return null; // 모달 창이 닫혀있는 경우에는 null 반환
+    }
   };
   
   if(user.user_type === '학생' && formType !== '')
@@ -227,6 +232,7 @@ function MyApp()
 {
   const [user, setUser] = useState([]);
   const [formType, setFormType] = useState('');
+  const navigate = useNavigate();
 
   const handleFormTypeChange = (selectedFormType) => {
     setFormType(selectedFormType);
@@ -245,6 +251,8 @@ function MyApp()
       })
       .catch((error) => {
         console.error('세션 정보를 가져오는 중 오류 발생:', error);
+        alert('로그인이 필요합니다.');
+        navigate('/');
       });
   }, []);
     return (

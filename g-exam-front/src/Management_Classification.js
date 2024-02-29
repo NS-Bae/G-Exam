@@ -1,6 +1,6 @@
 import './App.css';
 import React, { useEffect, useState, useRef } from 'react';
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import Modal from 'react-modal';
 import RegistPreExamClassificationModal from './Regist_PreExamClassification_Modal';
 
@@ -724,6 +724,31 @@ function WordForm({form_type})
 }
 function ManagementClassification() 
 {
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    fetch('/profile')
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error('HTTP 오류 ' + response.status);
+        }
+        return response.json();
+      })
+      .then((data) => {
+        if(data.user.user_type !== '선생')
+        {
+          alert('교사용 페이지입니다.');
+          navigate('/');
+        }
+      })
+      .catch((error) => {
+        console.error('세션 정보를 가져오는 중 오류 발생:', error);
+        alert('교사용 페이지입니다.');
+        navigate('/');
+      });
+  }, []);
+
   return (
     <div className = "background">
       <div className = "wrap">

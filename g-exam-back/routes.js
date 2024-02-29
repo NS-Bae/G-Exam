@@ -1542,7 +1542,7 @@ function MarkingAnswer({updatedObjectiveQuestions, subjectiveQuestions, updatedA
 {
   let wrong=0, correct = 0;
   let wrongAnswer = [];
-
+  console.log(updatedAnswer);
   for(const answer in updatedAnswer)
   {
     if(updatedAnswer[answer].exam_type === '주관식')
@@ -1576,7 +1576,7 @@ function MarkingAnswer({updatedObjectiveQuestions, subjectiveQuestions, updatedA
       {
         if(updatedAnswer[answer].classification_name === updatedObjectiveQuestions[question].classification_name && updatedAnswer[answer].exam_id === updatedObjectiveQuestions[question].exam_id)
         {
-          if(updatedAnswer[answer].user_answer === updatedObjectiveQuestions[question].answer)
+          if(updatedAnswer[answer].choiceNumber === updatedObjectiveQuestions[question].answer)
           {
             correct++;
           }
@@ -1593,7 +1593,7 @@ function MarkingAnswer({updatedObjectiveQuestions, subjectiveQuestions, updatedA
               choice3 : updatedObjectiveQuestions[question].choice3,
               choice4 : updatedObjectiveQuestions[question].choice4,
               choice5 : updatedObjectiveQuestions[question].choice5,
-              wrongAnswer : updatedAnswer[answer].user_answer,
+              wrongAnswer : updatedAnswer[answer].choiceNumber,
               correctAnswer : updatedObjectiveQuestions[question].answer,
             });
           }

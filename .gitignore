@@ -1,0 +1,13 @@
+# .gitignore
+
+# Ignore the database configuration file
+g-exam-back/db/db.js
+
+# Ignore the sessionOption.js file in the db folder
+g-exam-back/db/sessionOption.js
+
+# Ignore the .env file
+.env
+
+# Ignore the 시험결과_상세정보 folder in the specified absolute path
+/Users/USER/G-Exam/시험결과_상세정보
