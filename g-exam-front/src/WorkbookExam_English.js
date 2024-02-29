@@ -35,11 +35,6 @@ function RenderQuestion({examDetails})
       console.error('로그인이 되어있지 않습니다.', error);
     }
   };
-  
-  useEffect(() => {
-    fetchUserInfo();
-  }, []);
-
   const fetchExam = () =>{
     fetch('/start_exam', {
       method: 'POST', 
@@ -72,7 +67,11 @@ function RenderQuestion({examDetails})
     .catch((error) => {
       console.log('데이터를 불러오는 과정에서 문제가 발생했습니다.', error)
     })
-  }
+  };
+  
+  useEffect(() => {
+    fetchUserInfo();
+  }, []);
   useEffect(() => {
     fetchExam();
   }, []);
@@ -95,6 +94,14 @@ function RenderQuestion({examDetails})
     }
   });
 
+  const getSelectedAnswer = (classificationName, examId) => {
+    const selectedAnswer = formData.find(
+      (item) =>
+        item.classification_name === classificationName &&
+        parseInt(item.exam_id) === parseInt(examId)
+    );
+    return selectedAnswer ? selectedAnswer.user_answer : '';
+  };
   const handleCheckAnswer = (e) => {
     const key = e.target.dataset.key;
     const value = e.target.value;
@@ -192,6 +199,10 @@ function RenderQuestion({examDetails})
             prevButtonIsDisable={prevButtonIsDisable}
             onClickPaging={handleClickPaging}
             onCheckAnswer={handleCheckAnswer} 
+            selectedAnswer={getSelectedAnswer(
+              result[currentIndex].classification_name,
+              result[currentIndex].exam_id
+            )}
           />
           <div className='move_button_place'>
             <button className='letter_btn' onClick={handleFinishExam}>
@@ -213,6 +224,10 @@ function RenderQuestion({examDetails})
             prevButtonIsDisable={prevButtonIsDisable}
             onClickPaging={handleClickPaging}
             onCheckAnswer={handleCheckAnswer1} 
+            selectedAnswer={getSelectedAnswer(
+              result[currentIndex].classification_name,
+              result[currentIndex].exam_id
+            )}
           />
           <div className='move_button_place'>
             <button className='letter_btn' onClick={handleFinishExam}>
@@ -241,7 +256,13 @@ function ParagraphPlace({result})
     <p>{paragraph}</p>
   )
 }
-function ChoiceExamForm({ result, nextButtonIsDisable, prevButtonIsDisable, onClickPaging, onCheckAnswer })
+function ChoiceExamForm({ 
+  result, 
+  nextButtonIsDisable, 
+  prevButtonIsDisable, 
+  onClickPaging, 
+  onCheckAnswer, 
+  selectedAnswer })
 {
   const answerChoice = [];
 
@@ -261,7 +282,17 @@ function ChoiceExamForm({ result, nextButtonIsDisable, prevButtonIsDisable, onCl
         <p>{result.question}</p>
         {answerChoice.map((item) => (
           <div>
-            <input type='radio' id={item.key} key={item.key} name = 'answer' data-key={item.key} value={item.value} onChange={onCheckAnswer}/>{item.value}
+            <input 
+              type='radio' 
+              id={item.key} 
+              key={item.key} 
+              name = 'answer' 
+              data-key={item.key} 
+              value={item.value} 
+              onChange={onCheckAnswer}
+              checked={selectedAnswer === item.value}
+            />
+            {item.value}
           </div>
         ))}
       </div>
@@ -276,9 +307,16 @@ function ChoiceExamForm({ result, nextButtonIsDisable, prevButtonIsDisable, onCl
     </>
   );  
 }
-function EssayExamForm({ result, nextButtonIsDisable, prevButtonIsDisable, onClickPaging, onCheckAnswer }) {
+function EssayExamForm({ 
+  result, 
+  nextButtonIsDisable, 
+  prevButtonIsDisable, 
+  onClickPaging, 
+  onCheckAnswer,
+  selectedAnswer }) 
+{
   const key = `${result.classification_name}/${result.exam_id}`;
-  const [inputValue, setInputValue] = useState('');
+  const [inputValue, setInputValue] = useState(selectedAnswer || '');
 
   const handleInputChange = (e) => {
     const value = e.target.value;
