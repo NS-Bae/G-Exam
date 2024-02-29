@@ -10,5 +10,5 @@ g-exam-back/db/sessionOption.js
 .env
 
 # Ignore the 시험결과_상세정보 folder in the specified absolute path
-/Users/USER/G-Exam/시험결과_상세정보/
+Users/USER/G-Exam/시험결과_상세정보/
 시험결과_상세정보/마스터학생_국어_24-02-29-22-44-22.txt
