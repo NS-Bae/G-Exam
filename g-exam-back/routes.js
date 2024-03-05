@@ -111,9 +111,6 @@ router.get('/get_school_details', async (req, res) => {
 });
 router.post('/api/get_pw', (req, res) => {
   const {id, name, grade, school} = req.body;
-
-  console.log(id, name, grade, school);
-
   const query = 'SELECT pw FROM user_student WHERE id = ? AND name = ? AND school_list_school_name = ? AND grade = ?'
   const value = [id, name, school, grade];
 
