@@ -1,6 +1,6 @@
 import './App.css';
 import React, { useState } from 'react';
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 function AuthContent({ title, children }) {
   return (
@@ -27,6 +27,7 @@ function StudentJoinForm({ formType }) {
   const [error, setError] = useState('');
 
   const[schoolsList, setSchoolsList] = useState([]);
+  const navigate = useNavigate();
 
   const usernamePattern = /^[a-zA-Z0-9]{4,12}$/;
   const passwordPattern = /^[a-zA-Z0-9]{8,20}$/;
@@ -86,7 +87,7 @@ function StudentJoinForm({ formType }) {
         {
           // 회원가입이 성공한 경우
           alert(data.message); 
-          window.location.href = '/login';
+          navigate('/login');
         } 
         else if (data.error) 
         {
@@ -200,7 +201,7 @@ function TeacherJoinForm({ formType }) {
   const [name, setName] = useState('');
   // eslint-disable-next-line no-unused-vars
   const [error, setError] = useState('');
-
+  const navigate = useNavigate();
   const usernamePattern = /^[a-zA-Z0-9]{4,12}$/;
   const passwordPattern = /^[a-zA-Z0-9]{8,20}$/;
 
@@ -242,7 +243,7 @@ function TeacherJoinForm({ formType }) {
         {
           // 회원가입이 성공한 경우
           alert(data.message); 
-          window.location.href = '/login';
+          navigate('/login');
         } 
         else if (data.error) 
         {

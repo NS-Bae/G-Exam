@@ -109,6 +109,26 @@ router.get('/get_school_details', async (req, res) => {
     res.status(500).json({ error: 'An error occurred while fetching schools.' });
   }
 });
+router.post('/api/get_pw', (req, res) => {
+  const {id, name, grade, school} = req.body;
+
+  console.log(id, name, grade, school);
+
+  const query = 'SELECT pw FROM user_student WHERE id = ? AND name = ? AND school_list_school_name = ? AND grade = ?'
+  const value = [id, name, school, grade];
+
+  db.query(query, value, (err, result) => {
+    console.log(result);
+    if(err)
+    {
+      res.status(500).json({ error: err });
+    }
+    else
+    {
+      res.status(200).json({ data: result });
+    }
+  })
+});
 //변경 불필요. 회원가입 완료
 router.post('/join_member', function(req, res) {
   const formType = req.body.formType;

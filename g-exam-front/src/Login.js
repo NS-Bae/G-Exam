@@ -1,6 +1,6 @@
 import './App.css';
-import React, { useState, useEffect } from 'react';
-import { Link } from "react-router-dom";
+import React, { useState } from 'react';
+import { Link, useNavigate } from "react-router-dom";
 // AuthContent 컴포넌트 정의
 function AuthContent({ title, children }) {
   return (
@@ -78,9 +78,7 @@ function LoginForm(props) {
     </AuthContent>
   );
 }
-
-
-function AutoLoginCheck()
+/* function AutoLoginCheck()
 {
   const [isChecked, setIsChecked] = useState(false);
 
@@ -114,24 +112,23 @@ function AutoLoginCheck()
     </div>
   );
 }
-
-function ControlMemberLabel(props)
-{
-  const {labels} = props;
-  return(
-    labels.map((item, index) => (
-      <Link to = {`/${item.id}`} key = {index}>
-        <label>{item.label}</label>
-      </Link>
-    ))
-  );
-}
+ */
 
 function MyApp() {
-  const labelData = [
-    {id : "reset_pw", label : '비밀번호 찾기'}, 
-    {id : "join_member", label : '회원가입'}
-  ];
+  const navigate = useNavigate();
+
+  const handleClickLabel = (e) => {
+    const labelId = e.target.id;
+    if(labelId === 'reset_pw')
+    {
+      alert('관리자 혹은 교사에게 문의 하세요.');
+      navigate('/reset_pw');
+    }
+    else if(labelId === 'join_member')
+    {
+      navigate('/join_member');
+    }
+  }
 
   return (
     <div className="background">
@@ -139,8 +136,8 @@ function MyApp() {
         <Main />
         <LoginForm />
         <div className="login_etc">
-          <AutoLoginCheck />
-          <ControlMemberLabel labels = {labelData}/>
+          <label id = 'reset_pw' onClick={handleClickLabel}>비밀번호 찾기</label>
+          <label id = 'join_member' onClick={handleClickLabel}>회원가입</label>
         </div>
       </div>
     </div>
