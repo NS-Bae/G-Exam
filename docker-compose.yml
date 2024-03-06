@@ -1,0 +1,33 @@
+services:
+  frontend:
+    build: ./g-exam-front
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./g-exam-front:/app
+  backend:
+    build:
+      context: ./g-exam-back
+      dockerfile: Dockerfile
+    ports:
+      - "4000:4000"
+    volumes:
+      - ./g-exam-back:/server
+    depends_on:
+      - db
+    environment:
+      - NODE_ENV=production
+  db:
+    image: "mysql:latest"
+    ports:
+      - "3306:3306"
+    environment:
+      - MYSQL_ROOT_PASSWORD=My19971108!
+      - MYSQL_DATABASE=new_g-exam
+
+volumes:
+  frontend:
+  backend:
+
+networks:
+  default:
