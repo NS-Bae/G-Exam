@@ -20,7 +20,7 @@ router.use(passport.session());
 router.use(flash());
 router.use(express.json());
 //변경 불필요.
-router.get('/checksession', (req, res) => {
+router.get('/api/checksession', (req, res) => {
   if(req.session && req.session.passport && req.session.passport.user) 
   {
     res.json({isLoggedIn : true});
@@ -33,7 +33,7 @@ router.get('/checksession', (req, res) => {
   }
 });
 //변경 불필요.
-router.get('/profile', (req, res) => {
+router.get('/api/profile', (req, res) => {
   if (req.isAuthenticated()) 
   {
     res.json({ user: req.user });
@@ -44,7 +44,7 @@ router.get('/profile', (req, res) => {
   }
 });
 //변경 불필요.
-router.post('/login', function(req, res, next)
+router.post('/api/login', function(req, res, next)
 {
   passport.authenticate('local', function(err, user, info) {
     if (err) {
@@ -72,7 +72,7 @@ router.post('/login', function(req, res, next)
   })(req, res, next);
 });
 //변경 불필요.
-router.post('/logout', function(req, res) {
+router.post('/api/logout', function(req, res) {
   // 세션에 passport의 user 정보가 있는지 확인
   if (req.session.passport && req.session.passport.user) {
      // 세션 파괴를 시도합니다.
@@ -92,7 +92,7 @@ router.post('/logout', function(req, res) {
   }
 });
 //변경 불필요. 학교리스트 조회 가능.
-router.get('/get_school_details', async (req, res) => {
+router.get('/api/get_school_details', async (req, res) => {
   const schoolType = req.query.school;
   try {
     const sql = 'SELECT school_name FROM school_list WHERE school_grade = ?;';
@@ -127,7 +127,7 @@ router.post('/api/get_pw', (req, res) => {
   })
 });
 //변경 불필요. 회원가입 완료
-router.post('/join_member', function(req, res) {
+router.post('/api/join_member', function(req, res) {
   const formType = req.body.formType;
   if(formType === 'student')
   {
@@ -175,7 +175,7 @@ router.post('/join_member', function(req, res) {
   }
 });
 //변경 불필요.
-router.post('/get_exam_record', (req, res) => {
+router.post('/api/get_exam_record', (req, res) => {
   const { formType, user } = req.body;
 
   if (!formType || !user || !user.user_type) 
@@ -266,7 +266,7 @@ router.post('/get_exam_record', (req, res) => {
     console.log("옳바르지 않은 요청입니다.");
   }
 });
-router.post('/read_txt_file', (req, res) => {
+router.post('/api/read_txt_file', (req, res) => {
   const path = req.body.recordInfo3;
 
   const filePath = path;
@@ -288,7 +288,7 @@ router.post('/read_txt_file', (req, res) => {
   });
 });
 //변경 불필요.
-router.post('/change_state', (req, res) => {
+router.post('/api/change_state', (req, res) => {
   try {
     const sql = 'SELECT * FROM user_student WHERE ready = 0;';
     db.promise()
@@ -306,7 +306,7 @@ router.post('/change_state', (req, res) => {
   }
 });
 //변경 불필요.
-router.post('/approval_of_membership', async (req, res) => {
+router.post('/api/approval_of_membership', async (req, res) => {
   const selectedRows = req.body.selectedRows;
 
   const placeholders = selectedRows.map(() => '?').join(', ');
@@ -324,7 +324,7 @@ router.post('/approval_of_membership', async (req, res) => {
   }
 })
 //변경 불필요.
-router.post('/change_state_delete', (req, res) => {
+router.post('/api/change_state_delete', (req, res) => {
   try 
   {
     const sql = 'SELECT * FROM user_student;';
@@ -345,7 +345,7 @@ router.post('/change_state_delete', (req, res) => {
   }
 });
 //변경 불필요.
-router.post('/delete_of_membership', async (req, res) => {
+router.post('/api/delete_of_membership', async (req, res) => {
   const selectedRows = req.body.selectedRows;
 
   const placeholders = selectedRows.map(() => '?').join(', ');
@@ -363,7 +363,7 @@ router.post('/delete_of_membership', async (req, res) => {
   }
 });
 //변경 불필요.
-router.post('/update_info', function(req, res) {  
+router.post('/api/update_info', function(req, res) {  
   const school = req.body.school_details;
   const grade = req.body.grade;
   const user = req.body.user;
@@ -384,7 +384,7 @@ router.post('/update_info', function(req, res) {
   });
 });
 //변경 불필요.
-router.post('/withgrawal', function(req, res) {
+router.post('/api/withgrawal', function(req, res) {
   const user = req.body;
 
   const sql = `DELETE FROM user_student WHERE id = ?;`;
@@ -454,7 +454,7 @@ async function isWordTagExists(target_table, selectedClassification) {
   }
 };
 //단어 저장 요청받은 백엔드
-router.post('/save_word', async (req, res) => {
+router.post('/api/save_word', async (req, res) => {
   const { wordSave, selectedClassification, selectedMajor } = req.body;
   const target_table = `word_${convertKorean(selectedMajor)}`;
 
@@ -514,7 +514,7 @@ router.post('/save_word', async (req, res) => {
   }
 });
 //변경 불필요. 태그 혹은 과목으로 등록된 모든 단어/문제 가져오기
-router.post('/search_table', (req, res) => {
+router.post('/api/search_table', (req, res) => {
   const { selectedClassification, selectedMajor, offset } = req.body;
   const target_table = `word_${convertKorean(selectedMajor)}`;
 
@@ -555,7 +555,7 @@ router.post('/search_table', (req, res) => {
   });
 });
 //수정할 단어 불러오기
-router.post('/update_word', async (req, res) => {
+router.post('/api/update_word', async (req, res) => {
   const selectedRows = req.body.selectedRows;
   const selectedLevel = `word_${convertKorean(req.body.selectedLevel)}`;
 
@@ -575,7 +575,7 @@ router.post('/update_word', async (req, res) => {
   }
 });
 //변경 불필요. 개별단어 수정하기
-router.post('/update_word_change', (req, res) => {
+router.post('/api/update_word_change', (req, res) => {
   const {updatedData, selectedLevel} = req.body;
   const selectedMajor = `word_${convertKorean(selectedLevel)}`;
   
@@ -614,7 +614,7 @@ router.post('/update_word_change', (req, res) => {
   })
 });
 //변경 불필요.
-router.post('/delete_word', async (req, res) => {
+router.post('/api/delete_word', async (req, res) => {
   const selectedRows = req.body.selectedRows;
   const selectedLevel = `word_${convertKorean(req.body.selectedMajor)}`;
   
@@ -665,7 +665,7 @@ function convertEnglish(selectedCategory)
 
   return conversion[selectedCategory] || selectedCategory;
 }
-router.post('/search_exam', (req, res) => {
+router.post('/api/search_exam', (req, res) => {
   const type = req.body.type;
   const search = req.body.search;
   const offset = req.body.offset;
@@ -742,7 +742,7 @@ router.post('/search_exam', (req, res) => {
   }
 });
 
-router.post('/delete_exam', async (req, res) => {
+router.post('/api/delete_exam', async (req, res) => {
   const type = req.body.type;
   if(type === 'workbook')
   {
@@ -792,7 +792,7 @@ router.post('/delete_exam', async (req, res) => {
   }
 });
 
-router.post('/show_exam', async (req, res) => {
+router.post('/api/show_exam', async (req, res) => {
   const type = req.body.type;
   const selectedRows = req.body.selectedRows;
   if(type === 'workbook')
@@ -834,7 +834,7 @@ router.post('/show_exam', async (req, res) => {
   }
 });
 
-router.post('/update_exam', (req, res) => {
+router.post('/api/update_exam', (req, res) => {
   const newFormData = req.body.newFormData;
   const type = req.body.type;
   const classification = req.body.classification;
@@ -879,7 +879,7 @@ router.post('/update_exam', (req, res) => {
   })
 });
 
-router.post('/search_classification', (req, res) => {
+router.post('/api/search_classification', (req, res) => {
   const formType = req.body.form_type;
   const classification_category = req.body.selectedCategory;
   const offset = req.body.offset;
@@ -954,7 +954,7 @@ router.post('/search_classification', (req, res) => {
   
 });
 
-router.post('/add_classification', async (req, res) => {
+router.post('/api/add_classification', async (req, res) => {
   const tagValue = req.body.tagValue;
   const major = req.body.selectedCategory;
   const formType = req.body.form_type;
@@ -1029,7 +1029,7 @@ router.post('/add_classification', async (req, res) => {
   }
 });
 
-router.post('/delete_classification', async (req, res) => {
+router.post('/api/delete_classification', async (req, res) => {
   const target = req.body.checkedRows;
   const formType = req.body.form_type;
   const target_group = target.map(() => '?').join(', ');
@@ -1067,7 +1067,7 @@ router.post('/delete_classification', async (req, res) => {
   }
 });
 
-router.get('/get_majorlist', (req, res) => {
+router.get('/api/get_majorlist', (req, res) => {
 
   const sql = `SELECT major_name FROM major_list ORDER BY major_id;`;
 
@@ -1084,7 +1084,7 @@ router.get('/get_majorlist', (req, res) => {
   });
 });
 
-router.post('/get_classification', (req, res) => {
+router.post('/api/get_classification', (req, res) => {
   const formType = req.body.form_type;
   const selectedMajor = req.body.selectedMajor;
   const detail_school = req.body.detail;
@@ -1188,7 +1188,7 @@ async function getNumber(classification, target_table) {
   });
 };
 
-router.post('/regist_workbook_exam', async (req, res) => {
+router.post('/api/regist_workbook_exam', async (req, res) => {
   const formData = req.body.formData;
   const examMajor = req.body.selectedExamMajor;
   const classification = req.body.selectedClassification;
@@ -1222,7 +1222,7 @@ router.post('/regist_workbook_exam', async (req, res) => {
   }
 });
 
-router.post('/regist_pre_exam', async (req, res) => {
+router.post('/api/regist_pre_exam', async (req, res) => {
   const classification = req.body.selectedClassification;
   const major = req.body.selectedExamMajor;
   const formData = req.body.formData;
@@ -1248,7 +1248,7 @@ router.post('/regist_pre_exam', async (req, res) => {
 
 }); 
 
-router.post('/start_word_exam', async (req, res) => {
+router.post('/api/start_word_exam', async (req, res) => {
   const examInfo = req.body.examDetails;
   const target_table = `word_${convertKorean(examInfo.subject)}`;
   const questionCount = examInfo.questionCount;
@@ -1281,7 +1281,7 @@ router.post('/start_word_exam', async (req, res) => {
     }
   });
 });
-router.post('/submit_word_answer', async (req, res) => {
+router.post('/api/submit_word_answer', async (req, res) => {
   const answer = req.body.answer;
   const major = req.body.major;
   const user = req.body.user;
@@ -1426,7 +1426,7 @@ function writeWordExamRecord(correct, wrong, wrongAnswers, user, major, correctA
     }
   });
 };
-router.post('/start_exam', async (req, res) => {
+router.post('/api/start_exam', async (req, res) => {
   const examInfo = req.body.examDetails;
   const examCategory = examInfo.examSection;
   const examType = examInfo.examControl;
@@ -1497,7 +1497,7 @@ router.post('/start_exam', async (req, res) => {
     }
   });
 });
-router.post('/submit_exam_answer', async (req, res) => {
+router.post('/api/submit_exam_answer', async (req, res) => {
   const answer = req.body.answer;
   const major = req.body.major;
   const user = req.body.user;

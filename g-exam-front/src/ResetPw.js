@@ -32,7 +32,7 @@ function MyApp()
   };
   const handleGetPW = () => {
     console.log(id, name, grade, school);
-    fetch('/api/get_pw', {
+    fetch('/get_pw', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

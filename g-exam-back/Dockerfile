@@ -1,10 +1,11 @@
-FROM node:16
+FROM node
 
-WORKDIR /app
+WORKDIR .
 
-COPY package.json .
+COPY package.json ./
+
 RUN npm install
 
-COPY . .
+COPY ./ .
 
-CMD ["node", "server.js"]
+CMD ["npm", "run", "start"]

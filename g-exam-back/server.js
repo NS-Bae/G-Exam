@@ -25,41 +25,45 @@ app.use(cookieParser(process.env.COOKIE_SECRET));
 passport.use(new LocalStrategy({
   usernameField:'id', 
   passwordField:'pw',
-},async function(id, pw, done)
-{
-  const usernamePattern = /^[a-zA-Z0-9]{4,12}$/;
-  const passwordPattern = /^[a-zA-Z0-9]{8,20}$/;
-  
-  if (!usernamePattern.test(id) || !passwordPattern.test(pw)) {
-    return done(null, false, { message: '잘못된 형식의 ID 또는 비밀번호입니다.' });
-  }
-
-  var sql='SELECT * FROM total_user WHERE id = ?'; 
-  var params=[id]; 
-  
-  db.query(sql, params, function(err, rows)
+},
+  async function(id, pw, done)
   {
-    var user= rows[0];
-    user.ready = rows[0].ready;
-    if(err) return done(err);
-    if(rows.length === 0)
-    {
-      console.log("등록되지 않은 사용자입니다.");
-      return done(null, false, { message: "등록되지 않은 사용자입니다." });
-    }
-    if(user.pw!==pw) 
-    { 
-      console.log('비밀번호가 일치하지 않습니다.');
-      return done(null, false, { message: '비밀번호가 일치하지 않습니다.' });
-    }
-    if (user.ready !== 1) {
-      return done(null, false, { message: '계정이 승인되지 않았습니다. 관리자에게 계정의 승인을 요청하세요.' });
-    }
-    console.log('모든정보가 일치합니다.', user.user_type);
-    return done(null, user); 
+    const usernamePattern = /^[a-zA-Z0-9]{4,12}$/;
+    const passwordPattern = /^[a-zA-Z0-9]{8,20}$/;
     
-  })
-}));
+    if (!usernamePattern.test(id) || !passwordPattern.test(pw)) 
+    {
+      return done(null, false, { message: '잘못된 형식의 ID 또는 비밀번호입니다.' });
+    }
+
+    var sql='SELECT * FROM total_user WHERE id = ?'; 
+    var params=[id]; 
+    
+    await db.query(sql, params, function(err, rows)
+    {
+      var user= rows[0];
+      user.ready = rows[0].ready;
+      if(err) return done(err);
+      if(rows.length === 0)
+      {
+        console.log("등록되지 않은 사용자입니다.");
+        return done(null, false, { message: "등록되지 않은 사용자입니다." });
+      }
+      if(user.pw!==pw) 
+      { 
+        console.log('비밀번호가 일치하지 않습니다.');
+        return done(null, false, { message: '비밀번호가 일치하지 않습니다.' });
+      }
+      if (user.ready !== 1) 
+      {
+        return done(null, false, { message: '계정이 승인되지 않았습니다. 관리자에게 계정의 승인을 요청하세요.' });
+      }
+      console.log('모든정보가 일치합니다.', user.user_type);
+      return done(null, user); 
+      
+    })
+  }
+));
 
 app.use(session({
     secret: secret, // 세션 시크릿 키
