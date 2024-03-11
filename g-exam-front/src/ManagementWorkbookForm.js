@@ -26,7 +26,7 @@ const ManagementWorkbookForm = ({selectedCategory}) => {
     const fetchSubjectList = async () => {
       try 
       {
-        const response = await fetch('/get_majorlist');
+        const response = await fetch('/api/get_majorlist');
         if (!response.ok) 
         {
           throw new Error('네트워크 응답이 올바르지 않습니다.');
@@ -46,7 +46,7 @@ const ManagementWorkbookForm = ({selectedCategory}) => {
   useEffect(() => {
     const fatchTag = async () => {
       try {
-        const response = await fetch('/get_classification', {
+        const response = await fetch('/api/get_classification', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -78,7 +78,7 @@ const ManagementWorkbookForm = ({selectedCategory}) => {
     const itemsPerPage = 15; // 페이지당 아이템 수
     const offset = (page - 1) * itemsPerPage;
 
-    fetch('/search_exam', {
+    fetch('/api/search_exam', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -140,7 +140,7 @@ const ManagementWorkbookForm = ({selectedCategory}) => {
     const confirmation = window.confirm('선택된 시험문제를 삭제하시겠습니까?');
     if(confirmation)
     {
-      fetch('/delete_exam', {
+      fetch('/api/delete_exam', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

@@ -41,7 +41,7 @@ function WorkbookChoiceForm()
     const fetchSubjectList = async () => {
       try 
       {
-        const response = await fetch('/get_majorlist');
+        const response = await fetch('/api/get_majorlist');
         if (!response.ok) 
         {
           throw new Error('네트워크 응답이 올바르지 않습니다.');
@@ -61,7 +61,7 @@ function WorkbookChoiceForm()
   useEffect(() => {
     const fatchTag = async () => {
       try {
-        const response = await fetch('/get_classification', {
+        const response = await fetch('/api/get_classification', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -186,7 +186,7 @@ function WorkbookChoiceForm()
   };
 
   const handleButton = () => {
-    fetch('/regist_workbook_exam', {
+    fetch('/api/regist_workbook_exam', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

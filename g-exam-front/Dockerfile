@@ -1,12 +1,12 @@
-FROM node:16
+FROM node:alpine
 
 WORKDIR /app
 
-COPY package.json .
-RUN npm install
+COPY package.json /app
 
-COPY ./ ./
+RUN npm install --silent
 
-RUN npm run build
+COPY . /app
 
-CMD ["npm", "start"]
+CMD ["npm", "run", "start"]
+

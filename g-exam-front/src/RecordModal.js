@@ -7,7 +7,7 @@ const RecordModal = ({ modalIsOpen, closeModal, recordInfo1, recordInfo2, record
     closeModal();
   }
   useEffect(() => {
-    fetch('/read_txt_file', {
+    fetch('/api/read_txt_file', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

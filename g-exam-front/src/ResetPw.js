@@ -21,7 +21,7 @@ function MyApp()
     const selectedSchool = e.target.value;
   
     // 백엔드로 선택한 학교 유형을 보냅니다
-    fetch(`/get_school_details?school=${selectedSchool}`)
+    fetch(`/api/get_school_details?school=${selectedSchool}`)
       .then((response) => response.json())
       .then((data) => {
         if (data && data.schoolDetails) {
@@ -32,7 +32,7 @@ function MyApp()
   };
   const handleGetPW = () => {
     console.log(id, name, grade, school);
-    fetch('/get_pw', {
+    fetch('/api/get_pw', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

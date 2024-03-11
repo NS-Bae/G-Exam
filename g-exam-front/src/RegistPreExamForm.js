@@ -42,7 +42,7 @@ const RegistForm = () => {
   //과목별 분류 불러오기
   const fetchTag = async () => {
     try {
-      const response = await fetch('/get_classification', {
+      const response = await fetch('/api/get_classification', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -91,7 +91,7 @@ const RegistForm = () => {
   const handleSchoolTypeChange = (e) => {
       const selectedSchool = e.target.value;
       setSelectedSchoolType(e.target.value);
-      fetch(`/get_school_details?school=${selectedSchool}`)
+      fetch(`/api/get_school_details?school=${selectedSchool}`)
       .then((response) => response.json())
       .then((data) => {
       if (data && data.schoolDetails) {
@@ -174,7 +174,7 @@ const RegistForm = () => {
     handleButton(); 
   };
   const handleButton = () => {
-    fetch('/regist_pre_exam', {
+    fetch('/api/regist_pre_exam', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

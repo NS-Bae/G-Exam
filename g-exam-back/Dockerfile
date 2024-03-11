@@ -1,11 +1,13 @@
-FROM node
+FROM node:alpine
 
-WORKDIR .
+WORKDIR /app
 
-COPY package.json ./
+ENV PATH /app/node_modules/.bin:$PATH
 
-RUN npm install
+COPY package.json /app
 
-COPY ./ .
+RUN npm install --no-cache
+
+COPY . /app
 
 CMD ["npm", "run", "start"]

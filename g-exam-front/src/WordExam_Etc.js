@@ -15,7 +15,7 @@ function RenderForm({examType})
   const fetchUserInfo = async () => {
     try 
     {
-      const response = await fetch('/profile');
+      const response = await fetch('/api/profile');
       if (!response.ok) 
       {
         throw new Error('HTTP 오류 ' + response.status);
@@ -51,7 +51,7 @@ function RandomExam({user})
   );
 
   const fetchData = () => {
-    fetch('/start_word_exam', {
+    fetch('/api/start_word_exam', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -84,7 +84,7 @@ function RandomExam({user})
       });
   };
   const SubmitAnswer = () =>{
-    fetch('/submit_word_answer', {
+    fetch('/api/submit_word_answer', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -195,7 +195,7 @@ function MyApp()
   const navigate = useNavigate();
 
   useEffect(()=> {
-    fetch('/checksession')
+    fetch('/api/checksession')
       .then(response => response.json())
       .then(data => {
         if (data.isLoggedIn) 

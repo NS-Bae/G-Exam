@@ -143,7 +143,7 @@ function MyApp()
   const navigate = useNavigate();
 
   useEffect(() => {
-    fetch('/profile')
+    fetch('/api/profile')
       .then((response) => {
         if (!response.ok) {
           throw new Error('HTTP 오류 ' + response.status);

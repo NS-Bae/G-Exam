@@ -24,7 +24,7 @@ const ManagementExamForm = ({selectedCategory}) => {
     const itemsPerPage = 15; // 페이지당 아이템 수
     const offset = (page - 1) * itemsPerPage;
 
-    fetch('/search_exam', {
+    fetch('/api/search_exam', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -54,7 +54,7 @@ const ManagementExamForm = ({selectedCategory}) => {
   //과목별 분류 불러오기
   const fetchTag = async (major) => {
     try {
-      const response = await fetch('/get_classification', {
+      const response = await fetch('/api/get_classification', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -112,7 +112,7 @@ const ManagementExamForm = ({selectedCategory}) => {
     const confirmation = window.confirm('선택된 시험문제를 삭제하시겠습니까?');
     if(confirmation)
     {
-      fetch('/delete_exam', {
+      fetch('/api/delete_exam', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

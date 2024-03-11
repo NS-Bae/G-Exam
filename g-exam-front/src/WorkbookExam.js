@@ -234,7 +234,7 @@ function ChoiceTag({ selectedMajor, onSelectedValuesUpdate })
   const fetchClassification = async () => {
     try 
     {
-      fetch('/get_classification', {   
+      fetch('/api/get_classification', {   
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -323,7 +323,7 @@ function MyApp() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    fetch("/checksession")
+    fetch("/api/checksession")
       .then((response) => response.json())
       .then((data) => {
         if (data.isLoggedIn) {

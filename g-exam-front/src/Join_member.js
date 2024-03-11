@@ -36,7 +36,7 @@ function StudentJoinForm({ formType }) {
     const selectedSchool = e.target.value;
   
     // 백엔드로 선택한 학교 유형을 보냅니다
-    fetch(`/get_school_details?school=${selectedSchool}`)
+    fetch(`/api/get_school_details?school=${selectedSchool}`)
       .then((response) => response.json())
       .then((data) => {
         if (data && data.schoolDetails) {
@@ -74,7 +74,7 @@ function StudentJoinForm({ formType }) {
       school_details: document.getElementById('school_details').value, // 학생 또는 교사 여부를 백엔드로 전달
     };
     
-    fetch('/join_member', {
+    fetch('/api/join_member', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -230,7 +230,7 @@ function TeacherJoinForm({ formType }) {
       subject,
       formType,
     };
-    fetch('/join_member', {
+    fetch('/api/join_member', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

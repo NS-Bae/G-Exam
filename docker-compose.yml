@@ -1,69 +1,40 @@
-version: '3'
+version: '3.3'
 
 services:
-  # Nginx
-  nginx:
-    image: nginx:latest
-    ports:
-      - "80:80"
-    volumes:
-      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
-    networks:
-      - frontend
-      - backend
-    depends_on:
-      - web
-      - app
-
-  # Frontend
-  web:
-    build: 
-      context: ./g-exam-front
-      dockerfile: Dockerfile
-    expose:
-      - "3000"
-    volumes:
-      - ./g-exam-front:/app
-      - node_modules:/g-exam-front/node_modules
-    networks:
-      - frontend
-    depends_on:
-      - app
-
-  # Backend
-  app:
-    build:
-      context: ./g-exam-back
-      dockerfile: Dockerfile
-    expose:
-      - "4000"
-    volumes:
-      - ./g-exam-back:/server
-      - node_modules:/g-exam-back/node_modules
-    networks:
-      - backend
-      - frontend
-    depends_on:
-      - db
-
-  # Database
+    # Database
   db:
-    image: "mysql:8.1"
-    restart: always
+    build:
+      dockerfile: Dockerfile
+      context: ./
+    restart: unless-stopped
     ports:
       - "3306:3306"
     environment:
       - MYSQL_ROOT_PASSWORD=My19971108!
       - MYSQL_DATABASE=new_g-exam
+
+  nginx_proxy:
+    image: nginx:latest
+    container_name: nginx_proxy
+    restart: "on-failure"
+    ports:
+      - 80:80
     volumes:
-      - db-data:/var/lib/mysql
-    networks:
-      - backend
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ./g-exam-front/build:/usr/share/nginx/html
 
-volumes:
-  db-data:
-  node_modules:
-
-networks:
-  frontend:
-  backend:
+  server:
+    build:
+      context: ./g-exam-back/
+    container_name: server
+    restart: "on-failure"
+    expose:
+      - 4000
+    volumes:
+      - './g-exam-back:/app'
+      - '/app/node_modules'
+    environment:
+      - NODE_ENV=development
+      - CHOKIDAR_USEPOLLING=true
+    stdin_open: true
+    tty: true

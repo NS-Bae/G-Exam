@@ -194,7 +194,7 @@ const UpdateInfo = ({ modalIsOpen, closeModal, user }) => {
   const handleSchoolTypeChange = (e) => {
     const selectedSchool = e.target.value;
   
-    fetch(`/get_school_details?school=${selectedSchool}`)
+    fetch(`/api/get_school_details?school=${selectedSchool}`)
       .then((response) => response.json())
       .then((data) => {
         if (data && data.schoolDetails) {
@@ -212,7 +212,7 @@ const UpdateInfo = ({ modalIsOpen, closeModal, user }) => {
       school_details: document.getElementById('school_details').value, // 학생 또는 교사 여부를 백엔드로 전달
     };
 
-    fetch('/update_info', {
+    fetch('/api/update_info', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -243,7 +243,7 @@ const UpdateInfo = ({ modalIsOpen, closeModal, user }) => {
 
     if(confirmation)
     {
-      fetch('/withgrawal', {
+      fetch('/api/withgrawal', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -368,11 +368,11 @@ function TeacherBtn()
 
       if(modalType === 'approval')
       {
-        endpoint = '/change_state';
+        endpoint = '/api/change_state';
       }
       else if(modalType === 'delete')
       {
-        endpoint = '/change_state_delete';
+        endpoint = '/api/change_state_delete';
       }
       
 
@@ -426,7 +426,7 @@ function TeacherBtn()
     {
       try 
       {
-        const response = await fetch('/approval_of_membership', {
+        const response = await fetch('/api/approval_of_membership', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -458,7 +458,7 @@ function TeacherBtn()
     {
       try 
       {
-        const response = await fetch('/delete_of_membership', {
+        const response = await fetch('/api/delete_of_membership', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -578,7 +578,7 @@ function MyInformation() {
   const fetchUserInfo = async () => {
     try 
     {
-      const response = await fetch('/profile');
+      const response = await fetch('/api/profile');
       if (!response.ok) 
       {
         throw new Error('HTTP 오류 ' + response.status);

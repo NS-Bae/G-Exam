@@ -63,7 +63,7 @@ function ExamForm({form_type})
       const itemsPerPage = 15; 
       const offset = (page - 1) * itemsPerPage;
 
-      fetch('/search_classification', {
+      fetch('/api/search_classification', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -112,7 +112,7 @@ function ExamForm({form_type})
       {
         try 
         {
-          const response = await fetch('/add_classification', {
+          const response = await fetch('/api/add_classification', {
             method : 'POST', 
             headers : {
               'Content-Type' : 'application/json',
@@ -145,7 +145,7 @@ function ExamForm({form_type})
         {
           try 
           {
-            const response = await fetch('/delete_classification', {
+            const response = await fetch('/api/delete_classification', {
               method : 'POST', 
               headers : {
                 'Content-Type' : 'application/json',
@@ -199,7 +199,7 @@ function ExamForm({form_type})
       const fetchSubjectList = async () => {
         try 
         {
-          const response = await fetch('/get_majorlist');
+          const response = await fetch('/api/get_majorlist');
           if (!response.ok) 
           {
             throw new Error('네트워크 응답이 올바르지 않습니다.');
@@ -301,7 +301,7 @@ function PreExamForm({form_type})
     const itemsPerPage = 15; 
     const offset = (page - 1) * itemsPerPage;
 
-    fetch('/search_classification', {
+    fetch('/api/search_classification', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -351,7 +351,7 @@ function PreExamForm({form_type})
       {
         try 
         {
-          const response = await fetch('/delete_classification', {
+          const response = await fetch('/api/delete_classification', {
             method : 'POST', 
             headers : {
               'Content-Type' : 'application/json',
@@ -405,7 +405,7 @@ function PreExamForm({form_type})
     const fetchSubjectList = async () => {
       try 
       {
-        const response = await fetch('/get_majorlist');
+        const response = await fetch('/api/get_majorlist');
         if (!response.ok) 
         {
           throw new Error('네트워크 응답이 올바르지 않습니다.');
@@ -524,7 +524,7 @@ function WordForm({form_type})
     const itemsPerPage = 15; 
     const offset = (page - 1) * itemsPerPage;
 
-    fetch('/search_classification', {
+    fetch('/api/search_classification', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -573,7 +573,7 @@ function WordForm({form_type})
     {
       try 
       {
-        const response = await fetch('/add_classification', {
+        const response = await fetch('/api/add_classification', {
           method : 'POST', 
           headers : {
             'Content-Type' : 'application/json',
@@ -606,7 +606,7 @@ function WordForm({form_type})
       {
         try 
         {
-          const response = await fetch('/delete_classification', {
+          const response = await fetch('/api/delete_classification', {
             method : 'POST', 
             headers : {
               'Content-Type' : 'application/json',
@@ -728,7 +728,7 @@ function ManagementClassification()
   const navigate = useNavigate();
 
   useEffect(() => {
-    fetch('/profile')
+    fetch('/api/profile')
       .then((response) => {
         if (!response.ok) {
           throw new Error('HTTP 오류 ' + response.status);

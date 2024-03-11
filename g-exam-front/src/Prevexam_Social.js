@@ -20,7 +20,7 @@ function RenderQuestion({examDetails})
   const navigate = useNavigate();
 
   const fetchExam = () =>{
-    fetch('/start_exam', {
+    fetch('/api/start_exam', {
       method: 'POST', 
       headers: {
         'Content-Type': 'application/json',
@@ -55,7 +55,7 @@ function RenderQuestion({examDetails})
   const fetchUserInfo = async () => {
     try 
     {
-      const response = await fetch('/profile');
+      const response = await fetch('/api/profile');
       if (!response.ok) 
       {
         throw new Error('HTTP 오류 ' + response.status);
@@ -158,7 +158,7 @@ function RenderQuestion({examDetails})
     }
   };  
   const handleFinishExam = (e) => {
-    fetch('/submit_exam_answer', {
+    fetch('/api/submit_exam_answer', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -357,7 +357,7 @@ function MyApp()
   const navigate = useNavigate();
 
   useEffect(()=> {
-    fetch('/checksession')
+    fetch('/api/checksession')
       .then(response => response.json())
       .then(data => {
         if (data.isLoggedIn) 

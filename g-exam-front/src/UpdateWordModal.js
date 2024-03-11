@@ -17,7 +17,7 @@ const UpdateWordModal = ({ modalIsOpen, closeModal, handleCheckboxChange, checke
     useEffect(() => {
       // 모달이 열릴 때 데이터를 불러오기
       if (modalIsOpen) {
-        fetch('/update_word', {
+        fetch('/api/update_word', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -55,7 +55,7 @@ const UpdateWordModal = ({ modalIsOpen, closeModal, handleCheckboxChange, checke
         word_mean5: (editedData.word_mean5 !== '' && editedData.word_mean5 !== row.word_mean5) ? editedData.word_mean5.trim() : row.word_mean5,
           };
       console.log("up",updatedData);
-      fetch('/update_word_change', {
+      fetch('/api/update_word_change', {
         method : 'POST', 
         headers : {
           'Content-Type' : 'application/json'

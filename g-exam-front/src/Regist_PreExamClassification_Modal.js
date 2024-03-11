@@ -31,7 +31,7 @@ const RegistPreExamClassificationModal = ({ modalIsOpen, closeModal, modalExamId
     const fetchSubjectList = async () => {
       try 
       {
-        const response = await fetch('/get_majorlist');
+        const response = await fetch('/api/get_majorlist');
         if (!response.ok) 
         {
           throw new Error('네트워크 응답이 올바르지 않습니다.');
@@ -86,7 +86,7 @@ const RegistPreExamClassificationModal = ({ modalIsOpen, closeModal, modalExamId
     {
       try 
       {
-        const response = await fetch('/add_classification', {
+        const response = await fetch('/api/add_classification', {
           method : 'POST', 
           headers : {
             'Content-Type' : 'application/json',
@@ -128,7 +128,7 @@ const RegistPreExamClassificationModal = ({ modalIsOpen, closeModal, modalExamId
   const handleSchoolTypeChange = (e) => {
     const selectedSchool = e.target.value;
     setSelectedSchoolType(e.target.value);
-    fetch(`/get_school_details?school=${selectedSchool}`)
+    fetch(`/api/get_school_details?school=${selectedSchool}`)
     .then((response) => response.json())
     .then((data) => {
     if (data && data.schoolDetails) 

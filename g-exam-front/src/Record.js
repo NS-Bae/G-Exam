@@ -110,7 +110,7 @@ function RecordTable({ formType, user })
     const fetchData = async () => {
       try 
       {
-        const record_response = await fetch('/get_exam_record', {
+        const record_response = await fetch('/api/get_exam_record', {
           method : 'POST', 
           headers : {
             'Content-Type' : 'application/json',
@@ -239,7 +239,7 @@ function MyApp()
   };
 
   useEffect(() => {
-    fetch('/profile')
+    fetch('/api/profile')
       .then((response) => {
         if (!response.ok) {
           throw new Error('HTTP 오류 ' + response.status);

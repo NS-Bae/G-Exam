@@ -22,7 +22,7 @@ function ManagementWordForm()
     const fetchClassificationList = async () => {
       try 
       {
-        fetch('/get_classification', {
+        fetch('/api/get_classification', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -58,7 +58,7 @@ function ManagementWordForm()
     const itemsPerPage = 15; // 페이지당 아이템 수
     const offset = (page - 1) * itemsPerPage;
 
-    fetch('/search_table', {
+    fetch('/api/search_table', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -106,7 +106,7 @@ function ManagementWordForm()
     const confirmation = window.confirm('정말로 단어를 삭제하시겠습니까?');
     if(confirmation)
     {
-      fetch('/delete_word', {
+      fetch('/api/delete_word', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

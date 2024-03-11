@@ -22,7 +22,7 @@ function LoginForm(props) {
   async function handleLogin(e) {
     e.preventDefault();
 
-    fetch('/login', {
+    fetch('/api/login', {
       method: 'POST',
       headers: {
         'Content-type': 'application/json',
@@ -46,7 +46,7 @@ function LoginForm(props) {
   }
   return (
     <AuthContent title="로그인"> 
-      <form action='/login' onSubmit={handleLogin}>
+      <form action='/api/login' onSubmit={handleLogin}>
         <div className="input_place">
           <label>ID</label>
           <input

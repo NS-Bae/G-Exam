@@ -17,7 +17,7 @@ const UpdateExamModal = ({ modalIsOpen, closeModal, modalExamId, classification,
 
   useEffect(() => {
     if (modalIsOpen) {
-      fetch('/show_exam', {
+      fetch('/api/show_exam', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -66,7 +66,7 @@ const UpdateExamModal = ({ modalIsOpen, closeModal, modalExamId, classification,
     });
   };
   const handleUpdateButtonClick = () => {
-    fetch('/update_exam', {
+    fetch('/api/update_exam', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

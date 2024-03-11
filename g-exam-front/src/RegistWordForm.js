@@ -16,7 +16,7 @@ function RegistForm({ onChangeFormBackClick })
     const fetchClassificationList = async () => {
       try 
       {
-        fetch('/get_classification', {
+        fetch('/api/get_classification', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -71,7 +71,7 @@ function RegistForm({ onChangeFormBackClick })
       item => item.engWord.trim() !== '' && item.korWord.length > 0
     );
 
-    fetch('/save_word', {
+    fetch('/api/save_word', {
       method : 'POST', 
       headers: {
         'Content-Type' : 'application/json',

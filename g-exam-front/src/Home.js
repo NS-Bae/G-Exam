@@ -14,7 +14,7 @@ function LoginControl()
   const navigate = useNavigate();
 
   useEffect(()=> {
-    fetch('/checksession')
+    fetch('/api/checksession')
       .then(response => response.json())
       .then(data => {
         if (data.isLoggedIn) 
@@ -25,7 +25,7 @@ function LoginControl()
   }, [isLoggedIn]);
 
   const handleLogout = () => {
-    fetch('/logout', {
+    fetch('/api/logout', {
       method:'POST', 
       headers: {
         'Content-type': 'application/json',
@@ -103,7 +103,7 @@ function MyApp()
   ];
 
   useEffect(()=> {
-    fetch('/checksession')
+    fetch('/api/checksession')
       .then(response => response.json())
       .then(data => {
         if (data.isLoggedIn) 
