@@ -2,7 +2,7 @@
 FROM mysql:8.1
 
 # Set environment variables
-ENV MYSQL_ROOT_PASSWORD=My19971108!
+ENV MYSQL_ROOT_PASSWORD=RooTUsEr!1020
 ENV MYSQL_DATABASE=new_g-exam
 
 # Expose the MySQL port
