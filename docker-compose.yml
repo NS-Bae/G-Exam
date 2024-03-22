@@ -1,42 +1,18 @@
-version: '3.3'
+version: '3.8'
 
 services:
-    # Database
-  db:
+  frontend:
     build:
+      context: ./g-exam-front
       dockerfile: Dockerfile
-      context: ./
-    restart: unless-stopped
     ports:
-      - "3306:3306"
-    environment:
-      - MYSQL_HOST=ls-ca55893ba6d2224690c5161971f88beb5c1f3af7.ctwkii6wuxm1.ap-northeast-2.rds.amazonaws.com
-      - MYSQL_USER=dbmasteruser
-      - MYSQL_ROOT_PASSWORD=RooTUsEr!1020
-      - MYSQL_DATABASE=new_g-exam
+      - "80:80"  # 프론트엔드 서비스가 사용할 포트
+    # 필요한 설정 추가 가능
 
-  nginx_proxy:
-    image: nginx:latest
-    container_name: nginx_proxy
-    restart: "on-failure"
-    ports:
-      - 80:80
-    volumes:
-      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
-      - ./g-exam-front/build:/usr/share/nginx/html
-
-  server:
+  backend:
     build:
-      context: ./g-exam-back/
-    container_name: server
-    restart: "on-failure"
-    expose:
-      - 4000
-    volumes:
-      - './g-exam-back:/app'
-      - '/app/node_modules'
-    environment:
-      - NODE_ENV=development
-      - CHOKIDAR_USEPOLLING=true
-    stdin_open: true
-    tty: true
+      context: ./g-exam-back
+      dockerfile: Dockerfile
+    ports:
+      - "4000:4000"  # 백엔드 서비스가 사용할 포트
+    # 필요한 설정 추가 가능

@@ -2,6 +2,7 @@
   "dependencies": {
     "express": "^4.18.2",
     "lodash": "^4.17.21",
+    "nginx": "^1.0.8",
     "qrcode.react": "^3.1.0",
     "react": "^18.2.0"
   }
