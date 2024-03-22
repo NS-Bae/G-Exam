@@ -1,7 +1,7 @@
 # .gitignore
 
 # Ignore the database configuration file
-g-exam-back/db/db.js
+# g-exam-back/db/db.js
 
 # Ignore the sessionOption.js file in the db folder
 g-exam-back/db/sessionOption.js
