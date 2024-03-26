@@ -136,7 +136,7 @@ function RenderQuestion({examDetails})
     } 
     else 
     {
-      console.log('실패1!!');
+      console.log('실패!!');
     }
   }
   const handleClickPaging = (e) => {
@@ -383,5 +383,3 @@ function MyApp()
 }
 
 export default MyApp;
-
-

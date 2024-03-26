@@ -12,6 +12,13 @@ const moment = require('moment');
 const fs = require('fs');
 const path = require('path');
 const multer = require('multer');
+const AWS = require('aws-sdk');
+
+AWS.config.update({
+  accessKeyId: 'your-access-key-id',
+  secretAccessKey: 'your-secret-access-key'
+});
+
 
 router.use(bodyParser.urlencoded({ extended: false }));
 router.use(bodyParser.json());
@@ -268,9 +275,7 @@ router.post('/api/get_exam_record', (req, res) => {
 });
 router.post('/api/read_txt_file', (req, res) => {
   const path = req.body.recordInfo3;
-
   const filePath = path;
-  console.log(filePath);
 
   fs.readFile(filePath, 'utf8', (err, data) => {
     if (err) 
@@ -1446,9 +1451,40 @@ function writeWordExamRecord(correct, wrong, wrongAnswers, user, major, correctA
   }
   data.push([`정답 : ${correct}개, 오답 : ${wrong}개, 점수 : ${record_score}점`])
 
-  const filePath = `C:\\Users\\USER\\G-Exam\\시험결과_상세정보\\${wordTestInfo}.txt`;
+  const fileName = `${wordTestInfo}.txt`;
+  const s3 = new AWS.S3();
+  const bucketName = 'bucket-lmz8li';
+  const fileContent = data.join('\n');
 
-  fs.exists(filePath, (exists) => {
+  const uploadParams = {
+    Bucket: bucketName,
+    Key: fileName,
+    Body: fileContent
+  };
+
+  s3.upload(uploadParams, (err, data) => {
+    if (err) {
+        console.error('Error uploading file to S3:', err);
+        return;
+    }
+    console.log('File uploaded successfully to S3:', data.Location);
+
+    // 데이터베이스에 파일 경로 저장
+    const query = `INSERT INTO exam_record VALUES (?, ?, ?, ?)`;
+    const values = [user.id, wordTestInfo, record_score, data.Location];
+
+    db.query(query, values, (err, results) => {
+        if (err) {
+            console.error('Error inserting data into database:', err);
+            return;
+        }
+        console.log('Data inserted into database:', results);
+    });
+  });
+
+  /*const filePath = `C:\\Users\\USER\\G-Exam\\시험결과_상세정보\\${fileName}`;
+
+   fs.exists(filePath, (exists) => {
     if (exists) {
       // 파일이 존재하면 덮어쓰기
       fs.writeFile(filePath, data.join('\n'), (err) => {
@@ -1462,7 +1498,7 @@ function writeWordExamRecord(correct, wrong, wrongAnswers, user, major, correctA
         console.log('파일 저장 완료', filePath);
       });
     }
-  });
+  }); 
 
   const query = `INSERT INTO exam_record VALUES (?, ?, ?, ?)`;
   const values = [user.id, wordTestInfo, record_score, filePath];
@@ -1476,7 +1512,7 @@ function writeWordExamRecord(correct, wrong, wrongAnswers, user, major, correctA
     {
       console.log(results);
     }
-  });
+  });*/
 };
 router.post('/api/start_exam', async (req, res) => {
   const examInfo = req.body.examDetails;
