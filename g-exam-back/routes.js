@@ -290,7 +290,7 @@ router.post('/api/read_txt_file', (req, res) => {
 //변경 불필요.
 router.post('/api/change_state', (req, res) => {
   try {
-    const sql = 'SELECT * FROM user_student WHERE ready = 0;';
+    const sql = 'SELECT * FROM total_user WHERE ready = 0;';
     db.promise()
       .query(sql)
       .then(([rows]) => {
@@ -306,28 +306,10 @@ router.post('/api/change_state', (req, res) => {
   }
 });
 //변경 불필요.
-router.post('/api/approval_of_membership', async (req, res) => {
-  const selectedRows = req.body.selectedRows;
-
-  const placeholders = selectedRows.map(() => '?').join(', ');
-  const sql = `UPDATE user_student SET READY = 1 WHERE id IN (${placeholders});`;
-
-  try 
-  {
-    const [result] = await db.promise().query(sql, selectedRows);
-    res.status(200).json({ message: 'Rows updated successfully' });
-  } 
-  catch (error) 
-  {
-    console.error('Error executing query:', error);
-    res.status(500).json({ error: 'Error executing query' });
-  }
-})
-//변경 불필요.
 router.post('/api/change_state_delete', (req, res) => {
   try 
   {
-    const sql = 'SELECT * FROM user_student;';
+    const sql = 'SELECT * FROM total_user;';
     db.promise()
       .query(sql)
       .then(([rows]) => {
@@ -345,21 +327,91 @@ router.post('/api/change_state_delete', (req, res) => {
   }
 });
 //변경 불필요.
-router.post('/api/delete_of_membership', async (req, res) => {
+router.post('/api/approval_of_membership', async (req, res) => {
   const selectedRows = req.body.selectedRows;
+  let teacherArray = [];
+  let studentArray = [];
 
-  const placeholders = selectedRows.map(() => '?').join(', ');
-  const sql = `DELETE FROM user_student WHERE id IN (${placeholders});`;
+  selectedRows.forEach(row => {
+    if (row.user_type === '선생') 
+    {
+      teacherArray.push(row.id);
+    } 
+    else if (row.user_type === '학생') 
+    {
+      studentArray.push(row.id);
+    }
+  });
+
+  if (teacherArray.length === 0 && studentArray.length === 0) 
+  {
+    return res.status(400).json({ message: 'No rows to update' });
+  }
+  const teacher_placeholders = teacherArray.map(() => '?').join(', ');
+  const student_placeholders = studentArray.map(() => '?').join(', ');
 
   try 
   {
-    const [result] = await db.promise().query(sql, selectedRows);
+    if (teacherArray.length > 0) {
+      const sql1 = `UPDATE user_teacher SET READY = 1 WHERE id IN (${teacher_placeholders});`;
+      await db.promise().query(sql1, teacherArray);
+    }
+
+    if (studentArray.length > 0) {
+      const sql2 = `UPDATE user_student SET READY = 1 WHERE id IN (${student_placeholders});`;
+      await db.promise().query(sql2, studentArray);
+    }
+
     res.status(200).json({ message: 'Rows updated successfully' });
   } 
   catch (error) 
   {
-    console.error('Error executing query:', error);
-    res.status(500).json({ error: 'Error executing query' });
+    console.error('Error executing queries:', error);
+    res.status(500).json({ error: 'Error executing queries' });
+  }
+});
+//변경 불필요.
+router.post('/api/delete_of_membership', async (req, res) => {
+  const selectedRows = req.body.selectedRows;
+  let teacherArray = [];
+  let studentArray = [];
+  
+  selectedRows.forEach(row => {
+    if (row.user_type === '선생') 
+    {
+      teacherArray.push(row.id);
+    } 
+    else if (row.user_type === '학생') 
+    {
+      studentArray.push(row.id);
+    }
+  });
+
+  if (teacherArray.length === 0 && studentArray.length === 0) 
+  {
+    return res.status(400).json({ message: 'No rows to update' });
+  }
+  const teacher_placeholders = teacherArray.map(() => '?').join(', ');
+  const student_placeholders = studentArray.map(() => '?').join(', ');
+
+  try 
+  {
+    if (teacherArray.length > 0) {
+      const sql1 = `DELETE FROM user_teacher WHERE id IN (${teacher_placeholders});`;
+      await db.promise().query(sql1, teacherArray);
+    }
+
+    if (studentArray.length > 0) {
+      const sql2 = `DELETE FROM user_student WHERE id IN (${student_placeholders});`;
+      await db.promise().query(sql2, studentArray);
+    }
+
+    res.status(200).json({ message: '회원삭제가 정상적으로 실행되었습니다.' });
+  } 
+  catch (error) 
+  {
+    console.error('Error executing queries:', error);
+    res.status(500).json({ error: '회원삭제를 실패했습니다.' });
   }
 });
 //변경 불필요.

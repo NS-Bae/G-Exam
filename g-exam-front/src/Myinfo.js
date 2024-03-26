@@ -92,7 +92,7 @@ const ApprovalModal = ({ modalIsOpen, closeModal, studentInfo, handleCheckboxCha
               <th>아이디</th>
               <th>비번</th>
               <th>이름</th>
-              <th>학교, 학년</th>
+              <th>사용자 구분</th>
               <th>승인 여부</th>
             </tr>
           </thead>
@@ -102,13 +102,13 @@ const ApprovalModal = ({ modalIsOpen, closeModal, studentInfo, handleCheckboxCha
                 <td>
                   <input
                     type="checkbox"
-                    onChange={(event) => handleCheckboxChange(event, item.id)}
+                    onChange={(event) => handleCheckboxChange(event, item.id, item.user_type)}
                   />
                 </td>
                 <td>{item.id}</td>
                 <td>{item.pw}</td>
                 <td>{item.name}</td>
-                <td>{item.school_list_school_name} {item.grade}학년</td>
+                <td>{item.user_type}</td>
                 <td>{item.ready === 1 ? '승인' : '미승인'}</td>
               </tr>
             ))}
@@ -152,7 +152,8 @@ const DeleteModal = ({ modalIsOpen, closeModal, studentInfo, handleCheckboxChang
               <th>아이디</th>
               <th>비번</th>
               <th>이름</th>
-              <th>학교, 학년</th>
+              <th>사용자 구분</th>
+              <th>승인 여부</th>
             </tr>
           </thead>
           <tbody>
@@ -161,13 +162,14 @@ const DeleteModal = ({ modalIsOpen, closeModal, studentInfo, handleCheckboxChang
                 <td>
                   <input
                     type="checkbox"
-                    onChange={(event) => handleCheckboxChange(event, item.id)}
+                    onChange={(event) => handleCheckboxChange(event, item.id, item.user_type)}
                   />
                 </td>
                 <td>{item.id}</td>
                 <td>{item.pw}</td>
                 <td>{item.name}</td>
-                <td>{item.school_list_school_name} {item.grade}학년</td>
+                <td>{item.user_type}</td>
+                <td>{item.ready === 1 ? '승인' : '미승인'}</td>
               </tr>
             ))}
           </tbody>
@@ -410,11 +412,11 @@ function TeacherBtn()
     setModalType(null);
   };
   
-  const handleCheckboxChange = (event, id) => {
+  const handleCheckboxChange = (event, id, user_type) => {
     setCheckedRows(prevRows => {
       const isChecked = event.target.checked;
       const updatedRows = isChecked
-        ? [...prevRows, id]
+        ? [...prevRows, {id, user_type}]
         : prevRows.filter((rowId) => rowId !== id);
   
       setUpdateButtonDisabled(updatedRows.length === 0);
