@@ -108,34 +108,28 @@ function RecordTable({ formType, user })
 
   useEffect(() => {
     const fetchData = async () => {
-      try 
-      {
-        const record_response = await fetch('/api/get_exam_record', {
-          method : 'POST', 
-          headers : {
-            'Content-Type' : 'application/json',
-          }, 
-          body : JSON.stringify({formType, user}),
-        });
+      if (formType === 'word' || formType === 'exam') {
+        try {
+          const record_response = await fetch('/api/get_exam_record', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ formType, user }),
+          });
 
-        if(!record_response.ok)
-        {
-          throw new Error('네트워크 응답이 올바르지 않습니다.');
+          if (!record_response.ok) {
+            throw new Error('네트워크 응답이 올바르지 않습니다.');
+          }
+
+          const record_data = await record_response.json();
+          setExamRecords(record_data.examRecords);
+        } catch (error) {
+          console.error('데이터를 가져오는 과정에서 문제가 발생하였습니다.', error);
         }
-
-        const record_data = await record_response.json();
-
-        setExamRecords(record_data.examRecords);
-      }
-      catch(error)
-      {
-        console.log("데이터를 가져오는 과정에서 문제가 발생하였습니다.", error);
       }
     };
-    if(formType === 'word' || formType === 'exam')
-    {
-      fetchData();
-    }
+    fetchData();
   }, [formType, user]);
 
   const handleUpdateClick = (row) => {
@@ -199,26 +193,50 @@ function RecordTable({ formType, user })
   {
     return (
       <>
+        {formType && user.user_type && (
         <table className='record_table'>
           <thead>
             <tr>
-              <th>학생 아이디</th>
-              <th>시험 정보</th>
-              <th>점수</th>
+              {user.user_type === '학생' ? (
+                <>
+                  <th>시험 정보</th>
+                  <th>점수</th>
+                </>
+              ) : (
+                <>
+                  <th>학생 아이디</th>
+                  <th>시험 정보</th>
+                  <th>점수</th>
+                </>
+              )}
             </tr>
           </thead>
           <tbody>
             {examRecords.map((record, index) => (
-              <tr key = {index}>
-                <td>{record.user_student_id}</td>
-                <td>{record.exam_info}</td>
-                <td>{record.score}</td>
-                <td><p className='details' onClick={handleUpdateClick(record.record_info)}>자세히 보기</p></td>
+              <tr key={index}>
+                {user.user_type === '학생' ? (
+                  <>
+                    <td>{record.exam_info}</td>
+                    <td>{record.score}</td>
+                  </>
+                ) : (
+                  <>
+                    <td>{record.user_student_id}</td>
+                    <td>{record.exam_info}</td>
+                    <td>{record.score}</td>
+                  </>
+                )}
+                <td>
+                  <p className='details' onClick={() => handleUpdateClick(record)}>
+                    자세히 보기
+                  </p>
+                </td>
               </tr>
             ))}
           </tbody>
         </table>
-        {renderModalContent()}
+      )}
+      {renderModalContent()}
       </>
     );
   }
