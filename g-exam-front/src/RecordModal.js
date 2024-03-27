@@ -16,7 +16,6 @@ const RecordModal = ({ modalIsOpen, closeModal, recordInfo1, recordInfo2, record
     })
     .then(response => response.json())
     .then(data => {
-      console.log(data);
       setResult(data);
     })
     .catch(error => {
@@ -32,11 +31,6 @@ const RecordModal = ({ modalIsOpen, closeModal, recordInfo1, recordInfo2, record
     >
       <p>{recordInfo1}의 {recordInfo2}시험 결과</p>
       <ul class="record_list">
-        {/* {result.length > 0 && result.map((item, index) => (
-          <li key={index}>
-            {item}
-          </li>
-        ))} */}
         <pre>{result}</pre>
       </ul>
       <div className="btn_section">
