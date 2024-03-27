@@ -288,7 +288,6 @@ router.post('/api/read_txt_file', (req, res) => {
     // 읽어온 데이터는 data.Body에 있습니다.
     const fileContent = data.Body.toString('utf-8');
     res.json(fileContent);
-    console.log('File content:', fileContent);
   });
 });
 //변경 불필요.
@@ -1729,34 +1728,5 @@ function writeExamRecord(correct, wrong, user, wrongAnswers, major)
         console.log('Data inserted into database:', results);
     });
   });
-
-  /* fs.exists(filePath, (exists) => {
-    if (exists) {
-      // 파일이 존재하면 덮어쓰기
-      fs.writeFile(filePath, data.join('\n'), (err) => {
-        if (err) throw err;
-        console.log('파일 저장 완료');
-      });
-    } else {
-      // 파일이 없으면 새로 생성
-      fs.writeFile(filePath, data.join('\n'), (err) => {
-        if (err) throw err;
-        console.log('파일 저장 완료');
-      });
-    }
-  });
-
-  const query = `INSERT INTO exam_record VALUES (?, ?, ?, ?)`;
-  const values = [user.id, wordTestInfo, record_score, filePath];
-  db.query(query, values, (err, results) => {
-    if (err) 
-    {
-      console.log(err);
-    }
-    else
-    {
-      console.log(results);
-    }
-  }); */
 };
 module.exports = router;
