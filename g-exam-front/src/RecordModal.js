@@ -12,11 +12,12 @@ const RecordModal = ({ modalIsOpen, closeModal, recordInfo1, recordInfo2, record
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ recordInfo3 }),
+      body: JSON.stringify({ recordInfo2 }),
     })
     .then(response => response.json())
     .then(data => {
-      setResult(data.lines);
+      console.log(data);
+      setResult(data);
     })
     .catch(error => {
       console.error(error);
@@ -26,16 +27,17 @@ const RecordModal = ({ modalIsOpen, closeModal, recordInfo1, recordInfo2, record
     <Modal
       isOpen={modalIsOpen}
       onRequestClose={closeModal}
-      contentLabel="시험문제 수정"
+      contentLabel="오답노트"
       className="modal_design"
     >
       <p>{recordInfo1}의 {recordInfo2}시험 결과</p>
       <ul class="record_list">
-        {result.map((item) => (
-          <li>
+        {/* {result.length > 0 && result.map((item, index) => (
+          <li key={index}>
             {item}
           </li>
-        ))}
+        ))} */}
+        <pre>{result}</pre>
       </ul>
       <div className="btn_section">
         <button onClick={handleCloseButton} className="letter_btn">닫기</button>

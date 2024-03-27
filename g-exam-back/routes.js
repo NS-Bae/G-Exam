@@ -12,13 +12,7 @@ const moment = require('moment');
 const fs = require('fs');
 const path = require('path');
 const multer = require('multer');
-const AWS = require('aws-sdk');
-
-AWS.config.update({
-  accessKeyId: 'your-access-key-id',
-  secretAccessKey: 'your-secret-access-key'
-});
-
+const AWS = require('aws-sdk'); 
 
 router.use(bodyParser.urlencoded({ extended: false }));
 router.use(bodyParser.json());
@@ -274,22 +268,27 @@ router.post('/api/get_exam_record', (req, res) => {
   }
 });
 router.post('/api/read_txt_file', (req, res) => {
-  const path = req.body.recordInfo3;
-  const filePath = path;
+  const path = req.body.recordInfo2;
+  const fileName = decodeURIComponent(path.split('/').pop());
 
-  fs.readFile(filePath, 'utf8', (err, data) => {
-    if (err) 
-    {
-      console.error(err);
-      return res.status(500).send({ message: '파일 읽기 실패' });
+  console.log(fileName);
+
+  const s3 = new AWS.S3();
+  const params = {
+    Bucket: 'bucket-lmz8li',
+    Key: `${fileName}.txt`,
+  };
+  
+  s3.getObject(params, (err, data) => {
+    if (err) {
+      console.error('Error reading file from S3:', err);
+      return;
     }
-
-    const lines = data.split('\n');
-
-    const response = {
-      lines,
-    };
-    res.json(response);
+  
+    // 읽어온 데이터는 data.Body에 있습니다.
+    const fileContent = data.Body.toString('utf-8');
+    res.json(fileContent);
+    console.log('File content:', fileContent);
   });
 });
 //변경 불필요.
@@ -1435,7 +1434,7 @@ function writeWordExamRecord(correct, wrong, wrongAnswers, user, major, correctA
   const wordTestInfo = `${user.name}_${majorName}_${dayFormat}`;
   const record_score = (correct/(correct+wrong))*100;
 
-  const data = [`${user.name}학생의 ${majorName} 시험 오답모음`]; // 결과값
+  const data = [`${user.name}학생의 ${majorName} 시험 오답모음\n`]; // 결과값
 
   for(const i in wrongAnswers)
   {
@@ -1444,7 +1443,7 @@ function writeWordExamRecord(correct, wrong, wrongAnswers, user, major, correctA
       if(wrongAnswers[i].word_category === correctAnswer[j].word_category && wrongAnswers[i].word_id === correctAnswer[j].word_id)
       {
         data.push([
-          wrongAnswers[i].word_category, wrongAnswers[i].word_id, wrongAnswers[i].word, wrongAnswers[i].word_mean, correctAnswer[j].word_mean1
+          `${wrongAnswers[i].word_category} ${wrongAnswers[i].word_id}번 문제\n문제 : ${wrongAnswers[i].word}\n작성한 답 : ${wrongAnswers[i].word_mean}\n정답 :  ${correctAnswer[j].word_mean1}\n`
         ]);
       }
     }
@@ -1470,7 +1469,7 @@ function writeWordExamRecord(correct, wrong, wrongAnswers, user, major, correctA
     console.log('File uploaded successfully to S3:', data.Location);
 
     // 데이터베이스에 파일 경로 저장
-    const query = `INSERT INTO exam_record VALUES (?, ?, ?, ?)`;
+    const query = `INSERT INTO exam_word_record VALUES (?, ?, ?, ?)`;
     const values = [user.id, wordTestInfo, record_score, data.Location];
 
     db.query(query, values, (err, results) => {
@@ -1481,38 +1480,6 @@ function writeWordExamRecord(correct, wrong, wrongAnswers, user, major, correctA
         console.log('Data inserted into database:', results);
     });
   });
-
-  /*const filePath = `C:\\Users\\USER\\G-Exam\\시험결과_상세정보\\${fileName}`;
-
-   fs.exists(filePath, (exists) => {
-    if (exists) {
-      // 파일이 존재하면 덮어쓰기
-      fs.writeFile(filePath, data.join('\n'), (err) => {
-        if (err) throw err;
-        console.log('파일 저장 완료', filePath);
-      });
-    } else {
-      // 파일이 없으면 새로 생성
-      fs.writeFile(filePath, data.join('\n'), (err) => {
-        if (err) throw err;
-        console.log('파일 저장 완료', filePath);
-      });
-    }
-  }); 
-
-  const query = `INSERT INTO exam_record VALUES (?, ?, ?, ?)`;
-  const values = [user.id, wordTestInfo, record_score, filePath];
-
-  db.query(query, values, (err, results) => {
-    if (err) 
-    {
-      console.log(err);
-    }
-    else
-    {
-      console.log(results);
-    }
-  });*/
 };
 router.post('/api/start_exam', async (req, res) => {
   const examInfo = req.body.examDetails;
@@ -1637,7 +1604,6 @@ router.post('/api/submit_exam_answer', async (req, res) => {
       });
       const subjectiveQuestions = result.filter((item) => item.type === '주관식');
       const {correct, wrong, wrongAnswer} = MarkingAnswer({updatedObjectiveQuestions, subjectiveQuestions, updatedAnswer});
-/*       console.log('a',correct, wrong, wrongAnswer); */
       writeExamRecord(correct, wrong, user, wrongAnswer, major);
       res.status(200).json({ correct, wrong });
     }
@@ -1713,7 +1679,7 @@ function writeExamRecord(correct, wrong, user, wrongAnswers, major)
   const now = moment();
   const dayFormat = now.format('YY-MM-DD-HH-mm-ss');
   const majorName = convertEnglish(major);
-  const wordTestInfo = `${user.name}_${majorName}_${dayFormat}`;
+  const ExamInfo = `${user.name}_${majorName}_${dayFormat}`;
   const record_score = (correct/(correct+wrong))*100;
 
   const data = [`${user.name}학생의 ${majorName} 시험 오답모음`]; // 결과값
@@ -1722,20 +1688,49 @@ function writeExamRecord(correct, wrong, user, wrongAnswers, major)
 
   for(const i in wrongAnswers)
   {
-    data.push([`정보 : ${wrongAnswers[i].classification} ${wrongAnswers[i].examId}번 문제`]);
-    data.push([`지문 : ${wrongAnswers[i].paragraph}`]);
-    data.push([`문제 : ${wrongAnswers[i].question}`]);
+    data.push([`${wrongAnswers[i].classification} ${wrongAnswers[i].examId}번 문제`]);
+    data.push([`지문\n${wrongAnswers[i].paragraph}\n`]);
+    data.push([`문제 : ${wrongAnswers[i].question}\n`]);
     data.push([`선지1 : ${wrongAnswers[i].choice1}`]);
     data.push([`선지2 : ${wrongAnswers[i].choice2}`]);
     data.push([`선지3 : ${wrongAnswers[i].choice3}`]);
     data.push([`선지4 : ${wrongAnswers[i].choice4}`]);
-    data.push([`선지5 : ${wrongAnswers[i].choice5}`]);
-    data.push([`선택한 답 : ${wrongAnswers[i].wrongAnswer} ,  정답 : ${wrongAnswers[i].correctAnswer}`])
+    data.push([`선지5 : ${wrongAnswers[i].choice5}\n`]);
+    data.push([`선택한 답 : ${wrongAnswers[i].wrongAnswer}      정답 : ${wrongAnswers[i].correctAnswer}\n`])
   }
 
-  const filePath = `C:\\Users\\USER\\G-Exam\\시험결과_상세정보\\${wordTestInfo}.txt`;
+  const fileName = `${ExamInfo}.txt`;
+  const s3 = new AWS.S3();
+  const bucketName = 'bucket-lmz8li';
+  const fileContent = data.join('\n');
 
-  fs.exists(filePath, (exists) => {
+  const uploadParams = {
+    Bucket: bucketName,
+    Key: fileName,
+    Body: fileContent
+  };
+
+  s3.upload(uploadParams, (err, data) => {
+    if (err) {
+        console.error('Error uploading file to S3:', err);
+        return;
+    }
+    console.log('File uploaded successfully to S3:', data.Location);
+
+    // 데이터베이스에 파일 경로 저장
+    const query = `INSERT INTO exam_record VALUES (?, ?, ?, ?)`;
+    const values = [user.id, ExamInfo, record_score, data.Location];
+
+    db.query(query, values, (err, results) => {
+        if (err) {
+            console.error('Error inserting data into database:', err);
+            return;
+        }
+        console.log('Data inserted into database:', results);
+    });
+  });
+
+  /* fs.exists(filePath, (exists) => {
     if (exists) {
       // 파일이 존재하면 덮어쓰기
       fs.writeFile(filePath, data.join('\n'), (err) => {
@@ -1762,6 +1757,6 @@ function writeExamRecord(correct, wrong, user, wrongAnswers, major)
     {
       console.log(results);
     }
-  });
+  }); */
 };
 module.exports = router;
