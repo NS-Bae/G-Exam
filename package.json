@@ -1,6 +1,7 @@
 {
   "dependencies": {
     "express": "^4.18.2",
+    "git": "^0.1.5",
     "lodash": "^4.17.21",
     "nginx": "^1.0.8",
     "qrcode.react": "^3.1.0",
