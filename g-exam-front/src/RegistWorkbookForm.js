@@ -1,6 +1,7 @@
 import './App.css';
 import React from 'react';
 import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { useState, useEffect } from 'react';
 import OcrRequest  from './OCR_Request';
 import ImgPreview from './ImagePreview';
@@ -10,12 +11,12 @@ function WorkbookChoiceForm()
   const [selectedExamMajor, setSelectedExamMajor] = useState('');
   const [selectedClassification, setSelectedClassification] = useState('');
   const [selectedType, setSelectedType] = useState('');
+  const [imageUrl, setImageUrl] = useState('');
   const [isConfirmButtonClicked, setConfirmButtonClicked] = useState(false);
   const [tagList, setTagList] = useState([]);
   const [subjectList, setSubjectList] = useState([]);
   const [formData, setFormData] = useState({
     type: '',
-    image: '',
     paragraph: '',
     question: '',
     choice1: '',
@@ -110,31 +111,30 @@ function WorkbookChoiceForm()
   };
 
   const ImageUploadComponent = () => {
-    const [image, setImage] = useState('');
+    const handleImageChange = (e)=> {
+      const {files} = e.target;
+      const uploadFile = files[0];
+      const reader = new FileReader();
+      reader.readAsDataURL(uploadFile);
+      reader.onloadend = () => {
+        setImageUrl(reader.result);
+      };
+    };    
 
-    const handleImageChange = (e) => {
-      const imageFile = e.target.files[0];
-      if (imageFile) {
-        const formData = new FormData();
-        formData.append('image', imageFile);
-
-        Object.entries(formData).forEach(([key, value]) => {
-          formData.append(key, value);
-        });
-      }
-    };
     const openImagePreview = () => {
+      console.log(imageUrl);
       const imagePreviewWindow = window.open('', '_blank', 'width=600,height=400');
-      const imagePreviewPage = <ImgPreview image={image} />;
-      
-      ReactDOM.render(imagePreviewPage, imagePreviewWindow.document.body);
-    };
+      const imagePreviewRoot = imagePreviewWindow.document.createElement('div');
+      imagePreviewWindow.document.body.appendChild(imagePreviewRoot);
     
+      const root = createRoot(imagePreviewRoot);
+      root.render(<ImgPreview image={imageUrl} />);
+    };
   
     return (
       <div className='upper_button_place'>
         <input type="file" id = 'image' onChange={handleImageChange} accept="image/*" className='img_input'/>
-        {image && <button type='button' className='letter_btn' onClick={openImagePreview}>미리보기</button>}
+        {imageUrl && <button type='button' className='letter_btn' onClick={openImagePreview}>미리보기</button>}
       </div>
     );
   };
@@ -156,7 +156,7 @@ function WorkbookChoiceForm()
   const handleSubmit = (e) => {
     e.preventDefault();
     
-    console.log(formData);
+    console.log(1, formData);
 
     if (!validateForm()) {
       alert('입력되지 않은 값이 있습니다. 모든 항목을 입력해주세요.');
@@ -263,45 +263,45 @@ function WorkbookChoiceForm()
       <ImageUploadComponent />
       <div className="question_sub">
         <div className="paragraph_area">
-        <h4>지문</h4>
-        <textarea type="text" name="" id="paragraph" placeholder="지문" value={formData.paragraph} onChange={handleInputChange}></textarea>
+          <h4>지문</h4>
+          <textarea type="text" name="" id="paragraph" placeholder="지문" value={formData.paragraph} onChange={handleInputChange}></textarea>
         </div>
         <div className="question_area">
-        <div className="question_line">
-            <h4>질문</h4>
-            <textarea type="text" name="" id="question" placeholder="질문" value={formData.question} onChange={handleInputChange}></textarea>
+          <div className="question_line">
+              <h4>질문</h4>
+              <textarea type="text" name="" id="question" placeholder="질문" value={formData.question} onChange={handleInputChange}></textarea>
+          </div>
+          <div className="choice">
+              <h4>선택지1</h4>
+              <textarea type="text" name="" id="choice1" placeholder="선택지1" value={formData.choice1} onChange={handleInputChange}></textarea>
+          </div>
+          <div className="choice">
+              <h4>선택지2</h4>
+              <textarea type="text" name="" id="choice2" placeholder="선택지2" value={formData.choice2} onChange={handleInputChange}></textarea>
+          </div>
+          <div className="choice">
+              <h4>선택지3</h4>
+              <textarea type="text" name="" id="choice3" placeholder="선택지3" value={formData.choice3} onChange={handleInputChange}></textarea>
+          </div>
+          <div className="choice">
+              <h4>선택지4</h4>
+              <textarea type="text" name="" id="choice4" placeholder="선택지4" value={formData.choice4} onChange={handleInputChange}></textarea>
+          </div>
+          <div className="choice">
+              <h4>선택지5</h4>
+              <textarea type="text" name="" id="choice5" placeholder="선택지5" value={formData.choice5} onChange={handleInputChange}></textarea>
+          </div>
+          <div className="choice">
+              <h4>정답</h4>
+              <textarea type="text" name="" id="answer" placeholder="정답" value={formData.answer} onChange={handleInputChange}></textarea>
+          </div>
         </div>
-        <div className="choice">
-            <h4>선택지1</h4>
-            <textarea type="text" name="" id="choice1" placeholder="선택지1" value={formData.choice1} onChange={handleInputChange}></textarea>
-        </div>
-        <div className="choice">
-            <h4>선택지2</h4>
-            <textarea type="text" name="" id="choice2" placeholder="선택지2" value={formData.choice2} onChange={handleInputChange}></textarea>
-        </div>
-        <div className="choice">
-            <h4>선택지3</h4>
-            <textarea type="text" name="" id="choice3" placeholder="선택지3" value={formData.choice3} onChange={handleInputChange}></textarea>
-        </div>
-        <div className="choice">
-            <h4>선택지4</h4>
-            <textarea type="text" name="" id="choice4" placeholder="선택지4" value={formData.choice4} onChange={handleInputChange}></textarea>
-        </div>
-        <div className="choice">
-            <h4>선택지5</h4>
-            <textarea type="text" name="" id="choice5" placeholder="선택지5" value={formData.choice5} onChange={handleInputChange}></textarea>
-        </div>
-        <div className="choice">
-            <h4>정답</h4>
-            <textarea type="text" name="" id="answer" placeholder="정답" value={formData.answer} onChange={handleInputChange}></textarea>
-        </div>
-        </div>
+      </div>
+      <div className='btn_section'>
+          <button type = 'submit' className="letter_btn" onClick={handleSubmit}>등록</button>
+          <button type = 'button' className="letter_btn" onClick={openNewWindow}>OCR하러가기</button>
+      </div>
     </div>
-    <div className='btn_section'>
-        <button type = 'submit' className="letter_btn" onClick={handleSubmit}>등록</button>
-        <button type = 'button' className="letter_btn" onClick={openNewWindow}>OCR하러가기</button>
-    </div>
-  </div>
   );
   
   
