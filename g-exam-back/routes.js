@@ -1272,7 +1272,7 @@ router.post('/api/regist_workbook_exam', upload.single('image'), async (req, res
 
   const params = {
     Bucket: 'bucket-lmz8li',
-    Key: `시험이미지/${imageFile.originalname}`,
+    Key: `시험 이미지/${imageFile.originalname}`,
     Body: imageFile.buffer,
   };
 
