@@ -1298,19 +1298,7 @@ router.post('/api/regist_workbook_exam', upload.single('image'), async (req, res
       throw error;
     }
   });
-  /* try
-  {
-    const regist_query = `INSERT INTO ${target_table} VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
-    const values = [classification, problem_number + 1, type, paragraph, image, question, choice1, choice2, choice3, choice4, choice5, answer];
-    await db.execute(regist_query, values);
-
-    res.status(200).json({ message: '시험문제를 등록하였습니다.' });
-  } 
-  catch (error) 
-  {
-    console.error('시험문제 등록 오류:', error);
-    throw error;
-  } */
+  
 });
 
 router.post('/api/regist_pre_exam', async (req, res) => {
