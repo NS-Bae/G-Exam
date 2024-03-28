@@ -12,21 +12,14 @@ const moment = require('moment');
 const fs = require('fs');
 const path = require('path');
 const multer = require('multer');
-const AWS = require('aws-sdk');
 const multerS3 = require('multer-s3');
+const AWS = require('aws-sdk');
 
 const upload = multer({
-  storage: multerS3({
-     // 저장 위치
-     s3: new AWS.S3(),
-     bucket: 'bucket-lmz8li',
-     contentType: multerS3.AUTO_CONTENT_TYPE,
-     key(req, file, cb) {
-        cb(null, `${Date.now()}_${path.basename(file.originalname)}`) // original 폴더안에다 파일을 저장
-     },
-  }),
-  //* 용량 제한
-  limits: { fileSize: 100 * 1024 * 1024 },
+  storage: multer.memoryStorage(),
+  limits: {
+    fileSize: 100000000, // 1MB
+  },
 });
 
 router.use(bodyParser.urlencoded({ extended: false }));
@@ -1258,14 +1251,16 @@ async function getNumber(classification, target_table) {
   });
 };
 
-router.post('/api/regist_workbook_exam', async (req, res) => {
-  const formData = req.body.formData;
-  const examMajor = req.body.selectedExamMajor;
-  const classification = req.body.selectedClassification;
+router.post('/api/regist_workbook_exam', upload.single('image'), async (req, res) => {
+  const s3 = new AWS.S3();
+  const formData = req.body;
+  const imageFile = req.file;
+
+  const examMajor = formData.selectedExamMajor;
+  const classification = formData.selectedClassification;
   const type = formData.type;
   const paragraph = formData.paragraph || null;
   const question = formData.question || null;
-  const image = formData.image || null;
   const choice1 = formData.choice1 || null;
   const choice2 = formData.choice2 || null;
   const choice3 = formData.choice3 || null;
@@ -1274,38 +1269,36 @@ router.post('/api/regist_workbook_exam', async (req, res) => {
   const answer = formData.answer || null;
   const target_table = `workbook_${convertKorean(examMajor)}`
   const problem_number = await getNumber(classification, target_table);
-  /*
-  const bucketName = 'bucket-lmz8li';
-  const objectName = `${classification} ${problem_number + 1} ${type} 문제 이미지`;
-  const filePath = image;
-  const s3 = new AWS.S3();
-  let s3ImagePath;
-  fs.readFile(filePath, (err, data) => {
-    console.log(a, a);
-    if (err) {
-      console.error('Error reading file:', err);
-      return;
-    }
-  
-    const params = {
-      Bucket: bucketName,
-      Key: objectName,
-      Body: data,
-    };
-  
-    // 이미지 업로드 요청
-    s3.upload(params, (err, data) => {
-      if (err) {
-        console.error('Error uploading image:', err);
-        return;
-      }
-  
-      console.log('Image uploaded successfully:', data.Location);
-      s3ImagePath = data.Location;
-    });
-  }); */
 
-  try
+  const params = {
+    Bucket: 'bucket-lmz8li',
+    Key: `시험이미지/${imageFile.originalname}`,
+    Body: imageFile.buffer,
+  };
+
+  await s3.upload(params, (err, data) => {
+    if (err) {
+        console.error('Error uploading file to S3:', err);
+        return;
+    }
+    console.log('File uploaded successfully to S3:', data.Location);
+
+    // 데이터베이스에 파일 경로 저장
+    try
+    {
+      const regist_query = `INSERT INTO ${target_table} VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+      const values = [classification, problem_number + 1, type, paragraph, data.Location, question, choice1, choice2, choice3, choice4, choice5, answer];
+      db.execute(regist_query, values);
+
+      res.status(200).json({ message: '시험문제를 등록하였습니다.' });
+    } 
+    catch (error) 
+    {
+      console.error('시험문제 등록 오류:', error);
+      throw error;
+    }
+  });
+  /* try
   {
     const regist_query = `INSERT INTO ${target_table} VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
     const values = [classification, problem_number + 1, type, paragraph, image, question, choice1, choice2, choice3, choice4, choice5, answer];
@@ -1317,7 +1310,7 @@ router.post('/api/regist_workbook_exam', async (req, res) => {
   {
     console.error('시험문제 등록 오류:', error);
     throw error;
-  }
+  } */
 });
 
 router.post('/api/regist_pre_exam', async (req, res) => {
@@ -1499,7 +1492,7 @@ function writeWordExamRecord(correct, wrong, wrongAnswers, user, major, correctA
 
   const uploadParams = {
     Bucket: bucketName,
-    Key: `/시험 기록/${fileName}`,
+    Key: fileName,
     Body: fileContent
   };
 
@@ -1748,7 +1741,7 @@ function writeExamRecord(correct, wrong, user, wrongAnswers, major)
 
   const uploadParams = {
     Bucket: bucketName,
-    Key: `/시험 기록/${fileName}`,
+    Key: fileName,
     Body: fileContent
   };
 
@@ -1773,8 +1766,8 @@ function writeExamRecord(correct, wrong, user, wrongAnswers, major)
   });
 };
 
-//이미지 처리
+/* //이미지 처리
 router.post('/api/upload_images', async (req, res) => {
 
-});
+}); */
 module.exports = router;

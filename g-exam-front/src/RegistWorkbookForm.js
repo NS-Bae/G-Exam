@@ -10,8 +10,7 @@ function WorkbookChoiceForm()
 {
   const [selectedExamMajor, setSelectedExamMajor] = useState('');
   const [selectedClassification, setSelectedClassification] = useState('');
-  const [selectedType, setSelectedType] = useState('');
-  const [imageUrl, setImageUrl] = useState('');
+  const [image, setImage] = useState('');//이미지
   const [isConfirmButtonClicked, setConfirmButtonClicked] = useState(false);
   const [tagList, setTagList] = useState([]);
   const [subjectList, setSubjectList] = useState([]);
@@ -25,6 +24,7 @@ function WorkbookChoiceForm()
     choice4: '',
     choice5: '',
     answer: '',
+    image:null,
   });
   const validateForm = () => {
     const requiredFields = ['type', 'question', 'answer'];
@@ -90,7 +90,7 @@ function WorkbookChoiceForm()
   
   }, [selectedExamMajor]);
 
-  const openNewWindow = () => {
+  /* const openNewWindow = () => {
     const newWindowName = 'myNewWindow';
   
     const newWindow = window.open('', newWindowName, 'width=800,height=600');
@@ -108,36 +108,37 @@ function WorkbookChoiceForm()
     } else {
       console.error('새 창을 열 수 없습니다.');
     }
-  };
+  }; */
 
-  const ImageUploadComponent = () => {
+  /* const ImageUploadComponent = () => {
+    const [previewImg, setPreviewImg] = useState('');
     const handleImageChange = (e)=> {
       const {files} = e.target;
       const uploadFile = files[0];
       const reader = new FileReader();
       reader.readAsDataURL(uploadFile);
       reader.onloadend = () => {
-        setImageUrl(reader.result);
+        setPreviewImg(reader.result);
       };
+      setImageUrl(uploadFile);
     };    
 
     const openImagePreview = () => {
-      console.log(imageUrl);
+      console.log(previewImg);
       const imagePreviewWindow = window.open('', '_blank', 'width=600,height=400');
       const imagePreviewRoot = imagePreviewWindow.document.createElement('div');
       imagePreviewWindow.document.body.appendChild(imagePreviewRoot);
-    
       const root = createRoot(imagePreviewRoot);
-      root.render(<ImgPreview image={imageUrl} />);
+      root.render(<ImgPreview image={previewImg} />);
     };
   
     return (
       <div className='upper_button_place'>
         <input type="file" id = 'image' onChange={handleImageChange} accept="image/*" className='img_input'/>
-        {imageUrl && <button type='button' className='letter_btn' onClick={openImagePreview}>미리보기</button>}
+        {previewImg && <button type='button' className='letter_btn' onClick={openImagePreview}>미리보기</button>}
       </div>
     );
-  };
+  }; */
 
   const handleInputChange = (e) => {
     const { id, value } = e.target;
@@ -146,34 +147,28 @@ function WorkbookChoiceForm()
       [id]: value,
     }));
   };
-
-  const handleTypeChange = (e) => {
-    const value = e.target.value;
-    setSelectedType(value);
-    handleInputChange(e);
+  const handleImageUpload = (event) => {
+    const file = event.target.files[0];
+    const id = event.target.id;
+    setImage(file);
+    setFormData((prevData) => ({
+      ...prevData,
+      [id]: file,
+    }));
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    
-    console.log(1, formData);
 
     if (!validateForm()) {
       alert('입력되지 않은 값이 있습니다. 모든 항목을 입력해주세요.');
       return;
-    }
-    const formDataObject = new FormData();
-    Object.entries(formData).forEach(([key, value]) => {
-      formDataObject.append(key, value);
-    });
-    formDataObject.append('imagePath', formData.image);
-
+    };
     // 나머지 코드는 유효성 검사를 통과한 경우의 로직
     handleButton(); 
 
     setFormData({
       type: '',
-      image: '',
       paragraph: '',
       question: '',
       choice1: '',
@@ -182,16 +177,37 @@ function WorkbookChoiceForm()
       choice4: '',
       choice5: '',
       answer: '',
+      image: null,
     });
   };
 
+  const handleMajorListChange = (e) => {
+    const selectedMajor = e.target.value;
+    setSelectedExamMajor(selectedMajor);
+  };
+
+  const handleFirstConfirmButtonClick = () => {
+    setConfirmButtonClicked(true);
+  };
+  //등록api
   const handleButton = () => {
+    const form = new FormData();
+    form.append('selectedExamMajor', selectedExamMajor);
+    form.append('selectedClassification', selectedClassification);
+    form.append('type', formData.type);
+    form.append('paragraph', formData.paragraph);
+    form.append('question', formData.question);
+    form.append('choice1', formData.choice1);
+    form.append('choice2', formData.choice2);
+    form.append('choice3', formData.choice3);
+    form.append('choice4', formData.choice4);
+    form.append('choice5', formData.choice5);
+    form.append('answer', formData.answer);
+    form.append('image', image);
+    
     fetch('/api/regist_workbook_exam', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({formData, selectedExamMajor, selectedClassification}),
+        body: form,
       })
       .then((response) => {
         if (!response.ok) {
@@ -212,16 +228,6 @@ function WorkbookChoiceForm()
       .catch((error) => {
         console.error('네트워크 오류:', error);
       });
-  };
-
-  const handleMajorListChange = (e) => {
-    const selectedMajor = e.target.value;
-    setSelectedExamMajor(selectedMajor);
-  };
-
-  const handleFirstConfirmButtonClick = () => {
-    setConfirmButtonClicked(true);
-    console.log(selectedExamMajor, selectedClassification, selectedType);
   };
 
   return (
@@ -251,7 +257,7 @@ function WorkbookChoiceForm()
             </option>
           ))}
         </select>
-        <select id='type' value={formData.type} onChange={handleTypeChange}>
+        <select id='type' value={formData.type} onChange={handleInputChange}>
           <option value={'select'}>유형</option>
           <option value={'객관식'}>객관식</option>
           <option value={'주관식'}>주관식</option>
@@ -260,7 +266,9 @@ function WorkbookChoiceForm()
           확인
         </button>
       </div>
-      <ImageUploadComponent />
+      <div className='upper_button_place'>
+        <input id="image" type="file" accept="image/*" onChange={handleImageUpload}  className='img_input' />
+      </div>
       <div className="question_sub">
         <div className="paragraph_area">
           <h4>지문</h4>
@@ -299,8 +307,8 @@ function WorkbookChoiceForm()
       </div>
       <div className='btn_section'>
           <button type = 'submit' className="letter_btn" onClick={handleSubmit}>등록</button>
-          <button type = 'button' className="letter_btn" onClick={openNewWindow}>OCR하러가기</button>
-      </div>
+{/*           <button type = 'button' className="letter_btn" onClick={openNewWindow}>OCR하러가기</button>
+ */}      </div>
     </div>
   );
   
