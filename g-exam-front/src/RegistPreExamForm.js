@@ -148,6 +148,7 @@ const RegistForm = () => {
     const form = new FormData();
     form.append('selectedExamMajor', selectedExamMajor);
     form.append('selectedClassification', selectedClassification);
+    form.append('selectedSchool', formData.school_details);
     form.append('type', formData.type);
     form.append('paragraph', formData.paragraph);
     form.append('question', formData.question);
@@ -158,8 +159,8 @@ const RegistForm = () => {
     form.append('choice5', formData.choice5);
     form.append('answer', formData.answer);
     form.append('image', image);
-    
-    fetch('/api/regist_workbook_exam', {
+    console.log(form);
+    fetch('/api/regist_pre_exam', {
         method: 'POST',
         body: form,
       })

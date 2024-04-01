@@ -1270,24 +1270,27 @@ router.post('/api/regist_workbook_exam', upload.single('image'), async (req, res
   const target_table = `workbook_${convertKorean(examMajor)}`
   const problem_number = await getNumber(classification, target_table);
 
-  const params = {
-    Bucket: 'bucket-lmz8li',
-    Key: `시험 이미지/${imageFile.originalname}`,
-    Body: imageFile.buffer,
-  };
+  let examImgFilePath = null;
+  if (imageFile) {
+    const params = {
+      Bucket: 'bucket-lmz8li',
+      Key: `시험 이미지/${classification}_${problem_number + 1}번 문제`,
+      Body: imageFile.buffer,
+    };
 
-  await s3.upload(params, (err, data) => {
-    if (err) {
-        console.error('Error uploading file to S3:', err);
-        return;
-    }
-    console.log('File uploaded successfully to S3:', data.Location);
+    await s3.upload(params, (err, data) => {
+      if (err) {
+          console.error('Error uploading file to S3:', err);
+          return;
+      }
+      examImgFilePath = data.Location;
+    });
+  }
 
-    // 데이터베이스에 파일 경로 저장
-    try
+  try
     {
       const regist_query = `INSERT INTO ${target_table} VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
-      const values = [classification, problem_number + 1, type, paragraph, data.Location, question, choice1, choice2, choice3, choice4, choice5, answer];
+      const values = [classification, problem_number + 1, type, paragraph, examImgFilePath, question, choice1, choice2, choice3, choice4, choice5, answer];
       db.execute(regist_query, values);
 
       res.status(200).json({ message: '시험문제를 등록하였습니다.' });
@@ -1297,34 +1300,67 @@ router.post('/api/regist_workbook_exam', upload.single('image'), async (req, res
       console.error('시험문제 등록 오류:', error);
       throw error;
     }
-  });
   
 });
 
-router.post('/api/regist_pre_exam', async (req, res) => {
-  const classification = req.body.selectedClassification;
-  const major = req.body.selectedExamMajor;
-  const formData = req.body.formData;
-  const target_table = `pre_exam_${convertKorean(major)}`
+router.post('/api/regist_pre_exam', upload.single('image'), async (req, res) => {
+  const s3 = new AWS.S3();
+  const formData = req.body;
+  const imageFile = req.file;
 
+  const examMajor = formData.selectedExamMajor;
+  const classification = formData.selectedClassification;
+  const type = formData.type;
+  const school = formData.selectedSchool;
+  const paragraph = formData.paragraph || null;
+  const question = formData.question || null;
+  const choice1 = formData.choice1 || null;
+  const choice2 = formData.choice2 || null;
+  const choice3 = formData.choice3 || null;
+  const choice4 = formData.choice4 || null;
+  const choice5 = formData.choice5 || null;
+  const answer = formData.answer || null;
+  const target_table = `pre_exam_${convertKorean(examMajor)}`
   const problem_number = await getNumber(classification, target_table);
 
-  console.log(classification, '4', major, '5', formData, '6', target_table, '7', problem_number);
+  // 이미지 파일이 넘어오지 않은 경우 대비
+  let examImgFilePath = null;
+  if (imageFile) {
+    const params = {
+      Bucket: 'bucket-lmz8li',
+      Key: `시험 이미지/${classification}_${problem_number + 1}번 문제`,
+      Body: imageFile.buffer,
+    };
 
+    await s3.upload(params, (err, data) => {
+      if (err) {
+          console.error('Error uploading file to S3:', err);
+          return;
+      }
+      examImgFilePath = data.Location;
+    });
+  }
+
+  // 데이터베이스에 파일 경로 저장
   try
   {
     const regist_query = `INSERT INTO ${target_table} VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
-    const values = [classification, problem_number + 1, major, formData.school_details, formData.type, formData.paragraph, formData.image, formData.question, formData.choice1, formData.choice2, formData.choice3, formData.choice4, formData.choice5, formData.answer];
-    await db.execute(regist_query, values);
-
+    const values = [
+      classification, 
+      problem_number + 1, 
+      examMajor, school, type, 
+      paragraph, 
+      examImgFilePath,
+      question, choice1, choice2, choice3, choice4, choice5, answer
+    ];
+    db.execute(regist_query, values);
     res.status(200).json({ message: '시험문제를 등록하였습니다.' });
   } 
   catch (error) 
   {
     console.error('시험문제 등록 오류:', error);
-    throw error;
+    res.status(500).json({ error: '시험문제 등록에 실패하였습니다.' });
   }
-
 }); 
 
 router.post('/api/start_word_exam', async (req, res) => {
