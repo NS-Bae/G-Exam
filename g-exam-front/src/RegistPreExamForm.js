@@ -1,24 +1,23 @@
 import './App.css';
 import React from 'react';
-import ReactDOM from 'react-dom';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import OcrRequest  from './OCR_Request';
-import ImgPreview from './ImagePreview';
-import ReactDOMServer from 'react-dom/client';
 
 const RegistForm = () => {
   const [isConfirmButtonClicked, setConfirmButtonClicked] = useState(false);
+  const [isImageUploaded, setIsImageUploaded] = useState(false);
+  const [isPopupOpen, setIsPopupOpen] = useState(false);
+  const [imagePreview, setImagePreview] = useState([]);
   const [schoolsList, setSchoolsList] = useState([]);
   const [tagList, setTagList] = useState([]);
-  const [selectedType, setSelectedType] = useState('');
   const [selectedSchooltype, setSelectedSchoolType] = useState('');
   const [selectedExamMajor, setSelectedExamMajor] = useState(''); // 기출문제용 과목 선택
   const [selectedClassification, setSelectedClassification] = useState('');
+  const [image, setImage] = useState('');//이미지
   const [formData, setFormData] = useState({
     school_details: '',
     type: '',
     paragraph: '',
-    image: '',
     question: '',
     choice1: '',
     choice2: '',
@@ -26,6 +25,7 @@ const RegistForm = () => {
     choice4: '',
     choice5: '',
     answer: '',
+    image:null,
   });
   const validateForm = () => {
     const requiredFields = ['school_details', 'type', 'question', 'answer'];
@@ -38,7 +38,6 @@ const RegistForm = () => {
     }
     return true;
   };
-
   //과목별 분류 불러오기
   const fetchTag = async () => {
     try {
@@ -67,6 +66,38 @@ const RegistForm = () => {
     }
   };
 
+  const handleInputChange = (e) => {
+    const { id, value } = e.target;
+    setFormData((prevData) => ({
+      ...prevData,
+      [id]: value,
+    }));
+  };
+  const handleImageUpload = (event) => {
+    const file = event.target.files[0];
+    const id = event.target.id;
+    setImage(file);
+    setIsImageUploaded(true);
+    setFormData((prevData) => ({
+      ...prevData,
+      [id]: file,
+    }));
+
+    let fileRead = new FileReader();
+    fileRead.onload = function() {
+      setImagePreview(fileRead.result);
+    }
+    fileRead.readAsDataURL(file);
+  };
+
+  const handlePopupClose = () => {
+    setIsPopupOpen(false);
+  };
+  
+  const handleCheckImage = () => {
+    console.log(isImageUploaded, 'dd', imagePreview);
+    setIsPopupOpen(true);
+  };
   const handleConfirmButtonClick = () =>{
     setConfirmButtonClicked(true);
     fetchTag();
@@ -75,18 +106,6 @@ const RegistForm = () => {
     const selectedMajor = e.target.value;
     setSelectedExamMajor(selectedMajor);
     console.log(selectedMajor);    
-  };
-  const handleTypeChange = (e) => {
-    const value = e.target.value;
-    setSelectedType(value);
-    handleInputChange(e);
-  };
-  const handleInputChange = (e) => {
-      const { id, value } = e.target;
-      setFormData((prevData) => ({
-        ...prevData,
-        [id]: value,
-      }));
   };
   const handleSchoolTypeChange = (e) => {
       const selectedSchool = e.target.value;
@@ -101,105 +120,69 @@ const RegistForm = () => {
       .catch((error) => console.error('학교 목록 불러오기 오류:', error));
   };
   
-  const ImageUploadComponent = () => {
-    const [image, setImage] = useState('');
-  
-    const handleImageChange = (e) => {
-      const imageFile = e.target.files[0];
-      if (imageFile) {
-        const formData = new FormData();
-        formData.append('image', imageFile);
-
-        Object.entries(formData).forEach(([key, value]) => {
-          formData.append(key, value);
-        });
-      }
-    };
-    const openImagePreview = () => {
-      const imagePreviewWindow = window.open('', '_blank', 'width=600,height=400');
-      const imagePreviewPage = <ImgPreview image={image} />;
-      
-      ReactDOM.render(imagePreviewPage, imagePreviewWindow.document.body);
-    };
-    
-  
-    return (
-      <div className='upper_button_place'>
-        <input type="file" onChange={handleImageChange} accept="image/*" className='img_input'/>
-        {image && <button type = 'button' className='letter_btn' onClick={openImagePreview}>미리보기</button> }
-      </div>
-    );
-  };
-  const openNewWindow = () => {
-    const newWindowName = 'myNewWindow';
-  
-    const newWindow = window.open('', newWindowName, 'width=800,height=600');
-  
-    if (newWindow) {
-      newWindow.document.body.innerHTML = '<div id="root"></div>';
-      const rootElement = newWindow.document.getElementById('root');
-  
-      if (rootElement && typeof ReactDOM.createRoot === 'function') {
-        const root = ReactDOM.createRoot(rootElement);
-        root.render(<OcrRequest  />);
-      } else {
-        ReactDOM.render(<OcrRequest  />, rootElement);
-      }
-    } else {
-      console.error('새 창을 열 수 없습니다.');
-    }
-  };
+  //등록api
   const handleSubmit = (e) => {
     e.preventDefault();
-
-    console.log(formData,selectedExamMajor, selectedClassification);
 
     if (!validateForm()) {
       alert('입력되지 않은 값이 있습니다. 모든 항목을 입력해주세요.');
       return;
-    }
-
-    // 이하 코드는 유효성 검사를 통과한 경우에만 실행
-    const formDataObject = new FormData();
-    Object.entries(formData).forEach(([key, value]) => {
-      formDataObject.append(key, value);
-    });
-
-    // 나머지 코드는 유효성 검사를 통과한 경우의 로직
-    for (const [key, value] of formDataObject.entries()) {
-      console.log(`${key}: ${value}`);
-    }
-
+    };
     // 나머지 코드는 유효성 검사를 통과한 경우의 로직
     handleButton(); 
+
+    setFormData({
+      type: '',
+      paragraph: '',
+      question: '',
+      choice1: '',
+      choice2: '',
+      choice3: '',
+      choice4: '',
+      choice5: '',
+      answer: '',
+      image: null,
+    });
   };
   const handleButton = () => {
-    fetch('/api/regist_pre_exam', {
+    const form = new FormData();
+    form.append('selectedExamMajor', selectedExamMajor);
+    form.append('selectedClassification', selectedClassification);
+    form.append('type', formData.type);
+    form.append('paragraph', formData.paragraph);
+    form.append('question', formData.question);
+    form.append('choice1', formData.choice1);
+    form.append('choice2', formData.choice2);
+    form.append('choice3', formData.choice3);
+    form.append('choice4', formData.choice4);
+    form.append('choice5', formData.choice5);
+    form.append('answer', formData.answer);
+    form.append('image', image);
+    
+    fetch('/api/regist_workbook_exam', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          formData, 
-          selectedClassification: selectedClassification, 
-          selectedExamMajor: selectedExamMajor,
-        }),
+        body: form,
       })
-    .then((response) => response.json())
-    .then((data) => {
-      if (data.message) 
-      {
-        alert(data.message);
-      } 
-      else if (data.error) 
-      {
-        alert(data.error);
-      }
-    })
-    .catch((error) => {
-      console.error('네트워크 오류:', error);
-    });
-  }
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error(`Network response was not ok, status: ${response.status}`);
+        }
+        return response.json();
+      })
+      .then((data) => {
+        if (data.message) 
+        {
+          alert(data.message);
+        }
+        else if (data.error) 
+        {
+          alert(data.error);
+        }
+      })
+      .catch((error) => {
+        console.error('네트워크 오류:', error);
+      });
+  };
 
   return (
     <div className='place'>
@@ -233,7 +216,7 @@ const RegistForm = () => {
             ))}
           </select>
         </div>
-        <select id='type' value={formData.type} onChange={handleTypeChange}>
+        <select id='type' value={formData.type} onChange={handleInputChange}>
           <option value={'select'}>유형</option>
           <option value={'객관식'}>객관식</option>
           <option value={'주관식'}>주관식</option>
@@ -257,7 +240,18 @@ const RegistForm = () => {
           ))}
         </select>
       </div>
-      <ImageUploadComponent />
+      <div className='upper_button_place'>
+        <input id="image" type="file" accept="image/*" onChange={handleImageUpload}  className='img_input' />
+        { isImageUploaded && <button className='small_letter_button' onClick={handleCheckImage}>미리보기</button>}
+      </div>
+        {isPopupOpen && (
+        <div className="popup">
+          <div className="popup-content">
+            <img src={URL.createObjectURL(image)} alt="Uploaded" />
+            <button onClick={handlePopupClose}>Close</button>
+          </div>
+        </div>
+      )}
       <div className="question_sub">
         <div className="paragraph_area">
           <h4>지문</h4>
@@ -296,8 +290,8 @@ const RegistForm = () => {
       </div>
       <div className='btn_section'>
         <button type = 'submit' className="letter_btn" onClick={handleSubmit}>등록</button>
-        <button type = 'button' className="letter_btn" onClick={openNewWindow}>OCR하러가기</button>
-      </div>
+{/*         <button type = 'button' className="letter_btn" onClick={openNewWindow}>OCR하러가기</button>
+ */}      </div>
     </div>
   );
 };

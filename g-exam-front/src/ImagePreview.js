@@ -1,21 +1,18 @@
 import React from 'react';
+import Modal from 'react-modal';
 
-class ImgPreview extends React.Component {
-  render() {
-    const { image } = this.props;
-
-    const styles = {
-      maxWidth: '100%', // 이미지 최대 너비
-      maxHeight: '100%', // 이미지 최대 높이
-    };
-  
-    return (
+const PreviewModal = ({ image, onClose }) => {
+  return (
+    <Modal
+      isOpen={image !== null}
+      onRequestClose={onClose}
+      contentLabel="Image Preview"
+    >
       <div>
-        <h1>Image Preview</h1>
-        {image && <img src={image} alt="Preview" style={styles} />}
+        <img src={image} alt="Uploaded Image" />
       </div>
-    );
-  }
-}
+    </Modal>
+  );
+};
 
-export default ImgPreview;
+export default PreviewModal;

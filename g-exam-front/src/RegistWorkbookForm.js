@@ -1,7 +1,5 @@
 import './App.css';
 import React from 'react';
-import ReactDOM from 'react-dom';
-import { createRoot } from 'react-dom/client';
 import { useState, useEffect } from 'react';
 import OcrRequest  from './OCR_Request';
 import ImgPreview from './ImagePreview';
@@ -90,56 +88,6 @@ function WorkbookChoiceForm()
   
   }, [selectedExamMajor]);
 
-  /* const openNewWindow = () => {
-    const newWindowName = 'myNewWindow';
-  
-    const newWindow = window.open('', newWindowName, 'width=800,height=600');
-  
-    if (newWindow) {
-      newWindow.document.body.innerHTML = '<div id="root"></div>';
-      const rootElement = newWindow.document.getElementById('root');
-  
-      if (rootElement && typeof ReactDOM.createRoot === 'function') {
-        const root = ReactDOM.createRoot(rootElement);
-        root.render(<OcrRequest  />);
-      } else {
-        ReactDOM.render(<OcrRequest  />, rootElement);
-      }
-    } else {
-      console.error('새 창을 열 수 없습니다.');
-    }
-  }; */
-
-  /* const ImageUploadComponent = () => {
-    const [previewImg, setPreviewImg] = useState('');
-    const handleImageChange = (e)=> {
-      const {files} = e.target;
-      const uploadFile = files[0];
-      const reader = new FileReader();
-      reader.readAsDataURL(uploadFile);
-      reader.onloadend = () => {
-        setPreviewImg(reader.result);
-      };
-      setImageUrl(uploadFile);
-    };    
-
-    const openImagePreview = () => {
-      console.log(previewImg);
-      const imagePreviewWindow = window.open('', '_blank', 'width=600,height=400');
-      const imagePreviewRoot = imagePreviewWindow.document.createElement('div');
-      imagePreviewWindow.document.body.appendChild(imagePreviewRoot);
-      const root = createRoot(imagePreviewRoot);
-      root.render(<ImgPreview image={previewImg} />);
-    };
-  
-    return (
-      <div className='upper_button_place'>
-        <input type="file" id = 'image' onChange={handleImageChange} accept="image/*" className='img_input'/>
-        {previewImg && <button type='button' className='letter_btn' onClick={openImagePreview}>미리보기</button>}
-      </div>
-    );
-  }; */
-
   const handleInputChange = (e) => {
     const { id, value } = e.target;
     setFormData((prevData) => ({
@@ -185,7 +133,6 @@ function WorkbookChoiceForm()
     const selectedMajor = e.target.value;
     setSelectedExamMajor(selectedMajor);
   };
-
   const handleFirstConfirmButtonClick = () => {
     setConfirmButtonClicked(true);
   };
