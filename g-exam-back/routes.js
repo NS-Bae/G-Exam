@@ -1291,7 +1291,7 @@ router.post('/api/regist_workbook_exam', upload.single('image'), async (req, res
     {
       const regist_query = `INSERT INTO ${target_table} VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
       const values = [classification, problem_number + 1, type, paragraph, examImgFilePath, question, choice1, choice2, choice3, choice4, choice5, answer];
-      db.execute(regist_query, values);
+      await db.execute(regist_query, values);
 
       res.status(200).json({ message: '시험문제를 등록하였습니다.' });
     } 
@@ -1353,7 +1353,7 @@ router.post('/api/regist_pre_exam', upload.single('image'), async (req, res) => 
       examImgFilePath,
       question, choice1, choice2, choice3, choice4, choice5, answer
     ];
-    db.execute(regist_query, values);
+    await db.execute(regist_query, values);
     res.status(200).json({ message: '시험문제를 등록하였습니다.' });
   } 
   catch (error) 
