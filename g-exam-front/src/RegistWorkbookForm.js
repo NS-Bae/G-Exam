@@ -10,6 +10,9 @@ function WorkbookChoiceForm()
   const [selectedClassification, setSelectedClassification] = useState('');
   const [image, setImage] = useState('');//이미지
   const [isConfirmButtonClicked, setConfirmButtonClicked] = useState(false);
+  const [isImageUploaded, setIsImageUploaded] = useState(false);
+  const [isPopupOpen, setIsPopupOpen] = useState(false);
+  const [imagePreview, setImagePreview] = useState([]);
   const [tagList, setTagList] = useState([]);
   const [subjectList, setSubjectList] = useState([]);
   const [formData, setFormData] = useState({
@@ -99,10 +102,23 @@ function WorkbookChoiceForm()
     const file = event.target.files[0];
     const id = event.target.id;
     setImage(file);
+    setIsImageUploaded(true);
     setFormData((prevData) => ({
       ...prevData,
       [id]: file,
     }));
+    
+    let fileRead = new FileReader();
+    fileRead.onload = function() {
+      setImagePreview(fileRead.result);
+    }
+    fileRead.readAsDataURL(file);
+  };
+  const handleCheckImage = () => {
+    setIsPopupOpen(true);
+  }
+  const handlePopupClose = () => {
+    setIsPopupOpen(false);
   };
 
   const handleSubmit = (e) => {
@@ -215,7 +231,16 @@ function WorkbookChoiceForm()
       </div>
       <div className='upper_button_place'>
         <input id="image" type="file" accept="image/*" onChange={handleImageUpload}  className='img_input' />
+        { isImageUploaded && <button className='small_letter_button' onClick={handleCheckImage}>미리보기</button>}
       </div>
+      {isPopupOpen && (
+        <div className="popup">
+          <div className="popup-content">
+            <img src={URL.createObjectURL(image)} alt="Uploaded" />
+            <button onClick={handlePopupClose}>Close</button>
+          </div>
+        </div>
+      )}
       <div className="question_sub">
         <div className="paragraph_area">
           <h4>지문</h4>

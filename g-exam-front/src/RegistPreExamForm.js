@@ -95,7 +95,6 @@ const RegistForm = () => {
   };
   
   const handleCheckImage = () => {
-    console.log(isImageUploaded, 'dd', imagePreview);
     setIsPopupOpen(true);
   };
   const handleConfirmButtonClick = () =>{
@@ -159,7 +158,7 @@ const RegistForm = () => {
     form.append('choice5', formData.choice5);
     form.append('answer', formData.answer);
     form.append('image', image);
-    console.log(form);
+
     fetch('/api/regist_pre_exam', {
         method: 'POST',
         body: form,
@@ -245,7 +244,7 @@ const RegistForm = () => {
         <input id="image" type="file" accept="image/*" onChange={handleImageUpload}  className='img_input' />
         { isImageUploaded && <button className='small_letter_button' onClick={handleCheckImage}>미리보기</button>}
       </div>
-        {isPopupOpen && (
+      {isPopupOpen && (
         <div className="popup">
           <div className="popup-content">
             <img src={URL.createObjectURL(image)} alt="Uploaded" />
