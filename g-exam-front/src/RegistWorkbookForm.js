@@ -236,9 +236,9 @@ function WorkbookChoiceForm()
       {isPopupOpen && (
         <div className="popup">
           <div className="popup-content">
-            <img src={URL.createObjectURL(image)} alt="Uploaded" />
-            <button onClick={handlePopupClose}>Close</button>
+            <img className="popup" src={URL.createObjectURL(image)} alt="Uploaded" />
           </div>
+          <button onClick={handlePopupClose}>Close</button>
         </div>
       )}
       <div className="question_sub">

@@ -152,7 +152,7 @@ const UpdateExamModal = ({ modalIsOpen, closeModal, modalExamId, classification,
       <h2>{classification}</h2>
       <h2>{modalExamId}번 문제 수정</h2>
       <div className='place'>
-        <div>
+        <div className='popup-content'>
           <img src={defaultData.image} alt="S3 Image" />
         </div>
         <div className="question_sub">

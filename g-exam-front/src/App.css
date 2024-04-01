@@ -789,3 +789,14 @@
     flex-direction: row;
     justify-content: space-around;
   }
+
+  .popup
+  {
+    max-width: 80%;
+  }
+
+  .container
+  {
+    width: 45%;
+    margin: 2.5%;
+  }

@@ -245,7 +245,7 @@ function ImgPlace({result})
   const image = result.image;
   return (
     <>
-    {image && <img src={image} alt="Preview" />}
+    {image && <img className='container' src={image} alt="Preview" />}
     </>
   )
 }
@@ -253,7 +253,9 @@ function ParagraphPlace({result})
 {
   const paragraph = result.paragraph;
   return (
-    <p>{paragraph}</p>
+    <div className='container'>
+      <p>{paragraph}</p>
+    </div>
   )
 }
 function ChoiceExamForm({ 
