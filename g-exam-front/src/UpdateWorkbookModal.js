@@ -129,6 +129,9 @@ const UpdateWorkbookModal = ({ modalIsOpen, closeModal, modalExamId, classificat
       >
         <h2>{classification} {modalExamId}번 문제 수정</h2>
         <div className='place'>
+        <div>
+          <img src={defaultData.image} alt="S3 Image" />
+        </div>
         <div className="question_sub">
           <div className="paragraph_area">
             <h4>지문</h4>

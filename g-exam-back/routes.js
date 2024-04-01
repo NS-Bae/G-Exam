@@ -1278,6 +1278,7 @@ router.post('/api/regist_workbook_exam', upload.single('image'), async (req, res
       Bucket: 'bucket-lmz8li',
       Key: `시험 이미지/${classification}_${problem_number + 1}번 문제`,
       Body: imageFile.buffer,
+      ACL: 'public-read',
     };
 
     try {
@@ -1333,6 +1334,7 @@ router.post('/api/regist_pre_exam', upload.single('image'), async (req, res) => 
       Bucket: 'bucket-lmz8li',
       Key: `시험 이미지/${classification}_${problem_number + 1}번 문제`,
       Body: imageFile.buffer,
+      ACL: 'public-read',
     };
 
     try {
@@ -1794,8 +1796,4 @@ function writeExamRecord(correct, wrong, user, wrongAnswers, major)
   });
 };
 
-/* //이미지 처리
-router.post('/api/upload_images', async (req, res) => {
-
-}); */
 module.exports = router;
