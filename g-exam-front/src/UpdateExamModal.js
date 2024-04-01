@@ -152,6 +152,9 @@ const UpdateExamModal = ({ modalIsOpen, closeModal, modalExamId, classification,
       <h2>{classification}</h2>
       <h2>{modalExamId}번 문제 수정</h2>
       <div className='place'>
+        <div>
+          <img src={defaultData.image} alt="S3 Image" />
+        </div>
         <div className="question_sub">
           <div className="paragraph_area">
             <h4>지문</h4>

@@ -858,11 +858,12 @@ router.post('/api/delete_exam', async (req, res) => {
 router.post('/api/show_exam', async (req, res) => {
   const type = req.body.type;
   const selectedRows = req.body.selectedRows;
+
   if(type === 'workbook')
   {
     const selectedClassification = req.body.selectedClassification;
     const target_table = `workbook_${convertKorean(req.body.selectedCategory)}`;
-
+    
     sql = `SELECT * FROM ${target_table} WHERE exam_id = '${selectedRows}' AND classification_name = '${selectedClassification}';`;
     try 
     {
@@ -878,8 +879,9 @@ router.post('/api/show_exam', async (req, res) => {
   else if(type === 'pre_exam')
   {
     const selectedCategory = `pre_exam_${convertKorean(req.body.selectedCategory)}`;
-
-    sql = `SELECT * FROM ${selectedCategory} WHERE exam_id = '${selectedRows}';`;
+    const selectedClassification = req.body.selectedClassification;
+    
+    sql = `SELECT * FROM ${selectedCategory} WHERE exam_id = '${selectedRows}'AND classification_name = '${selectedClassification}';`;
     try 
     {
       const [result] = await db.promise().query(sql, selectedRows);
