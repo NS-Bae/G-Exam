@@ -1332,13 +1332,14 @@ router.post('/api/regist_pre_exam', upload.single('image'), async (req, res) => 
       Body: imageFile.buffer,
     };
 
-    await s3.upload(params, (err, data) => {
-      if (err) {
-          console.error('Error uploading file to S3:', err);
-          return;
-      }
+    try {
+      const data = await s3.upload(params).promise();
       examImgFilePath = data.Location;
-    });
+    } 
+    catch (err) {
+      console.error('Error uploading file to S3:', err);
+      return res.status(500).json({ error: '이미지 업로드에 실패하였습니다.' });
+    }
   }
 
   // 데이터베이스에 파일 경로 저장
