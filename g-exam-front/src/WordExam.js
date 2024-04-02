@@ -80,6 +80,7 @@ function ChoiceRandom({selectedMajor, onBackButtonClick})
   const [startNumber, setStartNumber] = useState(0);
   const [isExamButtonEnabled, setIsExamButtonEnabled] = useState(false);
   const [showStartNumberInput, setShowStartNumberInput] = useState(false);
+  const [verification, setVerification] = useState(false);
   const [selectedValues, setSelectedValues] = useState([]); 
   const navigate = useNavigate();
   const major = selectedMajor;
@@ -104,19 +105,43 @@ function ChoiceRandom({selectedMajor, onBackButtonClick})
     setStartNumber(numberOfQuestion);
   };
   const clickConfirmButton = () => {
-    console.log(selectedValues.length, formType);
     if(formType === 'sequential' && selectedValues.length > 1) 
     {
       alert('순차 출제에서는 태그를 하나만 선택할 수 있습니다.');
       return;
     }
-    if(saveNumber === 0 || saveNumber === '' || formType === '' || selectedValues === '' || selectedValues.length === 0)
+    fetch('/api/verification_word', {   
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        examDetails: examDetails
+      }),
+    })
+    .then((response) => {
+      if (response.status === 200) {
+        setVerification(true);
+        console.log('Success');
+      } 
+      else if (response.status === 201) {
+        setVerification(false);
+        return response.json().then((data) => {
+          alert(data.message);
+        });
+      }
+    })
+    .catch((error) => {
+      alert(error);
+      console.log('데이터 처리과정에서 문제가 발생하였습니다.', error);
+    });
+    if(verification === false || saveNumber === 0 || saveNumber === '' || formType === '' || selectedValues === '' || selectedValues.length === 0)
     {
       setIsExamButtonEnabled(false);
       let alertMessage1='', alertMessage2='', alertMessage3='';
-      if(saveNumber === 0 || saveNumber === '' )
+      if(verification === false || saveNumber === 0 || saveNumber === '' )
       {
-        alertMessage1 = "문항 수를 입력해주세요";
+        alertMessage1 = "문항 수를 확인해주세요";
       }
       if(formType === '')
       {

@@ -1030,7 +1030,7 @@ router.post('/api/add_classification', async (req, res) => {
     const table = "classification_list";
     try
     { 
-      const sql = `INSERT INTO ${table} VALUES (?, 0, ?)`;
+      const sql = `INSERT INTO ${table} VALUES (?, ?)`;
       const values = [classification, major];
   
       await db.execute(sql, values);
@@ -1047,7 +1047,7 @@ router.post('/api/add_classification', async (req, res) => {
     const table = "word_category";
     try
     {
-      const sql = `INSERT INTO ${table} VALUES (?, 0, ?)`;
+      const sql = `INSERT INTO ${table} VALUES (?, ?)`;
       const values = [classification, major];
   
       await db.execute(sql, values);
@@ -1068,7 +1068,7 @@ router.post('/api/add_classification', async (req, res) => {
     const formType = req.body.form_type;
     const classificationForm = `${formData.year}_${formData.school_details}_${formData.major}_${formData.grade}학년_${formData.semester}학기_${formData.period}고사`;
     let addTagClassification;    
-    const sql = `INSERT INTO ${table} VALUES (?, 0, ?)`;
+    const sql = `INSERT INTO ${table} VALUES (?, ?)`;
     let values;
 
     if(formData.tag === '')
@@ -1161,10 +1161,10 @@ router.post('/api/get_classification', (req, res) => {
 
   if(formType === "exam")
   {
-    target_table = "classification_list";
+    target_table = `workbook_${convertKorean(selectedMajor)}`;
     target_row = "classification_name";
     
-    sql = `SELECT ${target_row} FROM ${target_table} WHERE major_name = '${selectedMajor}';`;
+    sql = `SELECT ${target_row}, COUNT(*) as count FROM ${target_table} GROUP BY ${target_row};`;
     
     db.query(sql, (err, result) => {
       if (err) 
@@ -1174,17 +1174,16 @@ router.post('/api/get_classification', (req, res) => {
       } 
       else 
       {
-        console.log(result);
         res.status(200).json({ data: result });
       }
     });
   }
   else if(formType === "word")
   {
-    target_table = "word_category";
+    target_table = `word_${convertKorean(selectedMajor)}`;
     target_row = "word_category";
     
-    sql = `SELECT ${target_row} FROM ${target_table} WHERE major_name = '${selectedMajor}';`;
+    sql = `SELECT ${target_row}, COUNT(*) as count FROM ${target_table} GROUP BY ${target_row};`;
     
     db.query(sql, (err, result) => {
       if (err) 
@@ -1194,7 +1193,6 @@ router.post('/api/get_classification', (req, res) => {
       } 
       else 
       {
-        console.log(result);
         res.status(200).json({ data: result });
       }
     });
@@ -1202,16 +1200,16 @@ router.post('/api/get_classification', (req, res) => {
   else if(formType === "pre_exam")
   {
     console.log(detail_school, 'ss');
-    target_table = "pre_exam_classification_list";
+    target_table = `pre_exam_${convertKorean(selectedMajor)}`;
     target_row = "classification_name";
 
     if(detail_school !== undefined)
     {
-      sql = `SELECT ${target_row} FROM ${target_table} WHERE major_name = '${selectedMajor}' AND classification_name LIKE '%${detail_school}%';`;
+      sql = `SELECT ${target_row}, COUNT(*) as count FROM ${target_table} WHERE classification_name LIKE '%${detail_school}%' GROUP BY ${target_row};`;
     }
     else
     {
-      sql = `SELECT ${target_row} FROM ${target_table} WHERE major_name = '${selectedMajor}';`;
+      sql = `SELECT ${target_row}, COUNT(*) as count FROM ${target_table} GROUP BY ${target_row};`;
     }
     
     db.query(sql, (err, result) => {
@@ -1222,7 +1220,6 @@ router.post('/api/get_classification', (req, res) => {
       } 
       else 
       {
-        console.log(result);
         res.status(200).json({ data: result });
       }
     });
@@ -1795,5 +1792,121 @@ function writeExamRecord(correct, wrong, user, wrongAnswers, major)
     });
   });
 };
+//문항 수 검증 시험
+router.post('/api/verification_exam', (req, res) =>{
+  const {examSection, examControl, examType, subject, questionCount, startNumber, selectedTag} = req.body.examDetails;
+  const targetTable = `${examSection}_${convertKorean(subject)}`;
+  let countQuery;
+
+  if(examType === 'random')
+  {
+    const placeholders = selectedTag.map(() => '?').join(', ');
+    console.log(placeholders);
+    switch(examControl) {
+      case 'choice':
+        countQuery = `SELECT COUNT(*) AS count FROM ${targetTable} WHERE classification_name IN (${placeholders}) AND type = '객관식'`;
+        break;
+      case 'essay':
+        countQuery = `SELECT COUNT(*) AS count FROM ${targetTable} WHERE classification_name IN (${placeholders}) AND type = '주관식'`;
+        break;
+      default:
+        countQuery = `SELECT COUNT(*) AS count FROM ${targetTable} WHERE classification_name IN (${placeholders})`;
+    }
+    db.query(countQuery, selectedTag, (err, results) => {
+      if (err) {
+          console.error('Error inserting data into database:', err);
+          return;
+      }
+      count = results[0].count;
+      if(count<questionCount)
+      {
+        res.status(201).json({message:`출제할 문제가 저장된 문제보다 많습니다. ${count}개와 같거나 적은 수의 문제를 출제하세요`})
+      }
+      else
+      {
+        res.status(200).json();
+      }
+    });
+  }
+  else if(examType === 'sequential')
+  {
+    switch(examControl) {
+      case 'choice':
+        countQuery = `SELECT COUNT(*) AS count FROM (SELECT * FROM ${targetTable} WHERE classification_name = ? AND type = '객관식' ORDER BY exam_id LIMIT ${questionCount} OFFSET ${startNumber}) AS countquery`;
+        break;
+      case 'essay':
+        countQuery = `SELECT COUNT(*) AS count FROM (SELECT * FROM ${targetTable} WHERE classification_name = ? AND type = '주관식' ORDER BY exam_id LIMIT ${questionCount} OFFSET ${startNumber}) AS countquery`;
+        break;
+      default:
+        countQuery = `SELECT COUNT(*) AS count FROM (SELECT * FROM ${targetTable} WHERE classification_name = ? ORDER BY exam_id LIMIT ${questionCount} OFFSET ${startNumber}) AS countquery`;
+    }
+    db.query(countQuery, selectedTag, (err, results) => {
+      if (err) {
+          console.error('Error inserting data into database:', err);
+          return;
+      }
+      count = results[0].count;
+      if(count<questionCount)
+      {
+        res.status(201).json({message:`출제할 문제가 저장된 문제보다 많습니다. ${count}개와 같거나 적은 수의 문제를 출제하세요`})
+      }
+      else
+      {
+        res.status(200).json();
+      }
+    });
+  }
+});
+//문항 수 검증 단어
+router.post('/api/verification_word', (req, res) =>{
+  const {examType, subject, questionCount, startNumber, selectedTag} = req.body.examDetails;
+  const targetTable = `word_${convertKorean(subject)}`;
+  let countQuery;
+
+  console.log(examType, subject, questionCount, startNumber, selectedTag, targetTable);
+
+  if(examType === 'random')
+  {
+    const placeholders = selectedTag.map(() => '?').join(', ');
+    console.log(placeholders);
+    countQuery = `SELECT COUNT(*) AS count FROM ${targetTable} WHERE word_category IN (${placeholders})`;
+
+    db.query(countQuery, selectedTag, (err, results) => {
+      if (err) {
+          console.error('Error inserting data into database:', err);
+          return;
+      }
+      count = results[0].count;
+      if(count<questionCount)
+      {
+        res.status(201).json({message:`출제할 문제가 저장된 문제보다 많습니다. ${count}개와 같거나 적은 수의 문제를 출제하세요`})
+      }
+      else
+      {
+        res.status(200).json();
+      }
+    });
+  }
+  else if(examType === 'sequential')
+  {
+    countQuery = `SELECT COUNT(*) AS count FROM (SELECT * FROM ${targetTable} WHERE word_category = ? ORDER BY word_id LIMIT ${questionCount} OFFSET ${startNumber}) AS countquery`;
+    db.query(countQuery, selectedTag, (err, results) => {
+      if (err) {
+          console.error('Error inserting data into database:', err);
+          return;
+      }
+      count = results[0].count;
+      if(count<questionCount)
+      {
+        res.status(201).json({message:`출제할 문제가 저장된 문제보다 많습니다. ${count}개와 같거나 적은 수의 문제를 출제하세요`})
+      }
+      else
+      {
+        res.status(200).json();
+      }
+    });
+  }
+});
+
 
 module.exports = router;
