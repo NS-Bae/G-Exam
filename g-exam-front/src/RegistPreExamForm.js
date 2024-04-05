@@ -1,7 +1,6 @@
 import './App.css';
 import React from 'react';
 import { useState } from 'react';
-import OcrRequest  from './OCR_Request';
 
 const RegistForm = () => {
   const [isConfirmButtonClicked, setConfirmButtonClicked] = useState(false);
@@ -290,8 +289,7 @@ const RegistForm = () => {
       </div>
       <div className='btn_section'>
         <button type = 'submit' className="letter_btn" onClick={handleSubmit}>등록</button>
-{/*         <button type = 'button' className="letter_btn" onClick={openNewWindow}>OCR하러가기</button>
- */}      </div>
+      </div>
     </div>
   );
 };

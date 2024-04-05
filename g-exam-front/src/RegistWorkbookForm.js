@@ -1,7 +1,6 @@
 import './App.css';
 import React from 'react';
 import { useState, useEffect } from 'react';
-import OcrRequest  from './OCR_Request';
 import ImgPreview from './ImagePreview';
 
 function WorkbookChoiceForm() 
