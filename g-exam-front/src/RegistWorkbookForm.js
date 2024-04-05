@@ -278,9 +278,8 @@ function WorkbookChoiceForm()
         </div>
       </div>
       <div className='btn_section'>
-          <button type = 'submit' className="letter_btn" onClick={handleSubmit}>등록</button>
-{/*           <button type = 'button' className="letter_btn" onClick={openNewWindow}>OCR하러가기</button>
- */}      </div>
+        <button type = 'submit' className="letter_btn" onClick={handleSubmit}>등록</button>
+      </div>
     </div>
   );
   
