@@ -104,7 +104,7 @@ function ExamForm({form_type})
       const tagValue = tagRef.current ? tagRef.current.value : '';
       setAddButtonClicked(true);
       console.log(selectedCategory);
-      if(selectedCategory === "select" || tagValue === '')
+      if(selectedCategory === "select" || selectedCategory === "" || tagValue === '')
       {
         alert("분류값이 입력되지 않았거나 선택된 과목이 올바르지 않습니다.");
       }
@@ -565,7 +565,7 @@ function WordForm({form_type})
     const tagValue = tagRef.current ? tagRef.current.value : '';
     setAddButtonClicked(true);
     console.log(selectedCategory);
-    if(selectedCategory === "select" || tagValue === '')
+    if(selectedCategory === "select" || selectedCategory === "" || tagValue === '')
     {
       alert("분류값이 입력되지 않았거나 선택된 과목이 올바르지 않습니다.");
     }

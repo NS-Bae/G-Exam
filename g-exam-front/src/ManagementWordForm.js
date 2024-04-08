@@ -22,7 +22,7 @@ function ManagementWordForm()
     const fetchClassificationList = async () => {
       try 
       {
-        fetch('/api/get_classification', {
+        fetch('/api/classification', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',

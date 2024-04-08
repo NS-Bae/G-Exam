@@ -80,7 +80,6 @@ function ChoiceRandom({selectedMajor, onBackButtonClick})
   const [startNumber, setStartNumber] = useState(0);
   const [isExamButtonEnabled, setIsExamButtonEnabled] = useState(false);
   const [showStartNumberInput, setShowStartNumberInput] = useState(false);
-  const [verification, setVerification] = useState(false);
   const [selectedValues, setSelectedValues] = useState([]); 
   const navigate = useNavigate();
   const major = selectedMajor;
@@ -91,7 +90,8 @@ function ChoiceRandom({selectedMajor, onBackButtonClick})
     startNumber: startNumber,
     selectedTag: selectedValues,
   };
-  
+  let verification = false;
+
   const handleFormTypeChange = (e) => {
     setFormType(e.target.value);
     setShowStartNumberInput(e.target.value === 'sequential');
@@ -104,13 +104,13 @@ function ChoiceRandom({selectedMajor, onBackButtonClick})
     const numberOfQuestion = e.target.value;
     setStartNumber(numberOfQuestion);
   };
-  const clickConfirmButton = () => {
+  const clickConfirmButton = async() => {
     if(formType === 'sequential' && selectedValues.length > 1) 
     {
       alert('순차 출제에서는 태그를 하나만 선택할 수 있습니다.');
       return;
     }
-    fetch('/api/verification_word', {   
+    await fetch('/api/verification_word', {   
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -121,12 +121,12 @@ function ChoiceRandom({selectedMajor, onBackButtonClick})
     })
     .then((response) => {
       if (response.status === 200) {
-        setVerification(true);
+        verification = true;
         console.log('Success');
       } 
       else if (response.status === 201) {
-        setVerification(false);
         return response.json().then((data) => {
+          verification = false;
           alert(data.message);
         });
       }
@@ -223,7 +223,7 @@ function ChoiceRandom({selectedMajor, onBackButtonClick})
           뒤로가기
         </button>
       </div>
-      <QRCode value={`http://192.168.1.149:3000/wordtest/korean?examDetails=${encodeURIComponent(JSON.stringify(examDetails))}`} />
+      <QRCode value={`https://g-plan.org/wordtest/korean?examDetails=${encodeURIComponent(JSON.stringify(examDetails))}`} />
     </div>
   );
 }

@@ -81,7 +81,6 @@ function ChoiceRandom({selectedMajor, onBackButtonClick})
   const [startNumber, setStartNumber] = useState(0);
   const [isExamButtonEnabled, setIsExamButtonEnabled] = useState(false);
   const [showStartNumberInput, setShowStartNumberInput] = useState(false);
-  const [verification, setVerification] = useState(false);
   const [selectedValues, setSelectedValues] = useState([]); 
   const navigate = useNavigate();
   const major = selectedMajor;
@@ -94,6 +93,7 @@ function ChoiceRandom({selectedMajor, onBackButtonClick})
     startNumber: startNumber,
     selectedTag: selectedValues,
   };
+  let new_verification = false;
   
   const handleFormTypeChange = (e) => {
     setFormType(e.target.value);
@@ -107,13 +107,13 @@ function ChoiceRandom({selectedMajor, onBackButtonClick})
     const numberOfQuestion = e.target.value;
     setStartNumber(numberOfQuestion);
   };
-  const clickConfirmButton = () => {
+  const clickConfirmButton = async () => {
     if(formType === 'sequential' && selectedValues.length > 1) 
     {
       alert('순차 출제에서는 태그를 하나만 선택할 수 있습니다.');
       return;
     }
-    fetch('/api/verification_exam', {   
+    await fetch('/api/verification_exam', {   
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -124,12 +124,12 @@ function ChoiceRandom({selectedMajor, onBackButtonClick})
     })
     .then((response) => {
       if (response.status === 200) {
-        setVerification(true);
+        new_verification = true;
         console.log('Success');
       } 
       else if (response.status === 201) {
-        setVerification(false);
         return response.json().then((data) => {
+          new_verification = false;
           alert(data.message);
         });
       }
@@ -138,11 +138,11 @@ function ChoiceRandom({selectedMajor, onBackButtonClick})
       alert(error);
       console.log('데이터 처리과정에서 문제가 발생하였습니다.', error);
     });
-    if(verification === false || nowExamType === 'select' || saveNumber === 0 || saveNumber === '' || formType === '' || selectedValues === '' || selectedValues.length === 0)
+    if(new_verification === false || nowExamType === 'select' || saveNumber === 0 || saveNumber === '' || formType === '' || selectedValues === '' || selectedValues.length === 0)
     {
       setIsExamButtonEnabled(false);
       let alertMessage1 = '', alertMessage2 = '', alertMessage3 = '', alertMessage4 = '';
-      if(saveNumber === 0 || saveNumber === '' || verification === false)
+      if(saveNumber === 0 || saveNumber === '' || new_verification === false)
       {
         alertMessage1 = "문항 수를 확인해주세요";
       }
@@ -244,7 +244,7 @@ function ChoiceRandom({selectedMajor, onBackButtonClick})
           뒤로가기
         </button>
       </div>
-      <QRCode value={`http://192.168.1.149:3000/prevexam/korean?examDetails=${encodeURIComponent(JSON.stringify(examDetails))}`} />
+      <QRCode value={`https://g-plan.org/prevexam/korean?examDetails=${encodeURIComponent(JSON.stringify(examDetails))}`} />
     </div>
   );
 }

@@ -1077,7 +1077,7 @@ router.post('/api/add_classification', async (req, res) => {
     }
     else
     {
-      addTagClassification = `${classificationForm} ${formData.tag}`;
+      addTagClassification = `${classificationForm}_${formData.tag}`;
       values = [addTagClassification, formData.major];
     }
    
@@ -1220,6 +1220,68 @@ router.post('/api/get_classification', (req, res) => {
       } 
       else 
       {
+        res.status(200).json({ data: result });
+      }
+    });
+  }
+  else
+  {
+    return null;
+  }
+});
+
+router.post('/api/classification', (req, res) => {
+  const formType = req.body.form_type;
+  const selectedMajor = req.body.selectedMajor;
+  const detail_school = req.body.detail;
+  
+  console.log(formType, 1, selectedMajor, 1, detail_school);
+  let sql;
+
+  if(formType === "exam")
+  {
+    sql = `SELECT classification_name FROM classification_list WHERE major_name = '${selectedMajor}'`
+    db.query(sql, (err, result) => {
+      if (err) 
+      {
+        console.log(err);
+        res.status(500).json({ error: '' });
+      } 
+      else 
+      {
+        console.log(result);
+        res.status(200).json({ data: result });
+      }
+    });
+  }
+  else if(formType === "pre_exam")
+  {
+    sql = `SELECT classification_name FROM pre_exam_classification_list WHERE major_name = '${selectedMajor}'`
+    db.query(sql, (err, result) => {
+      if (err) 
+      {
+        console.log(err);
+        res.status(500).json({ error: '' });
+      } 
+      else 
+      {
+        console.log(result);
+        res.status(200).json({ data: result });
+      }
+    });
+  }
+  else if(formType === "word")
+  {
+    sql = `SELECT word_category FROM word_category WHERE major_name = '${selectedMajor}'`
+    db.query(sql, (err, result) => {
+      if (err) 
+      {
+        console.log(err);
+        res.status(500).json({ error: '' });
+      } 
+      else 
+      {
+        console.log(result);
         res.status(200).json({ data: result });
       }
     });

@@ -40,7 +40,7 @@ const RegistForm = () => {
   //과목별 분류 불러오기
   const fetchTag = async () => {
     try {
-      const response = await fetch('/api/get_classification', {
+      const response = await fetch('/api/classification', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

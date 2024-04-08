@@ -62,7 +62,7 @@ function WorkbookChoiceForm()
   useEffect(() => {
     const fatchTag = async () => {
       try {
-        const response = await fetch('/api/get_classification', {
+        const response = await fetch('/api/classification', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
