@@ -287,11 +287,11 @@ function RecordTable({ formType, user, selectedExamMajor, selectedSchoolGrade })
 }
 
 function SelectOption({
+  user,
   selectedExamMajor,
   setSelectedExamMajor,
   selectedSchoolGrade,
   setSelectedSchoolGrade,
-  onConfirmButtonClick,
 })
 {
   const [subjectList, setSubjectList] = useState([]);
@@ -339,16 +339,18 @@ function SelectOption({
             </option>
           ))}
         </select>
-        <select
-          id='schoolgrade'
-          onChange={handleSchoolGradeChange}
-          value={selectedSchoolGrade}
-        >
-          <option value={'select'}>선택하세요</option>
-          <option value={'초등'}>초등</option>
-          <option value={'중등'}>중등</option>
-          <option value={'고등'}>고등</option>
-        </select>
+        {user.user_type === '선생' && (
+          <select
+            id='schoolgrade'
+            onChange={handleSchoolGradeChange}
+            value={selectedSchoolGrade}
+          >
+            <option value={'select'}>선택하세요</option>
+            <option value={'초등'}>초등</option>
+            <option value={'중등'}>중등</option>
+            <option value={'고등'}>고등</option>
+          </select>
+        )}
     </div>
   )
 }
@@ -395,6 +397,7 @@ function MyApp()
           selectedExamMajor={selectedExamMajor}
           selectedSchoolGrade={selectedSchoolGrade} />
         <SelectOption
+          user={user}
           selectedExamMajor={selectedExamMajor}
           setSelectedExamMajor={setSelectedExamMajor}
           selectedSchoolGrade={selectedSchoolGrade}

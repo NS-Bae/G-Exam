@@ -186,96 +186,74 @@ router.post('/api/join_member', function(req, res) {
 //변경 불필요.
 router.post('/api/get_exam_record', (req, res) => {
   const { formType, user, selectedExamMajor, selectedSchoolGrade } = req.body;
-
-  console.log(formType, user, selectedExamMajor, selectedSchoolGrade);
-
-  /* if (!formType || !user || !user.user_type) 
+  let target_table;
+  let where_option = '';
+  let where_option2 = '';
+  
+  if (!formType || !user || !user.user_type) 
   {
     return res.status(400).json({ error: 'Invalid request parameters' });
   }
 
-  if(formType === "exam")
+  switch (formType) {
+    case 'word':
+      target_table = 'exam_word_record'
+      break;
+    case 'exam':
+      target_table = 'exam_record'
+      break;
+  }
+
+  if(user.user_type === '선생')
   {
-    if(user.user_type === '학생')
+    if(selectedExamMajor === 'select' && selectedSchoolGrade === 'select')
     {
-      try {
-        const sql = 'SELECT * FROM exam_record WHERE user_student_id = ?;';
-        db.promise()
-          .query(sql, [user.id])
-          .then(([rows]) => {
-            res.json({ examRecords: rows }); // 결과를 examRecords라는 키로 반환
-          })
-          .catch((error) => {
-            console.error('시험 결과를 가져오는데 실패했습니다', error);
-            res.status(500).json({ error: '시험 결과를 가져오는데 실패했습니다' });
-          });
-      } catch (error) {
-        console.error('시험 결과를 가져오는데 실패했습니다', error);
-        res.status(500).json({ error: '시험 결과를 가져오는데 실패했습니다' });
-      }
+      where_option = '';
     }
-    else if(user.user_type === '선생')
+    else if(selectedExamMajor !== 'select' && selectedSchoolGrade === 'select')
     {
-      try {
-        const sql = 'SELECT * FROM exam_record;';
-        db.promise()
-          .query(sql)
-          .then(([rows]) => {
-            res.json({ examRecords: rows }); // 결과를 examRecords라는 키로 반환
-          })
-          .catch((error) => {
-            console.error('시험 결과를 가져오는데 실패했습니다', error);
-            res.status(500).json({ error: '시험 결과를 가져오는데 실패했습니다' });
-          });
-      } catch (error) {
-        console.error('시험 결과를 가져오는데 실패했습니다', error);
-        res.status(500).json({ error: '시험 결과를 가져오는데 실패했습니다' });
-      }
+      where_option = `WHERE major = '${selectedExamMajor}'`;
+    }
+    else if(selectedExamMajor === 'select' && selectedSchoolGrade !== 'select')
+    {
+      where_option = `WHERE school_grade = '${selectedSchoolGrade}'`;
+    }
+    else
+    {
+      where_option = `WHERE major = '${selectedExamMajor}' AND school_grade = '${selectedSchoolGrade}'`;
     }
   }
-  else if(formType === "word")
+  else if(user.user_type === '학생')
   {
-    if(user.user_type === '학생')
+    if(selectedExamMajor === 'select')
     {
-      try {
-        const sql = 'SELECT * FROM exam_word_record WHERE user_student_id = ?;';
-        db.promise()
-          .query(sql, [user.id])
-          .then(([rows]) => {
-            res.json({ examRecords: rows }); // 결과를 examRecords라는 키로 반환
-          })
-          .catch((error) => {
-            console.error('시험 결과를 가져오는데 실패했습니다', error);
-            res.status(500).json({ error: '시험 결과를 가져오는데 실패했습니다' });
-          });
-      } catch (error) {
-        console.error('시험 결과를 가져오는데 실패했습니다', error);
-        res.status(500).json({ error: '시험 결과를 가져오는데 실패했습니다' });
-      }
+      where_option2 = `WHERE user_student_id = '${user.id}'`;
     }
-    else if(user.user_type === '선생')
+    else
     {
-      try {
-        const sql = 'SELECT * FROM exam_word_record;';
-        db.promise()
-          .query(sql)
-          .then(([rows]) => {
-            res.json({ examRecords: rows }); // 결과를 examRecords라는 키로 반환
-          })
-          .catch((error) => {
-            console.error('시험 결과를 가져오는데 실패했습니다', error);
-            res.status(500).json({ error: '시험 결과를 가져오는데 실패했습니다' });
-          });
-      } catch (error) {
-        console.error('시험 결과를 가져오는데 실패했습니다', error);
-        res.status(500).json({ error: '시험 결과를 가져오는데 실패했습니다' });
-      }
+      where_option2 = `WHERE user_student_id = '${user.id}' AND major = '${selectedExamMajor}'`;
     }
   }
-  else
+  const sql = `SELECT * FROM ${target_table} ${where_option} ${where_option2}`;
+
+  try 
   {
-    console.log("옳바르지 않은 요청입니다.");
-  } */
+    db.promise()
+      .query(sql, [user.id])
+      .then(([rows]) => {
+        res.json({ examRecords: rows }); // 결과를 examRecords라는 키로 반환
+      })
+      .catch((error) => {
+        console.error('시험 결과를 가져오는데 실패했습니다', error);
+        res.status(500).json({ error: '시험 결과를 가져오는데 실패했습니다' });
+      });
+  } 
+  catch (error) 
+  {
+    console.error('시험 결과를 가져오는데 실패했습니다', error);
+    res.status(500).json({ error: '시험 결과를 가져오는데 실패했습니다' });
+  }
+  
 });
 router.post('/api/read_txt_file', (req, res) => {
   const path = req.body.recordInfo2;
@@ -1574,7 +1552,19 @@ function writeWordExamRecord(correct, wrong, wrongAnswers, user, major, correctA
       }
     }
   }
-  data.push([`정답 : ${correct}개, 오답 : ${wrong}개, 점수 : ${record_score}점`])
+  data.push([`정답 : ${correct}개, 오답 : ${wrong}개, 점수 : ${record_score}점`]);
+
+  const schoolName = user.school_list_school_name;
+  const matchResult = schoolName.match(/초등|중등|고등/);
+  let extractedWord;
+
+  if (matchResult) {
+    extractedWord = matchResult[0]; // 추출된 단어
+    console.log(extractedWord);
+  } 
+  else {
+    console.log('초등, 중등, 고등 중 어떤 학교인지 확인할 수 없습니다.');
+  }
 
   const fileName = `${wordTestInfo}.txt`;
   const s3 = new AWS.S3();
@@ -1595,8 +1585,8 @@ function writeWordExamRecord(correct, wrong, wrongAnswers, user, major, correctA
     console.log('File uploaded successfully to S3:', data.Location);
 
     // 데이터베이스에 파일 경로 저장
-    const query = `INSERT INTO exam_word_record VALUES (?, ?, ?, ?)`;
-    const values = [user.id, wordTestInfo, record_score, data.Location];
+    const query = `INSERT INTO exam_word_record VALUES (?, ?, ?, ?, ?, ?)`;
+    const values = [user.id, wordTestInfo, record_score, data.Location, extractedWord, majorName];
 
     db.query(query, values, (err, results) => {
         if (err) {
@@ -1859,8 +1849,8 @@ function writeExamRecord(correct, wrong, user, wrongAnswers, major, combinedInfo
     console.log('File uploaded successfully to S3:', data.Location);
 
     // 데이터베이스에 파일 경로 저장
-    const query = `INSERT INTO exam_record VALUES (?, ?, ?, ?, ?)`;
-    const values = [user.id, ExamInfo, record_score, data.Location, extractedWord];
+    const query = `INSERT INTO exam_record VALUES (?, ?, ?, ?, ?, ?)`;
+    const values = [user.id, ExamInfo, record_score, data.Location, extractedWord, majorName];
 
     db.query(query, values, (err, results) => {
         if (err) {
