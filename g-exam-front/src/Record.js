@@ -40,7 +40,7 @@ function ChangeForm({ onFormTypeChange }) {
   );
 }
 
-function Check({ formType, user })
+function Check({ formType, user, selectedExamMajor, selectedSchoolGrade })
 {
   if(user.user_type === "학생")
   {
@@ -75,7 +75,7 @@ function Check({ formType, user })
     {
       return (
         <div>
-          <p>전체 학생 단어 시험 결과</p>
+          <p>{selectedSchoolGrade}학생 {selectedExamMajor}단어 시험 결과</p>
         </div>
       );
     }
@@ -83,7 +83,7 @@ function Check({ formType, user })
     {
       return (
         <div>
-          <p>전체 학생 일반 시험 결과</p>
+          <p>{selectedSchoolGrade} 학생 {selectedExamMajor}일반 시험 결과</p>
         </div>
       );
     }
@@ -97,7 +97,7 @@ function Check({ formType, user })
   }
 }
 
-function RecordTable({ formType, user })
+function RecordTable({ formType, user, selectedExamMajor, selectedSchoolGrade })
 {
   const [examRecords, setExamRecords] = useState([]);
   const [modalIsOpen, setModalIsOpen] = useState(false);
@@ -105,32 +105,32 @@ function RecordTable({ formType, user })
   const [recordInfo2, setRecordInfo2] = useState('');
   const [recordInfo3, setRecordInfo3] = useState('');
 
+  const fetchData = async () => {
+    if (formType === 'word' || formType === 'exam') {
+      try {
+        const record_response = await fetch('/api/get_exam_record', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ formType, user, selectedExamMajor, selectedSchoolGrade }),
+        });
 
-  useEffect(() => {
-    const fetchData = async () => {
-      if (formType === 'word' || formType === 'exam') {
-        try {
-          const record_response = await fetch('/api/get_exam_record', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ formType, user }),
-          });
-
-          if (!record_response.ok) {
-            throw new Error('네트워크 응답이 올바르지 않습니다.');
-          }
-
-          const record_data = await record_response.json();
-          setExamRecords(record_data.examRecords);
-        } catch (error) {
-          console.error('데이터를 가져오는 과정에서 문제가 발생하였습니다.', error);
+        if (!record_response.ok) {
+          throw new Error('네트워크 응답이 올바르지 않습니다.');
         }
+
+        const record_data = await record_response.json();
+        setExamRecords(record_data.examRecords);
+      } catch (error) {
+        console.error('데이터를 가져오는 과정에서 문제가 발생하였습니다.', error);
       }
-    };
+    }
+  };
+  useEffect(() => {
     fetchData();
-  }, [formType, user]);
+    console.log(selectedExamMajor, selectedSchoolGrade);
+  }, [formType, user, selectedExamMajor, selectedSchoolGrade]);
 
   const handleUpdateClick = (row) => {
     setRecordInfo1(row.user_student_id);
@@ -138,6 +138,41 @@ function RecordTable({ formType, user })
     setRecordInfo3(row.record_info);
     openModal({row});
   };
+  const handleDeleteClick = (row) => {
+    if(window.confirm("기록을 삭제하시겠습니까?"))
+    {
+      fetch('/api/delete_record', {
+        method: 'POST', 
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          row,
+          formType,
+        }),
+      })
+      .then((response) => {
+        if(!response.ok)
+        {
+          throw new Error('네트워크의 응답이 좋지 않습니다.');
+        }
+        return response.json();
+      })
+      .then((data) => {
+        console.log(data.message);
+        alert(data.message);
+        fetchData();
+      })
+      .catch((error) => {
+        console.log('데이터를 불러오는 과정에서 문제가 발생했습니다.', error)
+      })
+    }
+    else
+    {
+      return null;
+    }
+  }
+
   const openModal = () => {
     Modal.setAppElement('#root');
     setModalIsOpen(true);
@@ -160,7 +195,7 @@ function RecordTable({ formType, user })
     } 
     else 
     {
-      return null; // 모달 창이 닫혀있는 경우에는 null 반환
+      return null;
     }
   };
   
@@ -231,6 +266,11 @@ function RecordTable({ formType, user })
                     자세히 보기
                   </p>
                 </td>
+                <td>
+                  <p className='details' onClick={() => handleDeleteClick(record)}>
+                    삭제
+                  </p>
+                </td>
               </tr>
             ))}
           </tbody>
@@ -246,15 +286,88 @@ function RecordTable({ formType, user })
   }
 }
 
+function SelectOption({
+  selectedExamMajor,
+  setSelectedExamMajor,
+  selectedSchoolGrade,
+  setSelectedSchoolGrade,
+  onConfirmButtonClick,
+})
+{
+  const [subjectList, setSubjectList] = useState([]);
+
+  useEffect(() => {
+    const fetchSubjectList = async () => {
+      try 
+      {
+        const response = await fetch('/api/get_majorlist');
+        if (!response.ok) 
+        {
+          throw new Error('네트워크 응답이 올바르지 않습니다.');
+        }
+        const data = await response.json();
+        setSubjectList(data.data);
+      } 
+      catch (error) 
+      {
+        console.error('과목 리스트를 불러오는 중 오류 발생:', error);
+      }
+    };
+    fetchSubjectList(); // useEffect가 처음 실행될 때 과목 리스트를 가져옴
+  }, []);
+
+  const handleMajorListChange = (e) => {
+    const selectedMajor = e.target.value;
+    setSelectedExamMajor(selectedMajor);
+  };
+  const handleSchoolGradeChange = (e) => {
+    const selectedGrade = e.target.value;
+    setSelectedSchoolGrade(selectedGrade);
+  };
+
+  return (
+    <div className='upper_button_place'>
+      <select
+          id='major'
+          onChange={handleMajorListChange}
+          value={selectedExamMajor}
+        >
+          <option value={'select'}>선택하세요</option>
+          {subjectList.map((subject) => (
+            <option key={subject.major_name} value={subject.major_name}>
+              {subject.major_name}
+            </option>
+          ))}
+        </select>
+        <select
+          id='schoolgrade'
+          onChange={handleSchoolGradeChange}
+          value={selectedSchoolGrade}
+        >
+          <option value={'select'}>선택하세요</option>
+          <option value={'초등'}>초등</option>
+          <option value={'중등'}>중등</option>
+          <option value={'고등'}>고등</option>
+        </select>
+    </div>
+  )
+}
+
 function MyApp() 
 {
   const [user, setUser] = useState([]);
   const [formType, setFormType] = useState('');
+  const [selectedExamMajor, setSelectedExamMajor] = useState('select');
+  const [selectedSchoolGrade, setSelectedSchoolGrade] = useState('select');
   const navigate = useNavigate();
 
   const handleFormTypeChange = (selectedFormType) => {
     setFormType(selectedFormType);
   };
+  const handleConfirmButtonClick = () => {
+    setSelectedExamMajor(selectedExamMajor);
+    setSelectedSchoolGrade(selectedSchoolGrade);
+  }
 
   useEffect(() => {
     fetch('/api/profile')
@@ -278,8 +391,22 @@ function MyApp()
       <div className = "wrap">
         <Main/>
         <ChangeForm onFormTypeChange={handleFormTypeChange} />
-        <Check formType={formType} user={user} />
-        <RecordTable formType={formType} user={user}/>
+        <Check formType={formType} user={user} 
+          selectedExamMajor={selectedExamMajor}
+          selectedSchoolGrade={selectedSchoolGrade} />
+        <SelectOption
+          selectedExamMajor={selectedExamMajor}
+          setSelectedExamMajor={setSelectedExamMajor}
+          selectedSchoolGrade={selectedSchoolGrade}
+          setSelectedSchoolGrade={setSelectedSchoolGrade}
+          onConfirmButtonClick={handleConfirmButtonClick}
+          />
+        <RecordTable 
+          formType={formType}
+          user={user}
+          selectedExamMajor={selectedExamMajor}
+          selectedSchoolGrade={selectedSchoolGrade}
+        />
       </div>
     </div>
   );

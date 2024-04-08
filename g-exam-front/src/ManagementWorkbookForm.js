@@ -39,7 +39,6 @@ const ManagementWorkbookForm = ({selectedCategory}) => {
         console.error('과목 리스트를 불러오는 중 오류 발생:', error);
       }
     };
-
     fetchSubjectList(); // useEffect가 처음 실행될 때 과목 리스트를 가져옴
   }, []);
   //과목별 분류 불러오기

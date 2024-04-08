@@ -185,9 +185,11 @@ router.post('/api/join_member', function(req, res) {
 });
 //변경 불필요.
 router.post('/api/get_exam_record', (req, res) => {
-  const { formType, user } = req.body;
+  const { formType, user, selectedExamMajor, selectedSchoolGrade } = req.body;
 
-  if (!formType || !user || !user.user_type) 
+  console.log(formType, user, selectedExamMajor, selectedSchoolGrade);
+
+  /* if (!formType || !user || !user.user_type) 
   {
     return res.status(400).json({ error: 'Invalid request parameters' });
   }
@@ -273,7 +275,7 @@ router.post('/api/get_exam_record', (req, res) => {
   else
   {
     console.log("옳바르지 않은 요청입니다.");
-  }
+  } */
 });
 router.post('/api/read_txt_file', (req, res) => {
   const path = req.body.recordInfo2;
@@ -1728,7 +1730,7 @@ router.post('/api/submit_exam_answer', async (req, res) => {
       });
       const subjectiveQuestions = result.filter((item) => item.type === '주관식');
       const {correct, wrong, wrongAnswer} = MarkingAnswer({updatedObjectiveQuestions, subjectiveQuestions, updatedAnswer});
-      writeExamRecord(correct, wrong, user, wrongAnswer, major);
+      writeExamRecord(correct, wrong, user, wrongAnswer, major, combinedInfoArray);
       res.status(200).json({ correct, wrong });
     }
   });
@@ -1798,13 +1800,16 @@ function MarkingAnswer({updatedObjectiveQuestions, subjectiveQuestions, updatedA
   }
   return {correct, wrong, wrongAnswer};
 }
-function writeExamRecord(correct, wrong, user, wrongAnswers, major)
+function writeExamRecord(correct, wrong, user, wrongAnswers, major, combinedInfoArray)
 {
   const now = moment();
   const dayFormat = now.format('YY-MM-DD-HH-mm-ss');
   const majorName = convertEnglish(major);
-  const ExamInfo = `${user.name}_${majorName}_${dayFormat}`;
+  const ExamRecord = `${user.name}_${majorName}_${dayFormat}`;
   const record_score = (correct/(correct+wrong))*100;
+  
+  const sentence = combinedInfoArray.map(item => `${item[0]}${item[1]}번`).join(',');
+  const ExamInfo = `${user.name}_${sentence}_${dayFormat}`;
 
   const data = [`${user.name}학생의 ${majorName} 시험 오답모음`]; // 결과값
 
@@ -1823,7 +1828,7 @@ function writeExamRecord(correct, wrong, user, wrongAnswers, major)
     data.push([`선택한 답 : ${wrongAnswers[i].wrongAnswer}      정답 : ${wrongAnswers[i].correctAnswer}\n`])
   }
 
-  const fileName = `${ExamInfo}.txt`;
+  const fileName = `${ExamRecord}.txt`;
   const s3 = new AWS.S3();
   const bucketName = 'bucket-lmz8li';
   const fileContent = data.join('\n');
@@ -1834,6 +1839,18 @@ function writeExamRecord(correct, wrong, user, wrongAnswers, major)
     Body: fileContent
   };
 
+  const schoolName = user.school_list_school_name;
+  const matchResult = schoolName.match(/초등|중등|고등/);
+  let extractedWord;
+
+  if (matchResult) {
+    extractedWord = matchResult[0]; // 추출된 단어
+    console.log(extractedWord);
+  } 
+  else {
+    console.log('초등, 중등, 고등 중 어떤 학교인지 확인할 수 없습니다.');
+  }
+
   s3.upload(uploadParams, (err, data) => {
     if (err) {
         console.error('Error uploading file to S3:', err);
@@ -1842,8 +1859,8 @@ function writeExamRecord(correct, wrong, user, wrongAnswers, major)
     console.log('File uploaded successfully to S3:', data.Location);
 
     // 데이터베이스에 파일 경로 저장
-    const query = `INSERT INTO exam_record VALUES (?, ?, ?, ?)`;
-    const values = [user.id, ExamInfo, record_score, data.Location];
+    const query = `INSERT INTO exam_record VALUES (?, ?, ?, ?, ?)`;
+    const values = [user.id, ExamInfo, record_score, data.Location, extractedWord];
 
     db.query(query, values, (err, results) => {
         if (err) {
@@ -1969,6 +1986,63 @@ router.post('/api/verification_word', (req, res) =>{
     });
   }
 });
+//기록삭제
+router.post('/api/delete_record', async (req, res) => {
+  const s3 = new AWS.S3();
+  const delete_data = req.body.row;
+  const form = req.body.formType;
+  const filePath = delete_data.record_info;
+  let delete_query;
+
+  if(form === "exam")
+  {
+    delete_query = `DELETE FROM exam_record WHERE 
+                      user_student_id = '${delete_data.user_student_id}' AND 
+                      exam_info = '${delete_data.exam_info}'`
+
+    console.log(delete_query);
+  }
+  else if(form === "word")
+  {
+    delete_query = `DELETE FROM exam_word_record WHERE 
+                      user_student_id = '${delete_data.user_student_id}' AND 
+                      exam_info = '${delete_data.exam_info}'`
+
+    console.log(delete_query);
+  }
+
+  if (delete_data && delete_data.record_info) 
+  {
+    const params = {
+      Bucket: 'bucket-lmz8li',
+      Key: `${delete_data.record_info}`,
+    };
+  
+    s3.deleteObject(params, (err, data) => {
+      if (err) {
+        console.error("파일 삭제 실패:", err);
+      } 
+      else {
+        console.log("파일이 성공적으로 삭제되었습니다.");
+      }
+    });
+  } 
+  else 
+  {
+    console.log("record_info 값이 존재하지 않습니다.");
+  }
+
+  try 
+  {
+    const [result] = await db.promise().query(delete_query);
+    res.status(200).json({ message: 'Rows deleted successfully' });
+  } 
+  catch (error) 
+  {
+    console.error('Error executing query:', error);
+    res.status(500).json({ error: 'Error executing query' });
+  }
+})
 
 
 module.exports = router;
