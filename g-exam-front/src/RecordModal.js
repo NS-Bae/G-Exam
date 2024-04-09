@@ -12,7 +12,7 @@ const RecordModal = ({ modalIsOpen, closeModal, recordInfo1, recordInfo2, record
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ recordInfo2 }),
+      body: JSON.stringify({ recordInfo3 }),
     })
     .then(response => response.json())
     .then(data => {

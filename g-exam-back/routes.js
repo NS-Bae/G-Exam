@@ -256,7 +256,7 @@ router.post('/api/get_exam_record', (req, res) => {
   
 });
 router.post('/api/read_txt_file', (req, res) => {
-  const path = req.body.recordInfo2;
+  const path = req.body.recordInfo3;
   const fileName = decodeURIComponent(path.split('/').pop());
 
   console.log(fileName);
@@ -272,8 +272,6 @@ router.post('/api/read_txt_file', (req, res) => {
       console.error('Error reading file from S3:', err);
       return;
     }
-  
-    // 읽어온 데이터는 data.Body에 있습니다.
     const fileContent = data.Body.toString('utf-8');
     res.json(fileContent);
   });
