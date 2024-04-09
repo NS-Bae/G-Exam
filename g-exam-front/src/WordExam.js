@@ -9,6 +9,8 @@ function convertKorean(selectedCategory)
   const conversion = {
     '국어' : 'korean', 
     '영어' : 'english', 
+    '수학' : 'math', 
+    '사회' : 'social', 
     '과학' : 'science', 
     '한문' : 'chinesecharacter', 
     '역사' : 'history', 
