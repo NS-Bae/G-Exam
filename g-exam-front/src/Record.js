@@ -75,7 +75,7 @@ function Check({ formType, user, selectedExamMajor, selectedSchoolGrade })
     {
       return (
         <div>
-          <p>{selectedSchoolGrade}학생 {selectedExamMajor}단어 시험 결과</p>
+          <p>{selectedSchoolGrade === 'select' ? '전체' : selectedSchoolGrade}학생 {selectedExamMajor === 'select' ? '전체' : selectedExamMajor}단어 시험 결과</p>
         </div>
       );
     }
@@ -83,7 +83,7 @@ function Check({ formType, user, selectedExamMajor, selectedSchoolGrade })
     {
       return (
         <div>
-          <p>{selectedSchoolGrade} 학생 {selectedExamMajor}일반 시험 결과</p>
+          <p>{selectedSchoolGrade === 'select' ? '전체' : selectedSchoolGrade} 학생 {selectedExamMajor === 'select' ? '전체' : selectedExamMajor} 시험 결과</p>
         </div>
       );
     }
