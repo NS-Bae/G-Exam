@@ -346,9 +346,9 @@ function SelectOption({
             value={selectedSchoolGrade}
           >
             <option value={'select'}>선택하세요</option>
-            <option value={'초등'}>초등</option>
-            <option value={'중등'}>중등</option>
-            <option value={'고등'}>고등</option>
+            <option value={'초등학교'}>초등</option>
+            <option value={'중학교'}>중등</option>
+            <option value={'고등학교'}>고등</option>
           </select>
         )}
     </div>

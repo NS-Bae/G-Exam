@@ -1830,7 +1830,7 @@ function writeExamRecord(correct, wrong, user, wrongAnswers, major, combinedInfo
   };
 
   const schoolName = user.school_list_school_name;
-  const matchResult = schoolName.match(/초등|중등|고등/);
+  const matchResult = schoolName.match(/초등학교|중학교|고등학교/);
   let extractedWord;
 
   if (matchResult) {
