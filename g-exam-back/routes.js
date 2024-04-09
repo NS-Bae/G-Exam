@@ -263,7 +263,7 @@ router.post('/api/read_txt_file', (req, res) => {
 
   const s3 = new AWS.S3();
   const params = {
-    Bucket: 'bucket-lmz8li',
+    Bucket: 'bucket-3ioqrj',
     Key: `${fileName}.txt`,
   };
   
@@ -1314,7 +1314,7 @@ router.post('/api/regist_workbook_exam', upload.single('image'), async (req, res
   let examImgFilePath = null;
   if (imageFile) {
     const params = {
-      Bucket: 'bucket-lmz8li',
+      Bucket: 'bucket-3ioqrj',
       Key: `시험 이미지/${classification}_${problem_number + 1}번 문제`,
       Body: imageFile.buffer,
       ACL: 'public-read',
@@ -1370,7 +1370,7 @@ router.post('/api/regist_pre_exam', upload.single('image'), async (req, res) => 
   let examImgFilePath = null;
   if (imageFile) {
     const params = {
-      Bucket: 'bucket-lmz8li',
+      Bucket: 'bucket-3ioqrj',
       Key: `시험 이미지/${classification}_${problem_number + 1}번 문제`,
       Body: imageFile.buffer,
       ACL: 'public-read',
@@ -1568,7 +1568,7 @@ function writeWordExamRecord(correct, wrong, wrongAnswers, user, major, correctA
 
   const fileName = `${wordTestInfo}.txt`;
   const s3 = new AWS.S3();
-  const bucketName = 'bucket-lmz8li';
+  const bucketName = 'bucket-3ioqrj';
   const fileContent = data.join('\n');
 
   const uploadParams = {
@@ -1820,7 +1820,7 @@ function writeExamRecord(correct, wrong, user, wrongAnswers, major, combinedInfo
 
   const fileName = `${ExamRecord}.txt`;
   const s3 = new AWS.S3();
-  const bucketName = 'bucket-lmz8li';
+  const bucketName = 'bucket-3ioqrj';
   const fileContent = data.join('\n');
 
   const uploadParams = {
@@ -2004,7 +2004,7 @@ router.post('/api/delete_record', async (req, res) => {
   if (delete_data && delete_data.record_info) 
   {
     const params = {
-      Bucket: 'bucket-lmz8li',
+      Bucket: 'bucket-3ioqrj',
       Key: `${delete_data.record_info}`,
     };
   
