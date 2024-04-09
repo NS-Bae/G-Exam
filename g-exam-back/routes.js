@@ -264,7 +264,7 @@ router.post('/api/read_txt_file', (req, res) => {
   const s3 = new AWS.S3();
   const params = {
     Bucket: 'bucket-3ioqrj',
-    Key: `${fileName}.txt`,
+    Key: fileName,
   };
   
   s3.getObject(params, (err, data) => {
