@@ -93,6 +93,7 @@ function ChoiceRandom({selectedMajor, onBackButtonClick})
     startNumber: startNumber,
     selectedTag: selectedValues,
   };
+  const conversion = convertKorean(major);
   let new_verification = false;
   
   const handleFormTypeChange = (e) => {
@@ -170,7 +171,6 @@ function ChoiceRandom({selectedMajor, onBackButtonClick})
     }
   };
   const handleGoExam = () => {
-    const conversion = convertKorean(major);
     navigate(`/workbookexam/${conversion}?examDetails=${encodeURIComponent(JSON.stringify(examDetails))}`);
   };
   const handleSelectedValuesUpdate = (values) => {
@@ -244,7 +244,7 @@ function ChoiceRandom({selectedMajor, onBackButtonClick})
           뒤로가기
         </button>
       </div>
-      <QRCode value={`https://gplan29.com/workbookexam/korean?examDetails=${encodeURIComponent(JSON.stringify(examDetails))}`} />
+      <QRCode value={`https://gplan29.com/workbookexam/${conversion}?examDetails=${encodeURIComponent(JSON.stringify(examDetails))}`} />
     </div>
   );
 }
