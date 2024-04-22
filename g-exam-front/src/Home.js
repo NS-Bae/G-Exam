@@ -99,6 +99,7 @@ function MyApp()
     {id : "prevtest", title : "기출문제 풀기"}, 
     {id : "workbookexam", title : "일반문제 풀기"}, 
     {id : "wordtest", title : "단어 시험"}, 
+    {id : "personality", title : "교양 시험"}, 
     {id : "record", title : "시험결과 보기"}
   ];
 
