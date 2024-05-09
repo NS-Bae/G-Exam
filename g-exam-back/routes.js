@@ -1724,7 +1724,7 @@ router.post('/api/submit_exam_answer', async (req, res) => {
   });
   
   const query = `
-    SELECT classification_name, exam_id, paragraph, question, choice1, choice2, choice3, choice4, choice5, answer, type FROM ${target_table} 
+    SELECT classification_name, exam_id, paragraph, question, choice1, choice2, choice3, choice4, choice5, answer, type, commentary, commentary_image FROM ${target_table} 
     WHERE (classification_name, exam_id) IN (?)`;
   const value = [combinedInfoArray];
 
@@ -1748,11 +1748,11 @@ router.post('/api/submit_exam_answer', async (req, res) => {
     }
   });
 });
+//updatedAnswer === 사용자가 선택한 답과 문제정보, updatedObjectiveQuestions === 실제 정답(객관식), subjectiveQuestions === 실제 정답(주관식)
 function MarkingAnswer({updatedObjectiveQuestions, subjectiveQuestions, updatedAnswer})
 {
   let wrong=0, correct = 0;
   let wrongAnswer = [];
-  console.log(updatedAnswer);
   for(const answer in updatedAnswer)
   {
     if(updatedAnswer[answer].exam_type === '주관식')
@@ -1775,6 +1775,8 @@ function MarkingAnswer({updatedObjectiveQuestions, subjectiveQuestions, updatedA
               question : subjectiveQuestions[question].question,
               wrongAnswer : updatedAnswer[answer].user_answer,
               correctAnswer : subjectiveQuestions[question].answer,
+              commentary : subjectiveQuestions[question].commentary, 
+              commentary_image : subjectiveQuestions[question].commentary_image,
             });
           }
         }
@@ -1805,6 +1807,8 @@ function MarkingAnswer({updatedObjectiveQuestions, subjectiveQuestions, updatedA
               choice5 : updatedObjectiveQuestions[question].choice5,
               wrongAnswer : updatedAnswer[answer].choiceNumber,
               correctAnswer : updatedObjectiveQuestions[question].answer,
+              commentary : updatedObjectiveQuestions[question].commentary,
+              commentary_image : updatedObjectiveQuestions[question].commentary_image,
             });
           }
         }
@@ -1839,6 +1843,8 @@ function writeExamRecord(correct, wrong, user, wrongAnswers, major, combinedInfo
     data.push([`선지4 : ${wrongAnswers[i].choice4}`]);
     data.push([`선지5 : ${wrongAnswers[i].choice5}\n`]);
     data.push([`선택한 답 : ${wrongAnswers[i].wrongAnswer}      정답 : ${wrongAnswers[i].correctAnswer}\n`])
+    data.push([`해설 : ${wrongAnswers[i].commentary}`])
+    data.push([`해설 이미지 : ${wrongAnswers[i].commentary_image}`])
   }
 
   const fileName = `${ExamRecord}.txt`;
