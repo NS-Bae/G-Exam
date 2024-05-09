@@ -19,7 +19,7 @@ const { Console } = require('console');
 const upload = multer({
   storage: multer.memoryStorage(),
   limits: {
-    fileSize: 100000000, // 1MB
+    fileSize: 1000000000, // 1GB
   },
 });
 
@@ -1351,7 +1351,7 @@ router.post('/api/regist_workbook_exam', upload.fields([{ name: 'image', maxCoun
       console.error('Error uploading file to S3:', err);
       return res.status(500).json({ error: '이미지 업로드에 실패하였습니다.' });
     }
-  }
+  } 
 
   try
   {
