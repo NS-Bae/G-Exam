@@ -14,6 +14,7 @@ const path = require('path');
 const multer = require('multer');
 const multerS3 = require('multer-s3');
 const AWS = require('aws-sdk');
+const { Console } = require('console');
 
 const upload = multer({
   storage: multer.memoryStorage(),
@@ -263,7 +264,7 @@ router.post('/api/read_txt_file', (req, res) => {
 
   const s3 = new AWS.S3();
   const params = {
-    Bucket: 'bucket-3ioqrj',
+    Bucket: 'bucket-lmz8li',
     Key: fileName,
   };
   
@@ -1290,10 +1291,11 @@ async function getNumber(classification, target_table) {
   });
 };
 
-router.post('/api/regist_workbook_exam', upload.single('image'), async (req, res) => {
+router.post('/api/regist_workbook_exam', upload.fields([{ name: 'image', maxCount: 1 }, { name: 'commentary_image', maxCount: 1 }]), async (req, res) => {
   const s3 = new AWS.S3();
   const formData = req.body;
-  const imageFile = req.file;
+  const commentary_image = req.files.commentary_image;
+  const image = req.files.image;
 
   const examMajor = formData.selectedExamMajor;
   const classification = formData.selectedClassification;
@@ -1306,21 +1308,44 @@ router.post('/api/regist_workbook_exam', upload.single('image'), async (req, res
   const choice4 = formData.choice4 || null;
   const choice5 = formData.choice5 || null;
   const answer = formData.answer || null;
+  const commentary = formData.commentary || null;
   const target_table = `workbook_${convertKorean(examMajor)}`
   const problem_number = await getNumber(classification, target_table);
 
-  let examImgFilePath = null;
-  if (imageFile) {
+  console.log('alpha', formData);
+  console.log('bravo', image);
+  console.log('charlie', commentary_image);
+
+  let examImgFilePath1 = null;
+  let examImgFilePath2 = null;
+  if (image) {
     const params = {
-      Bucket: 'bucket-3ioqrj',
+      Bucket: 'bucket-lmz8li',
       Key: `시험 이미지/${classification}_${problem_number + 1}번 문제`,
-      Body: imageFile.buffer,
+      Body: image[0].buffer,
       ACL: 'public-read',
     };
 
     try {
       const data = await s3.upload(params).promise();
-      examImgFilePath = data.Location;
+      examImgFilePath1 = data.Location;
+    } 
+    catch (err) {
+      console.error('Error uploading file to S3:', err);
+      return res.status(500).json({ error: '이미지 업로드에 실패하였습니다.' });
+    }
+  }
+  if (commentary_image) {
+    const params = {
+      Bucket: 'bucket-lmz8li',
+      Key: `시험 이미지/${classification}_${problem_number + 1}번 문제 해설`,
+      Body: commentary_image[0].buffer,
+      ACL: 'public-read',
+    };
+
+    try {
+      const data = await s3.upload(params).promise();
+      examImgFilePath2 = data.Location;
     } 
     catch (err) {
       console.error('Error uploading file to S3:', err);
@@ -1329,18 +1354,18 @@ router.post('/api/regist_workbook_exam', upload.single('image'), async (req, res
   }
 
   try
-    {
-      const regist_query = `INSERT INTO ${target_table} VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
-      const values = [classification, problem_number + 1, type, paragraph, examImgFilePath, question, choice1, choice2, choice3, choice4, choice5, answer];
-      await db.execute(regist_query, values);
+  {
+    const regist_query = `INSERT INTO ${target_table} VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+    const values = [classification, problem_number + 1, type, paragraph, examImgFilePath1, question, choice1, choice2, choice3, choice4, choice5, answer, commentary, examImgFilePath2];
+    await db.execute(regist_query, values);
 
-      res.status(200).json({ message: '시험문제를 등록하였습니다.' });
-    } 
-    catch (error) 
-    {
-      console.error('시험문제 등록 오류:', error);
-      throw error;
-    }
+    res.status(200).json({ message: '시험문제를 등록하였습니다.' });
+  } 
+  catch (error) 
+  {
+    console.error('시험문제 등록 오류:', error);
+    throw error;
+  }
   
 });
 
@@ -1368,7 +1393,7 @@ router.post('/api/regist_pre_exam', upload.single('image'), async (req, res) => 
   let examImgFilePath = null;
   if (imageFile) {
     const params = {
-      Bucket: 'bucket-3ioqrj',
+      Bucket: 'bucket-lmz8li',
       Key: `시험 이미지/${classification}_${problem_number + 1}번 문제`,
       Body: imageFile.buffer,
       ACL: 'public-read',
@@ -1566,7 +1591,7 @@ function writeWordExamRecord(correct, wrong, wrongAnswers, user, major, correctA
 
   const fileName = `${wordTestInfo}.txt`;
   const s3 = new AWS.S3();
-  const bucketName = 'bucket-3ioqrj';
+  const bucketName = 'bucket-lmz8li';
   const fileContent = data.join('\n');
 
   const uploadParams = {
@@ -1818,7 +1843,7 @@ function writeExamRecord(correct, wrong, user, wrongAnswers, major, combinedInfo
 
   const fileName = `${ExamRecord}.txt`;
   const s3 = new AWS.S3();
-  const bucketName = 'bucket-3ioqrj';
+  const bucketName = 'bucket-lmz8li';
   const fileContent = data.join('\n');
 
   const uploadParams = {
@@ -2002,7 +2027,7 @@ router.post('/api/delete_record', async (req, res) => {
   if (delete_data && delete_data.record_info) 
   {
     const params = {
-      Bucket: 'bucket-3ioqrj',
+      Bucket: 'bucket-lmz8li',
       Key: `${delete_data.record_info}`,
     };
   

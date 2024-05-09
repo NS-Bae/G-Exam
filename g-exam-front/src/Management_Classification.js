@@ -400,8 +400,8 @@ function PreExamForm({form_type})
   useEffect(() => {
     fetchData(1);
   }, [])
-
-  useEffect(() => {
+  //과목 불러오기
+  /* useEffect(() => {
     const fetchSubjectList = async () => {
       try 
       {
@@ -412,6 +412,7 @@ function PreExamForm({form_type})
         }
         const data = await response.json();
         setSubjectList(data.data);
+        console.log(data.data);
       } 
       catch (error) 
       {
@@ -420,7 +421,7 @@ function PreExamForm({form_type})
     };
 
     fetchSubjectList(); // useEffect가 처음 실행될 때 과목 리스트를 가져옴
-  }, []);
+  }, []); */
 
   const openModal = () => {
     Modal.setAppElement('#root');
@@ -451,11 +452,12 @@ function PreExamForm({form_type})
             value={selectedCategory}
           >
             <option value={'select'}>선택하세요</option>
-            {subjectList.map((subject) => (
-              <option key={subject.major_name} value={subject.major_name}>
-                {subject.major_name}
-              </option>
-            ))}
+            <option key='국어' value='국어'>국어</option>
+            <option key='영어' value='영어'>영어</option>
+            <option key='수학' value='수학'>수학</option>
+            <option key='사회' value='사회'>사회</option>
+            <option key='과학' value='과학'>과학</option>
+            <option key='기타' value='기타'>기타</option>
           </select>
           <button className='letter_btn' type='button' onClick={handleConfirmButtonClick}>
           확인

@@ -240,6 +240,7 @@ const RegistForm = () => {
         </select>
       </div>
       <div className='upper_button_place'>
+        <h4>문제 이미지</h4>
         <input id="image" type="file" accept="image/*" onChange={handleImageUpload}  className='img_input' />
         { isImageUploaded && <button className='small_letter_button' onClick={handleCheckImage}>미리보기</button>}
       </div>
