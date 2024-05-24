@@ -173,7 +173,7 @@ function ChoiceRandom({selectedMajor, onBackButtonClick})
     }
   };
   const handleGoExam = () => {
-    navigate(`/prevexam/${conversion}?examDetails=${encodeURIComponent(JSON.stringify(examDetails))}`);
+    navigate(`/prevtest/${conversion}?examDetails=${encodeURIComponent(JSON.stringify(examDetails))}`);
   };
   const handleSelectedValuesUpdate = (values) => {
     setSelectedValues(values);
@@ -246,7 +246,7 @@ function ChoiceRandom({selectedMajor, onBackButtonClick})
           뒤로가기
         </button>
       </div>
-      <QRCode value={`https://gplan29.com/prevtest/${conversion}?examDetails=${encodeURIComponent(JSON.stringify(examDetails))}`} />
+      <QRCode value={`https://g-plan.org/prevtest/${conversion}?examDetails=${encodeURIComponent(JSON.stringify(examDetails))}`} />
     </div>
   );
 }
