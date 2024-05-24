@@ -18,8 +18,8 @@ const db = require('./db/db');
 const secret = randomstring.generate();
 
 app.use(express.static(path.join(__dirname, '../g-exam-front/build')));
-app.use(bodyParser.urlencoded({ extended: false }));
-app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: false, limit: '1gb' }));
+app.use(bodyParser.json({ limit: '1gb' }));
 app.use(cookieParser(process.env.COOKIE_SECRET));
 
 passport.use(new LocalStrategy({
