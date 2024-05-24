@@ -40,8 +40,6 @@ const RecordModal = ({ modalIsOpen, closeModal, recordInfo1, recordInfo2, record
     imageNames.push(imageName);
   }
 
-  console.log(lines);
-
   return (
     <Modal
       isOpen={modalIsOpen}
