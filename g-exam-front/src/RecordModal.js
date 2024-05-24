@@ -53,7 +53,7 @@ const RecordModal = ({ modalIsOpen, closeModal, recordInfo1, recordInfo2, record
           <React.Fragment key={index}>
           {line.startsWith('해설 이미지') ? (
             <>
-              <img src={line.split(' : ')[1]} alt={line.split(' : ')[1]} /> 
+              <img className='container' src={line.split(' : ')[1]} alt={line.split(' : ')[1]} /> 
               <br /><br />
             </>
           ) : (
