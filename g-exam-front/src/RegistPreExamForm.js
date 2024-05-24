@@ -5,7 +5,9 @@ import { useState } from 'react';
 const RegistForm = () => {
   const [isConfirmButtonClicked, setConfirmButtonClicked] = useState(false);
   const [isImageUploaded, setIsImageUploaded] = useState(false);
+  const [isImageUploaded1, setIsImageUploaded1] = useState(false);
   const [isPopupOpen, setIsPopupOpen] = useState(false);
+  const [isPopup1Open, setIsPopup1Open] = useState(false);
   const [imagePreview, setImagePreview] = useState([]);
   const [schoolsList, setSchoolsList] = useState([]);
   const [tagList, setTagList] = useState([]);
@@ -13,6 +15,7 @@ const RegistForm = () => {
   const [selectedExamMajor, setSelectedExamMajor] = useState(''); // 기출문제용 과목 선택
   const [selectedClassification, setSelectedClassification] = useState('');
   const [image, setImage] = useState('');//이미지
+  const [image1, setImage1] = useState('');//이미지1
   const [formData, setFormData] = useState({
     school_details: '',
     type: '',
@@ -25,6 +28,8 @@ const RegistForm = () => {
     choice5: '',
     answer: '',
     image:null,
+    commentary:'',
+    commentary_image:null,
   });
   const validateForm = () => {
     const requiredFields = ['school_details', 'type', 'question', 'answer'];
@@ -88,14 +93,38 @@ const RegistForm = () => {
     }
     fileRead.readAsDataURL(file);
   };
+  const handleImageUpload1 = (event) => {
+    const file = event.target.files[0];
+    const id = event.target.id;
+    setImage1(file);
+    setIsImageUploaded1(true);
+    setFormData((prevData) => ({
+      ...prevData,
+      [id]: file,
+    }));
+
+    console.log(id, file);
+    
+    let fileRead = new FileReader();
+    fileRead.onload = function() {
+      setImagePreview(fileRead.result);
+    }
+    fileRead.readAsDataURL(file);
+  };
 
   const handlePopupClose = () => {
     setIsPopupOpen(false);
   };
-  
   const handleCheckImage = () => {
     setIsPopupOpen(true);
   };
+  const handleCheckImage1 = () => {
+    setIsPopup1Open(true);
+  }
+  const handlePopupClose1 = () => {
+    setIsPopup1Open(false);
+  };
+
   const handleConfirmButtonClick = () =>{
     setConfirmButtonClicked(true);
     fetchTag();
@@ -140,6 +169,8 @@ const RegistForm = () => {
       choice5: '',
       answer: '',
       image: null,
+      commentary:'',
+      commentary_image:null,
     });
   };
   const handleButton = () => {
@@ -156,6 +187,8 @@ const RegistForm = () => {
     form.append('choice4', formData.choice4);
     form.append('choice5', formData.choice5);
     form.append('answer', formData.answer);
+    form.append('commentary', formData.commentary);
+    form.append('commentary_image', image1);
     form.append('image', image);
 
     fetch('/api/regist_pre_exam', {
@@ -239,7 +272,71 @@ const RegistForm = () => {
           ))}
         </select>
       </div>
-      <div className='upper_button_place'>
+      <div className="question_sub">
+        <div className='question_row'>
+          <h4 className='question_tag'>문제 이미지</h4>
+          <input id="image" type="file" accept="image/*" onChange={handleImageUpload}  className='img_input' />
+          { isImageUploaded && <button className='small_letter_btn' onClick={handleCheckImage}>미리보기</button>}
+        </div>
+        {isPopupOpen && (
+          <div className="popup">
+            <div className="popup-content">
+              <img className="popup" src={URL.createObjectURL(image)} alt="Uploaded" />
+            </div>
+            <button onClick={handlePopupClose}>Close</button>
+          </div>
+        )}
+        <div className="question_row">
+          <h4 className='question_tag'>지문</h4>
+          <textarea className="longtext_input" type="text" name="" id="paragraph" placeholder="지문" value={formData.paragraph} onChange={handleInputChange}></textarea>
+        </div>
+        <div className="question_row">
+          <h4 className='question_tag'>질문</h4>
+          <textarea className="question_input" type="text" name="" id="question" placeholder="질문" value={formData.question} onChange={handleInputChange}></textarea>
+        </div>
+        <div className="question_row">
+          <h4 className='question_tag'>선택지1</h4>
+          <textarea className="question_input" type="text" name="" id="choice1" placeholder="선택지1" value={formData.choice1} onChange={handleInputChange}></textarea>
+        </div>
+        <div className="question_row">
+          <h4 className='question_tag'>선택지2</h4>
+          <textarea className="question_input" type="text" name="" id="choice2" placeholder="선택지2" value={formData.choice2} onChange={handleInputChange}></textarea>
+        </div>
+        <div className="question_row">
+          <h4 className='question_tag'>선택지3</h4>
+          <textarea className="question_input" type="text" name="" id="choice3" placeholder="선택지3" value={formData.choice3} onChange={handleInputChange}></textarea>
+        </div>
+        <div className="question_row">
+          <h4 className='question_tag'>선택지4</h4>
+          <textarea className="question_input" type="text" name="" id="choice4" placeholder="선택지4" value={formData.choice4} onChange={handleInputChange}></textarea>
+        </div>
+        <div className="question_row">
+          <h4 className='question_tag'>선택지5</h4>
+          <textarea className="question_input" type="text" name="" id="choice5" placeholder="선택지5" value={formData.choice5} onChange={handleInputChange}></textarea>
+        </div>
+        <div className="question_row">
+          <h4 className='question_tag'>정답</h4>
+          <textarea className="question_input" type="text" name="" id="answer" placeholder="정답(숫자)" value={formData.answer} onChange={handleInputChange}></textarea>
+        </div>
+        <div className='question_row'>
+          <h4 className='question_tag'>해설 이미지</h4>
+          <input id="commentary_image" type="file" accept="image/*" onChange={handleImageUpload1} className='img_input' />
+          { isImageUploaded1 && <button className='small_letter_btn' onClick={handleCheckImage1}>미리보기</button>}
+        </div>
+        {isPopup1Open && (
+          <div className="popup">
+            <div className="popup-content">
+              <img className="popup" src={URL.createObjectURL(image1)} alt="Uploaded" />
+            </div>
+            <button onClick={handlePopupClose1}>Close</button>
+          </div>
+        )}
+        <div className="question_row">
+          <h4 className='question_tag'>해설</h4>
+          <textarea className="longtext_input" type="text" name="" id="commentary" placeholder="해설" value={formData.commentary} onChange={handleInputChange}></textarea>
+        </div>
+      </div>
+      {/* <div className='upper_button_place'>
         <h4>문제 이미지</h4>
         <input id="image" type="file" accept="image/*" onChange={handleImageUpload}  className='img_input' />
         { isImageUploaded && <button className='small_letter_button' onClick={handleCheckImage}>미리보기</button>}
@@ -287,7 +384,7 @@ const RegistForm = () => {
             <textarea type="text" name="" id="answer" placeholder="정답" value={formData.answer} onChange={handleInputChange}></textarea>
           </div>
         </div>
-      </div>
+      </div> */}
       <div className='btn_section'>
         <button type = 'submit' className="letter_btn" onClick={handleSubmit}>등록</button>
       </div>
