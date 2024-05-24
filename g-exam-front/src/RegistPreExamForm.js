@@ -1,6 +1,6 @@
 import './App.css';
 import React from 'react';
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 
 const RegistForm = () => {
   const [isConfirmButtonClicked, setConfirmButtonClicked] = useState(false);
@@ -31,6 +31,10 @@ const RegistForm = () => {
     commentary:'',
     commentary_image:null,
   });
+
+  const imageInputRef = useRef(null);
+  const image1InputRef = useRef(null);
+
   const validateForm = () => {
     const requiredFields = ['school_details', 'type', 'question', 'answer'];
     for (const field of requiredFields) 
@@ -172,6 +176,17 @@ const RegistForm = () => {
       commentary:'',
       commentary_image:null,
     });
+    setImage(null);
+    setImage1(null);
+    setIsImageUploaded(false);
+    setIsImageUploaded1(false);
+
+    if (imageInputRef.current) {
+      imageInputRef.current.value = '';
+    }
+    if (image1InputRef.current) {
+      image1InputRef.current.value = '';
+    }
   };
   const handleButton = () => {
     const form = new FormData();
@@ -275,7 +290,7 @@ const RegistForm = () => {
       <div className="question_sub">
         <div className='question_row'>
           <h4 className='question_tag'>문제 이미지</h4>
-          <input id="image" type="file" accept="image/*" onChange={handleImageUpload}  className='img_input' />
+          <input id="image" type="file" accept="image/*" onChange={handleImageUpload}  className='img_input' ref={imageInputRef} />
           { isImageUploaded && <button className='small_letter_btn' onClick={handleCheckImage}>미리보기</button>}
         </div>
         {isPopupOpen && (
@@ -320,7 +335,7 @@ const RegistForm = () => {
         </div>
         <div className='question_row'>
           <h4 className='question_tag'>해설 이미지</h4>
-          <input id="commentary_image" type="file" accept="image/*" onChange={handleImageUpload1} className='img_input' />
+          <input id="commentary_image" type="file" accept="image/*" onChange={handleImageUpload1} className='img_input' ref={image1InputRef} />
           { isImageUploaded1 && <button className='small_letter_btn' onClick={handleCheckImage1}>미리보기</button>}
         </div>
         {isPopup1Open && (
@@ -336,55 +351,6 @@ const RegistForm = () => {
           <textarea className="longtext_input" type="text" name="" id="commentary" placeholder="해설" value={formData.commentary} onChange={handleInputChange}></textarea>
         </div>
       </div>
-      {/* <div className='upper_button_place'>
-        <h4>문제 이미지</h4>
-        <input id="image" type="file" accept="image/*" onChange={handleImageUpload}  className='img_input' />
-        { isImageUploaded && <button className='small_letter_button' onClick={handleCheckImage}>미리보기</button>}
-      </div>
-      {isPopupOpen && (
-        <div className="popup">
-          <div className="popup-content">
-            <img className="popup" src={URL.createObjectURL(image)} alt="Uploaded" />
-          </div>
-          <button onClick={handlePopupClose}>Close</button>
-        </div>
-      )}
-      <div className="question_sub">
-        <div className="paragraph_area">
-          <h4>지문</h4>
-          <textarea type="text" name="" id="paragraph" placeholder="지문" value={formData.paragraph} onChange={handleInputChange}></textarea>
-        </div>
-        <div className="question_area">
-          <div className="question_line">
-            <h4>질문</h4>
-            <textarea type="text" name="" id="question" placeholder="질문" value={formData.question} onChange={handleInputChange}></textarea>
-          </div>
-          <div className="choice">
-            <h4>선택지1</h4>
-            <textarea type="text" name="" id="choice1" placeholder="선택지1" value={formData.choice1} onChange={handleInputChange}></textarea>
-          </div>
-          <div className="choice">
-            <h4>선택지2</h4>
-            <textarea type="text" name="" id="choice2" placeholder="선택지2" value={formData.choice2} onChange={handleInputChange}></textarea>
-          </div>
-          <div className="choice">
-            <h4>선택지3</h4>
-            <textarea type="text" name="" id="choice3" placeholder="선택지3" value={formData.choice3} onChange={handleInputChange}></textarea>
-          </div>
-          <div className="choice">
-            <h4>선택지4</h4>
-            <textarea type="text" name="" id="choice4" placeholder="선택지4" value={formData.choice4} onChange={handleInputChange}></textarea>
-          </div>
-          <div className="choice">
-            <h4>선택지5</h4>
-            <textarea type="text" name="" id="choice5" placeholder="선택지5" value={formData.choice5} onChange={handleInputChange}></textarea>
-          </div>
-          <div className="choice">
-            <h4>정답</h4>
-            <textarea type="text" name="" id="answer" placeholder="정답" value={formData.answer} onChange={handleInputChange}></textarea>
-          </div>
-        </div>
-      </div> */}
       <div className='btn_section'>
         <button type = 'submit' className="letter_btn" onClick={handleSubmit}>등록</button>
       </div>

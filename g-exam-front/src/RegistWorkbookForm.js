@@ -1,6 +1,6 @@
 import './App.css';
 import React from 'react';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef} from 'react';
 
 function WorkbookChoiceForm() 
 {
@@ -30,6 +30,10 @@ function WorkbookChoiceForm()
     commentary:'',
     commentary_image:null,
   });
+
+  const imageInputRef = useRef(null);
+  const image1InputRef = useRef(null);
+
   const validateForm = () => {
     const requiredFields = ['type', 'question', 'answer'];
     for (const field of requiredFields) 
@@ -177,6 +181,13 @@ function WorkbookChoiceForm()
     setImage1(null);
     setIsImageUploaded(false);
     setIsImageUploaded1(false);
+
+    if (imageInputRef.current) {
+      imageInputRef.current.value = '';
+    }
+    if (image1InputRef.current) {
+      image1InputRef.current.value = '';
+    }
   };
 
   const handleMajorListChange = (e) => {
@@ -270,7 +281,7 @@ function WorkbookChoiceForm()
       <div className="question_sub">
         <div className='question_row'>
           <h4 className='question_tag'>문제 이미지</h4>
-          <input id="image" type="file" accept="image/*" onChange={handleImageUpload}  className='img_input' />
+          <input id="image" type="file" accept="image/*" onChange={handleImageUpload}  className='img_input' ref={imageInputRef} />
           { isImageUploaded && <button className='small_letter_btn' onClick={handleCheckImage}>미리보기</button>}
         </div>
         {isPopupOpen && (
@@ -315,7 +326,7 @@ function WorkbookChoiceForm()
         </div>
         <div className='question_row'>
           <h4 className='question_tag'>해설 이미지</h4>
-          <input id="commentary_image" type="file" accept="image/*" onChange={handleImageUpload1} className='img_input' />
+          <input id="commentary_image" type="file" accept="image/*" onChange={handleImageUpload1} className='img_input' ref={image1InputRef} />
           { isImageUploaded1 && <button className='small_letter_btn' onClick={handleCheckImage1}>미리보기</button>}
         </div>
         {isPopup1Open && (
