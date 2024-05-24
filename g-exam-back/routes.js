@@ -1312,10 +1312,6 @@ router.post('/api/regist_workbook_exam', upload.fields([{ name: 'image', maxCoun
   const target_table = `workbook_${convertKorean(examMajor)}`
   const problem_number = await getNumber(classification, target_table);
 
-  console.log('alpha', formData);
-  console.log('bravo', image);
-  console.log('charlie', commentary_image);
-
   let examImgFilePath1 = null;
   let examImgFilePath2 = null;
   if (image) {
@@ -1356,7 +1352,18 @@ router.post('/api/regist_workbook_exam', upload.fields([{ name: 'image', maxCoun
   try
   {
     const regist_query = `INSERT INTO ${target_table} VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
-    const values = [classification, problem_number + 1, type, paragraph, examImgFilePath1, question, choice1, choice2, choice3, choice4, choice5, answer, commentary, examImgFilePath2];
+    const values = [
+      classification, 
+      problem_number + 1, 
+      type, 
+      paragraph, 
+      examImgFilePath1, 
+      question, 
+      choice1, choice2, choice3, choice4, choice5, 
+      answer, 
+      commentary, 
+      examImgFilePath2
+    ];
     await db.execute(regist_query, values);
 
     res.status(200).json({ message: '시험문제를 등록하였습니다.' });
@@ -1369,10 +1376,11 @@ router.post('/api/regist_workbook_exam', upload.fields([{ name: 'image', maxCoun
   
 });
 
-router.post('/api/regist_pre_exam', upload.single('image'), async (req, res) => {
+router.post('/api/regist_pre_exam', upload.fields([{ name: 'image', maxCount: 1 }, { name: 'commentary_image', maxCount: 1 }]), async (req, res) => {
   const s3 = new AWS.S3();
   const formData = req.body;
-  const imageFile = req.file;
+  const commentary_image = req.files.commentary_image;
+  const image = req.files.image;
 
   const examMajor = formData.selectedExamMajor;
   const classification = formData.selectedClassification;
@@ -1386,16 +1394,18 @@ router.post('/api/regist_pre_exam', upload.single('image'), async (req, res) => 
   const choice4 = formData.choice4 || null;
   const choice5 = formData.choice5 || null;
   const answer = formData.answer || null;
+  const commentary = formData.commentary || null;
   const target_table = `pre_exam_${convertKorean(examMajor)}`
   const problem_number = await getNumber(classification, target_table);
 
   // 이미지 파일이 넘어오지 않은 경우 대비
-  let examImgFilePath = null;
-  if (imageFile) {
+  let examImgFilePath1 = null;
+  let examImgFilePath2 = null;
+  if (image) {
     const params = {
       Bucket: 'bucket-lmz8li',
       Key: `시험 이미지/${classification}_${problem_number + 1}번 문제`,
-      Body: imageFile.buffer,
+      Body: image[0].buffer,
       ACL: 'public-read',
     };
 
@@ -1408,18 +1418,39 @@ router.post('/api/regist_pre_exam', upload.single('image'), async (req, res) => 
       return res.status(500).json({ error: '이미지 업로드에 실패하였습니다.' });
     }
   }
+  if (commentary_image) {
+    const params = {
+      Bucket: 'bucket-lmz8li',
+      Key: `시험 이미지/${classification}_${problem_number + 1}번 문제 해설`,
+      Body: commentary_image[0].buffer,
+      ACL: 'public-read',
+    };
+
+    try {
+      const data = await s3.upload(params).promise();
+      examImgFilePath2 = data.Location;
+    } 
+    catch (err) {
+      console.error('Error uploading file to S3:', err);
+      return res.status(500).json({ error: '이미지 업로드에 실패하였습니다.' });
+    }
+  }
 
   // 데이터베이스에 파일 경로 저장
   try
   {
-    const regist_query = `INSERT INTO ${target_table} VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+    const regist_query = `INSERT INTO ${target_table} VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
     const values = [
       classification, 
       problem_number + 1, 
       examMajor, school, type, 
       paragraph, 
-      examImgFilePath,
-      question, choice1, choice2, choice3, choice4, choice5, answer
+      examImgFilePath1,
+      question, 
+      choice1, choice2, choice3, choice4, choice5, 
+      answer, 
+      commentary, 
+      examImgFilePath2
     ];
     await db.execute(regist_query, values);
     res.status(200).json({ message: '시험문제를 등록하였습니다.' });
