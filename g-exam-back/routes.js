@@ -1411,7 +1411,7 @@ router.post('/api/regist_pre_exam', upload.fields([{ name: 'image', maxCount: 1 
 
     try {
       const data = await s3.upload(params).promise();
-      examImgFilePath = data.Location;
+      examImgFilePath1 = data.Location;
     } 
     catch (err) {
       console.error('Error uploading file to S3:', err);
