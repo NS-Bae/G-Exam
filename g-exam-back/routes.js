@@ -685,6 +685,8 @@ function convertKorean(selectedCategory)
     '과학' : 'science', 
     '한문' : 'chinese_character', 
     '역사' : 'history', 
+    '영어듣기' : 'english_listening',
+    '교양' : 'refinement',
     '기타' : 'etc', 
   }
 
@@ -700,6 +702,8 @@ function convertEnglish(selectedCategory)
     'science' : '과학', 
     'chinese_character' : '한문', 
     'history' : '역사', 
+    'english_listening' : '영어듣기',
+    'refinement' : '교양',
     'etc' : '기타', 
   }
 

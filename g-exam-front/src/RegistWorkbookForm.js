@@ -8,9 +8,12 @@ function WorkbookChoiceForm()
   const [selectedClassification, setSelectedClassification] = useState('');
   const [image, setImage] = useState('');//이미지
   const [image1, setImage1] = useState('');//이미지1
+  const [audio, setAudio] = useState('');
   const [isConfirmButtonClicked, setConfirmButtonClicked] = useState(false);
   const [isImageUploaded, setIsImageUploaded] = useState(false);
   const [isImageUploaded1, setIsImageUploaded1] = useState(false);
+  const [isAudioUploaded, setIsAudioUploaded] = useState(false);
+  const [audioURL, setAudioURL] = useState(false);
   const [isPopupOpen, setIsPopupOpen] = useState(false);
   const [isPopup1Open, setIsPopup1Open] = useState(false);
   const [imagePreview, setImagePreview] = useState([]);
@@ -29,10 +32,12 @@ function WorkbookChoiceForm()
     image:null,
     commentary:'',
     commentary_image:null,
+    voicefile:null,
   });
 
   const imageInputRef = useRef(null);
   const image1InputRef = useRef(null);
+  const audioInputRef = useRef(null);
 
   const validateForm = () => {
     const requiredFields = ['type', 'question', 'answer'];
@@ -139,6 +144,23 @@ function WorkbookChoiceForm()
     }
     fileRead.readAsDataURL(file);
   };
+  const handleAudioUpload = (event) => {
+    const file = event.target.files[0];
+    const id = event.target.id;
+    setAudio(file);
+    setIsAudioUploaded(true);
+    setAudioURL(URL.createObjectURL(file));
+    setFormData((prevData) => ({
+      ...prevData,
+      [id]: file,
+    }));
+    
+    let fileRead = new FileReader();
+    fileRead.onload = function() {
+      setImagePreview(fileRead.result);
+    }
+    fileRead.readAsDataURL(file);
+  };
   const handleCheckImage = () => {
     setIsPopupOpen(true);
   }
@@ -176,6 +198,7 @@ function WorkbookChoiceForm()
       image: null,
       commentary:'',
       commentary_image:null,
+      voicefile:null,
     });
     setImage(null);
     setImage1(null);
@@ -195,6 +218,7 @@ function WorkbookChoiceForm()
     setSelectedExamMajor(selectedMajor);
   };
   const handleFirstConfirmButtonClick = () => {
+    console.log(selectedExamMajor);
     setConfirmButtonClicked(true);
   };
   //등록api
@@ -292,6 +316,20 @@ function WorkbookChoiceForm()
             <button onClick={handlePopupClose}>Close</button>
           </div>
         )}
+        { (selectedExamMajor === '영어듣기' || selectedExamMajor === '교양') && (
+          <div className="question_row">
+            <h4 className='question_tag'>음원 파일</h4>
+            <input id="voicefile" type="file" accept="audio/*" onChange={handleAudioUpload}  className='img_input' ref={audioInputRef} />
+            {audioURL && (
+              <div className="audio-preview">
+                <audio controls>
+                  <source src={audioURL} type={audio.type} />
+                  Your browser does not support the audio element.
+                </audio>
+              </div>
+            )}
+          </div>
+        )}
         <div className="question_row">
           <h4 className='question_tag'>지문</h4>
           <textarea className="longtext_input" type="text" name="" id="paragraph" placeholder="지문" value={formData.paragraph} onChange={handleInputChange}></textarea>
@@ -347,8 +385,6 @@ function WorkbookChoiceForm()
       </div>
     </div>
   );
-  
-  
 };
 
 export default WorkbookChoiceForm;
