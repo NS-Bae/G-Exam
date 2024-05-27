@@ -20,6 +20,7 @@ import WorkbookEnglish from "./WorkbookExam_English";
 import WorkbookMath from "./WorkbookExam_Math";
 import WorkbookSocial from "./WorkbookExam_Social";
 import WorkbookScience from "./WorkbookExam_Science";
+import WorkbookEnglishListening from "./WorkbookExam_English_Listening";
 import WorkbookEtc from "./WorkbookExam_Etc";
 
 import WordExam from "./WordExam";
@@ -55,6 +56,7 @@ const App = () => {
         <Route path = "/workbookexam/math" element = {<WorkbookMath />} />
         <Route path = "/workbookexam/science" element = {<WorkbookScience />} />
         <Route path = "/workbookexam/social" element = {<WorkbookSocial />} />
+        <Route path = "/workbookexam/english_listening" element = {<WorkbookEnglishListening />} />
         <Route path = "/workbookexam/etc" element = {<WorkbookEtc />} />
       <Route path = "/wordtest" element = {<WordExam />} />
         <Route path = "/wordtest/korean" element = {<KoreanWord />} />
