@@ -322,8 +322,7 @@ function WorkbookChoiceForm()
             {audioURL && (
               <div className="audio-preview">
                 <audio controls>
-                  <source src={audioURL} type={audio.type} />
-                  Your browser does not support the audio element.
+                  <source src={audioURL} type={audio && audio.type ? audio.type : 'audio/mpeg'} />
                 </audio>
               </div>
             )}
