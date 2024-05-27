@@ -154,12 +154,6 @@ function WorkbookChoiceForm()
       ...prevData,
       [id]: file,
     }));
-    
-    let fileRead = new FileReader();
-    fileRead.onload = function() {
-      setImagePreview(fileRead.result);
-    }
-    fileRead.readAsDataURL(file);
   };
   const handleCheckImage = () => {
     setIsPopupOpen(true);
