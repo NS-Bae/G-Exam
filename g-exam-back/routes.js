@@ -260,8 +260,6 @@ router.post('/api/read_txt_file', (req, res) => {
   const path = req.body.recordInfo3;
   const fileName = decodeURIComponent(path.split('/').pop());
 
-  console.log(fileName);
-
   const s3 = new AWS.S3();
   const params = {
     Bucket: 'bucket-lmz8li',
@@ -784,22 +782,65 @@ router.post('/api/search_exam', (req, res) => {
   }
 });
 
+const deleteImageFromS3 = async (key) => {
+  const s3 = new AWS.S3();
+
+  const params = {
+    Bucket: 'bucket-lmz8li',
+    Key: key
+  };
+
+  try 
+  {
+    await s3.deleteObject(params).promise();
+    console.log(`Image ${key} deleted successfully from ${params.Bucket}`);
+  } 
+  catch (error) 
+  {
+    console.error(`Error deleting image ${key} from ${params.Bucket}:`, error);
+  }
+};
+const extractS3KeyFromUrl = (url) => {
+  const urlObj = new URL(url);
+  return decodeURIComponent(urlObj.pathname.substring(1));
+};
 router.post('/api/delete_exam', async (req, res) => {
   const type = req.body.type;
   if(type === 'workbook')
   {
     const selectedRows = req.body.selectedRows;
     const selectedCategory = `workbook_${convertKorean(req.body.selectedCategory)}`;
-    console.log(selectedCategory, 'aa', selectedRows);
-
     const placeholders = selectedRows.map(() => '(?, ?)').join(', ');
-    const sql = `DELETE FROM ${selectedCategory} WHERE (classification_name, exam_id) IN (${placeholders});`;
     const compoundKeys = selectedRows.flatMap(({ examCatgory, examId }) => [examCatgory, examId]);
+
+    const sql = `DELETE FROM ${selectedCategory} WHERE (classification_name, exam_id) IN (${placeholders});`;
+    const aws_sql = `SELECT image, commentary_image FROM ${selectedCategory} WHERE (classification_name, exam_id) IN (${placeholders});`;
 
     try 
     {
-      const [result] = await db.promise().query(sql, compoundKeys);
-      res.status(200).json({ message: 'Rows deleted successfully' });
+      const [result] = await db.promise().query(aws_sql, compoundKeys);
+
+      for (const row of result) 
+      {
+        if (row.image) 
+        {
+          console.log('aa', row.image);
+          const imageKey = extractS3KeyFromUrl(row.image);
+          console.log(imageKey);
+          await deleteImageFromS3(imageKey);
+        }
+        if (row.commentary_image) 
+        {
+          console.log('ab', row.commentary_image);
+          const commentaryImageKey = extractS3KeyFromUrl(row.commentary_image);
+          console.log(commentaryImageKey);
+          await deleteImageFromS3(commentaryImageKey);
+        }
+      }
+
+      await db.promise().query(sql, compoundKeys);
+
+      res.status(200).json({ message: 'Rows and images deleted successfully' });
     } 
     catch (error) 
     {
@@ -811,15 +852,34 @@ router.post('/api/delete_exam', async (req, res) => {
   {
     const selectedRows = req.body.selectedRows;
     const selectedCategory = `pre_exam_${convertKorean(req.body.selectedCategory)}`;
-    console.log(selectedCategory, 'aa', selectedRows);
-
     const placeholders = selectedRows.map(() => '(?, ?)').join(', ');
-    const sql = `DELETE FROM ${selectedCategory} WHERE (classification_name, exam_id) IN (${placeholders});`;
     const compoundKeys = selectedRows.flatMap(({ examCatgory, examId }) => [examCatgory, examId]);
+    
+    const sql = `DELETE FROM ${selectedCategory} WHERE (classification_name, exam_id) IN (${placeholders});`;
+    const aws_sql = `SELECT image, commentary_image FROM ${selectedCategory} WHERE (classification_name, exam_id) IN (${placeholders});`;
 
     try 
     {
+      for (const row of result) 
+      {
+        if (row.image) 
+        {
+          console.log('aa', row.image);
+          const imageKey = extractS3KeyFromUrl(row.image);
+          console.log(imageKey);
+          await deleteImageFromS3(imageKey);
+        }
+        if (row.commentary_image) 
+        {
+          console.log('ab', row.commentary_image);
+          const commentaryImageKey = extractS3KeyFromUrl(row.commentary_image);
+          console.log(commentaryImageKey);
+          await deleteImageFromS3(commentaryImageKey);
+        }
+      }
+
       const [result] = await db.promise().query(sql, compoundKeys);
+
       res.status(200).json({ message: 'Rows deleted successfully' });
     } 
     catch (error) 
