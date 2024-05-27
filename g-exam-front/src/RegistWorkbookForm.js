@@ -196,6 +196,7 @@ function WorkbookChoiceForm()
     });
     setImage(null);
     setImage1(null);
+    setAudio(null);
     setIsImageUploaded(false);
     setIsImageUploaded1(false);
 
@@ -204,6 +205,9 @@ function WorkbookChoiceForm()
     }
     if (image1InputRef.current) {
       image1InputRef.current.value = '';
+    }
+    if (audioInputRef.current) {
+      audioInputRef.current.value = '';
     }
   };
 
@@ -232,6 +236,7 @@ function WorkbookChoiceForm()
     form.append('commentary', formData.commentary);
     form.append('commentary_image', image1);
     form.append('image', image);
+    form.append('voicefile', audio);
 
     console.log(form);
     

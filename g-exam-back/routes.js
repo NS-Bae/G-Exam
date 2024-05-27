@@ -1355,11 +1355,12 @@ async function getNumber(classification, target_table) {
   });
 };
 
-router.post('/api/regist_workbook_exam', upload.fields([{ name: 'image', maxCount: 1 }, { name: 'commentary_image', maxCount: 1 }]), async (req, res) => {
+router.post('/api/regist_workbook_exam', upload.fields([{ name: 'image', maxCount: 1 }, { name: 'commentary_image', maxCount: 1 }, { name: 'voicefile', maxCount: 1 }]), async (req, res) => {
   const s3 = new AWS.S3();
   const formData = req.body;
   const commentary_image = req.files.commentary_image;
   const image = req.files.image;
+  const voicefile = req.files.voicefile;
 
   const examMajor = formData.selectedExamMajor;
   const classification = formData.selectedClassification;
@@ -1378,6 +1379,8 @@ router.post('/api/regist_workbook_exam', upload.fields([{ name: 'image', maxCoun
 
   let examImgFilePath1 = null;
   let examImgFilePath2 = null;
+  let examAudioFilePath = null;
+  
   if (image) {
     const params = {
       Bucket: 'bucket-lmz8li',
@@ -1412,10 +1415,28 @@ router.post('/api/regist_workbook_exam', upload.fields([{ name: 'image', maxCoun
       return res.status(500).json({ error: '이미지 업로드에 실패하였습니다.' });
     }
   } 
+  if (voicefile)
+  {
+    const params = {
+      Bucket: 'bucket-lmz8li',
+      Key: `시험 음원/${classification}_${problem_number + 1}번 문제 음원`,
+      Body: voicefile[0].buffer,
+      ACL: 'public-read',
+    };
+
+    try {
+      const data = await s3.upload(params).promise();
+      examAudioFilePath = data.Location;
+    } 
+    catch (err) {
+      console.error('Error uploading file to S3:', err);
+      return res.status(500).json({ error: '음성파일 업로드에 실패하였습니다.' });
+    }
+  }
 
   try
   {
-    const regist_query = `INSERT INTO ${target_table} VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+    const regist_query = `INSERT INTO ${target_table} VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
     const values = [
       classification, 
       problem_number + 1, 
@@ -1426,7 +1447,8 @@ router.post('/api/regist_workbook_exam', upload.fields([{ name: 'image', maxCoun
       choice1, choice2, choice3, choice4, choice5, 
       answer, 
       commentary, 
-      examImgFilePath2
+      examImgFilePath2, 
+      examAudioFilePath
     ];
     await db.execute(regist_query, values);
 
