@@ -1,16 +1,21 @@
 import './App.css';
 import React from 'react';
-import { useState, useEffect } from 'react';
-import ImgPreview from './ImagePreview';
+import { useState, useEffect, useRef} from 'react';
 
 function WorkbookChoiceForm() 
 {
   const [selectedExamMajor, setSelectedExamMajor] = useState('');
   const [selectedClassification, setSelectedClassification] = useState('');
   const [image, setImage] = useState('');//이미지
+  const [image1, setImage1] = useState('');//이미지1
+  const [audio, setAudio] = useState('');
   const [isConfirmButtonClicked, setConfirmButtonClicked] = useState(false);
   const [isImageUploaded, setIsImageUploaded] = useState(false);
+  const [isImageUploaded1, setIsImageUploaded1] = useState(false);
+  const [isAudioUploaded, setIsAudioUploaded] = useState(false);
+  const [audioURL, setAudioURL] = useState(false);
   const [isPopupOpen, setIsPopupOpen] = useState(false);
+  const [isPopup1Open, setIsPopup1Open] = useState(false);
   const [imagePreview, setImagePreview] = useState([]);
   const [tagList, setTagList] = useState([]);
   const [subjectList, setSubjectList] = useState([]);
@@ -25,7 +30,15 @@ function WorkbookChoiceForm()
     choice5: '',
     answer: '',
     image:null,
+    commentary:'',
+    commentary_image:null,
+    voicefile:null,
   });
+
+  const imageInputRef = useRef(null);
+  const image1InputRef = useRef(null);
+  const audioInputRef = useRef(null);
+
   const validateForm = () => {
     const requiredFields = ['type', 'question', 'answer'];
     for (const field of requiredFields) 
@@ -113,15 +126,51 @@ function WorkbookChoiceForm()
     }
     fileRead.readAsDataURL(file);
   };
+  const handleImageUpload1 = (event) => {
+    const file = event.target.files[0];
+    const id = event.target.id;
+    setImage1(file);
+    setIsImageUploaded1(true);
+    setFormData((prevData) => ({
+      ...prevData,
+      [id]: file,
+    }));
+
+    console.log(id, file);
+    
+    let fileRead = new FileReader();
+    fileRead.onload = function() {
+      setImagePreview(fileRead.result);
+    }
+    fileRead.readAsDataURL(file);
+  };
+  const handleAudioUpload = (event) => {
+    const file = event.target.files[0];
+    const id = event.target.id;
+    setAudio(file);
+    setIsAudioUploaded(true);
+    setAudioURL(URL.createObjectURL(file));
+    setFormData((prevData) => ({
+      ...prevData,
+      [id]: file,
+    }));
+  };
   const handleCheckImage = () => {
     setIsPopupOpen(true);
   }
   const handlePopupClose = () => {
     setIsPopupOpen(false);
   };
+  const handleCheckImage1 = () => {
+    setIsPopup1Open(true);
+  }
+  const handlePopupClose1 = () => {
+    setIsPopup1Open(false);
+  };
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    console.log(formData);
 
     if (!validateForm()) {
       alert('입력되지 않은 값이 있습니다. 모든 항목을 입력해주세요.');
@@ -141,7 +190,25 @@ function WorkbookChoiceForm()
       choice5: '',
       answer: '',
       image: null,
+      commentary:'',
+      commentary_image:null,
+      voicefile:null,
     });
+    setImage(null);
+    setImage1(null);
+    setAudio(null);
+    setIsImageUploaded(false);
+    setIsImageUploaded1(false);
+
+    if (imageInputRef.current) {
+      imageInputRef.current.value = '';
+    }
+    if (image1InputRef.current) {
+      image1InputRef.current.value = '';
+    }
+    if (audioInputRef.current) {
+      audioInputRef.current.value = '';
+    }
   };
 
   const handleMajorListChange = (e) => {
@@ -149,6 +216,7 @@ function WorkbookChoiceForm()
     setSelectedExamMajor(selectedMajor);
   };
   const handleFirstConfirmButtonClick = () => {
+    console.log(selectedExamMajor);
     setConfirmButtonClicked(true);
   };
   //등록api
@@ -165,7 +233,12 @@ function WorkbookChoiceForm()
     form.append('choice4', formData.choice4);
     form.append('choice5', formData.choice5);
     form.append('answer', formData.answer);
+    form.append('commentary', formData.commentary);
+    form.append('commentary_image', image1);
     form.append('image', image);
+    form.append('voicefile', audio);
+
+    console.log(form);
     
     fetch('/api/regist_workbook_exam', {
         method: 'POST',
@@ -228,52 +301,81 @@ function WorkbookChoiceForm()
           확인
         </button>
       </div>
-      <div className='upper_button_place'>
-        <input id="image" type="file" accept="image/*" onChange={handleImageUpload}  className='img_input' />
-        { isImageUploaded && <button className='small_letter_button' onClick={handleCheckImage}>미리보기</button>}
-      </div>
-      {isPopupOpen && (
-        <div className="popup">
-          <div className="popup-content">
-            <img className="popup" src={URL.createObjectURL(image)} alt="Uploaded" />
-          </div>
-          <button onClick={handlePopupClose}>Close</button>
-        </div>
-      )}
       <div className="question_sub">
-        <div className="paragraph_area">
-          <h4>지문</h4>
-          <textarea type="text" name="" id="paragraph" placeholder="지문" value={formData.paragraph} onChange={handleInputChange}></textarea>
+        <div className='question_row'>
+          <h4 className='question_tag'>문제 이미지</h4>
+          <input id="image" type="file" accept="image/*" onChange={handleImageUpload}  className='img_input' ref={imageInputRef} />
+          { isImageUploaded && <button className='small_letter_btn' onClick={handleCheckImage}>미리보기</button>}
         </div>
-        <div className="question_area">
-          <div className="question_line">
-              <h4>질문</h4>
-              <textarea type="text" name="" id="question" placeholder="질문" value={formData.question} onChange={handleInputChange}></textarea>
+        {isPopupOpen && (
+          <div className="popup">
+            <div className="popup-content">
+              <img className="popup" src={URL.createObjectURL(image)} alt="Uploaded" />
+            </div>
+            <button onClick={handlePopupClose}>Close</button>
           </div>
-          <div className="choice">
-              <h4>선택지1</h4>
-              <textarea type="text" name="" id="choice1" placeholder="선택지1" value={formData.choice1} onChange={handleInputChange}></textarea>
+        )}
+        { (selectedExamMajor === '영어듣기' || selectedExamMajor === '교양') && (
+          <div className="question_row">
+            <h4 className='question_tag'>음원 파일</h4>
+            <input id="voicefile" type="file" accept="audio/*" onChange={handleAudioUpload}  className='img_input' ref={audioInputRef} />
+            {audioURL && (
+              <div className="audio-preview">
+                <audio controls>
+                  <source src={audioURL} type={audio && audio.type ? audio.type : 'audio/mpeg'} />
+                </audio>
+              </div>
+            )}
           </div>
-          <div className="choice">
-              <h4>선택지2</h4>
-              <textarea type="text" name="" id="choice2" placeholder="선택지2" value={formData.choice2} onChange={handleInputChange}></textarea>
+        )}
+        <div className="question_row">
+          <h4 className='question_tag'>지문</h4>
+          <textarea className="longtext_input" type="text" name="" id="paragraph" placeholder="지문" value={formData.paragraph} onChange={handleInputChange}></textarea>
+        </div>
+        <div className="question_row">
+          <h4 className='question_tag'>질문</h4>
+          <textarea className="question_input" type="text" name="" id="question" placeholder="질문" value={formData.question} onChange={handleInputChange}></textarea>
+        </div>
+        <div className="question_row">
+          <h4 className='question_tag'>선택지1</h4>
+          <textarea className="question_input" type="text" name="" id="choice1" placeholder="선택지1" value={formData.choice1} onChange={handleInputChange}></textarea>
+        </div>
+        <div className="question_row">
+          <h4 className='question_tag'>선택지2</h4>
+          <textarea className="question_input" type="text" name="" id="choice2" placeholder="선택지2" value={formData.choice2} onChange={handleInputChange}></textarea>
+        </div>
+        <div className="question_row">
+          <h4 className='question_tag'>선택지3</h4>
+          <textarea className="question_input" type="text" name="" id="choice3" placeholder="선택지3" value={formData.choice3} onChange={handleInputChange}></textarea>
+        </div>
+        <div className="question_row">
+          <h4 className='question_tag'>선택지4</h4>
+          <textarea className="question_input" type="text" name="" id="choice4" placeholder="선택지4" value={formData.choice4} onChange={handleInputChange}></textarea>
+        </div>
+        <div className="question_row">
+          <h4 className='question_tag'>선택지5</h4>
+          <textarea className="question_input" type="text" name="" id="choice5" placeholder="선택지5" value={formData.choice5} onChange={handleInputChange}></textarea>
+        </div>
+        <div className="question_row">
+          <h4 className='question_tag'>정답</h4>
+          <textarea className="question_input" type="text" name="" id="answer" placeholder="정답(숫자)" value={formData.answer} onChange={handleInputChange}></textarea>
+        </div>
+        <div className='question_row'>
+          <h4 className='question_tag'>해설 이미지</h4>
+          <input id="commentary_image" type="file" accept="image/*" onChange={handleImageUpload1} className='img_input' ref={image1InputRef} />
+          { isImageUploaded1 && <button className='small_letter_btn' onClick={handleCheckImage1}>미리보기</button>}
+        </div>
+        {isPopup1Open && (
+          <div className="popup">
+            <div className="popup-content">
+              <img className="popup" src={URL.createObjectURL(image1)} alt="Uploaded" />
+            </div>
+            <button onClick={handlePopupClose1}>Close</button>
           </div>
-          <div className="choice">
-              <h4>선택지3</h4>
-              <textarea type="text" name="" id="choice3" placeholder="선택지3" value={formData.choice3} onChange={handleInputChange}></textarea>
-          </div>
-          <div className="choice">
-              <h4>선택지4</h4>
-              <textarea type="text" name="" id="choice4" placeholder="선택지4" value={formData.choice4} onChange={handleInputChange}></textarea>
-          </div>
-          <div className="choice">
-              <h4>선택지5</h4>
-              <textarea type="text" name="" id="choice5" placeholder="선택지5" value={formData.choice5} onChange={handleInputChange}></textarea>
-          </div>
-          <div className="choice">
-              <h4>정답</h4>
-              <textarea type="text" name="" id="answer" placeholder="정답" value={formData.answer} onChange={handleInputChange}></textarea>
-          </div>
+        )}
+        <div className="question_row">
+          <h4 className='question_tag'>해설</h4>
+          <textarea className="longtext_input" type="text" name="" id="commentary" placeholder="해설" value={formData.commentary} onChange={handleInputChange}></textarea>
         </div>
       </div>
       <div className='btn_section'>
@@ -281,8 +383,6 @@ function WorkbookChoiceForm()
       </div>
     </div>
   );
-  
-  
 };
 
 export default WorkbookChoiceForm;

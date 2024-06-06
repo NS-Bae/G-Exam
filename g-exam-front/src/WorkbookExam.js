@@ -14,6 +14,8 @@ function convertKorean(selectedCategory)
     '과학' : 'science', 
     '한문' : 'chinesecharacter', 
     '역사' : 'history', 
+    '영어듣기' : 'english_listening', 
+    '교양' : 'refinement', 
     '기타' : 'etc', 
   }
 
@@ -29,12 +31,14 @@ function MajorSelection({ isLoggedIn }) {
   const [showChoiceRandom, setShowChoiceRandom] = useState(false);
   const [selectedMajor, setSelectedMajor] = useState('');
   const exambtntype = [
-    { id: '국어', title: '국어 시험' },
-    { id: '영어', title: '영어 시험' },
-    { id: '수학', title: '수학 시험' },
-    { id: '사회', title: '사회 시험' },
-    { id: '과학', title: '과학 시험' },
-    { id: '기타', title: '기타 시험' },
+    { id: '국어', title: '국어' },
+    { id: '영어', title: '영어' },
+    { id: '영어듣기', title: '영어 듣기' },
+    { id: '수학', title: '수학' },
+    { id: '사회', title: '사회' },
+    { id: '과학', title: '과학' },
+    { id: '교양', title: '교양' },
+    { id: '기타', title: '기타' },
   ];
 
   const handleMajorSelection = (id) => {
@@ -246,7 +250,7 @@ function ChoiceRandom({selectedMajor, onBackButtonClick})
           뒤로가기
         </button>
       </div>
-      <QRCode value={`https://gplan29.com/workbookexam/${conversion}?examDetails=${encodeURIComponent(JSON.stringify(examDetails))}`} />
+      <QRCode value={`https://g-plan.org/workbookexam/${conversion}?examDetails=${encodeURIComponent(JSON.stringify(examDetails))}`} />
     </div>
   );
 }

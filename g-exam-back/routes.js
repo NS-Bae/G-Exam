@@ -14,11 +14,12 @@ const path = require('path');
 const multer = require('multer');
 const multerS3 = require('multer-s3');
 const AWS = require('aws-sdk');
+const { Console } = require('console');
 
 const upload = multer({
   storage: multer.memoryStorage(),
   limits: {
-    fileSize: 100000000, // 1MB
+    fileSize: 1000000000, // 1GB
   },
 });
 
@@ -259,11 +260,9 @@ router.post('/api/read_txt_file', (req, res) => {
   const path = req.body.recordInfo3;
   const fileName = decodeURIComponent(path.split('/').pop());
 
-  console.log(fileName);
-
   const s3 = new AWS.S3();
   const params = {
-    Bucket: 'bucket-3ioqrj',
+    Bucket: 'bucket-lmz8li',
     Key: fileName,
   };
   
@@ -686,6 +685,8 @@ function convertKorean(selectedCategory)
     '과학' : 'science', 
     '한문' : 'chinese_character', 
     '역사' : 'history', 
+    '영어듣기' : 'english_listening',
+    '교양' : 'refinement',
     '기타' : 'etc', 
   }
 
@@ -701,6 +702,8 @@ function convertEnglish(selectedCategory)
     'science' : '과학', 
     'chinese_character' : '한문', 
     'history' : '역사', 
+    'english_listening' : '영어듣기',
+    'refinement' : '교양',
     'etc' : '기타', 
   }
 
@@ -783,22 +786,65 @@ router.post('/api/search_exam', (req, res) => {
   }
 });
 
+const deleteImageFromS3 = async (key) => {
+  const s3 = new AWS.S3();
+
+  const params = {
+    Bucket: 'bucket-lmz8li',
+    Key: key
+  };
+
+  try 
+  {
+    await s3.deleteObject(params).promise();
+    console.log(`Image ${key} deleted successfully from ${params.Bucket}`);
+  } 
+  catch (error) 
+  {
+    console.error(`Error deleting image ${key} from ${params.Bucket}:`, error);
+  }
+};
+const extractS3KeyFromUrl = (url) => {
+  const urlObj = new URL(url);
+  return decodeURIComponent(urlObj.pathname.substring(1));
+};
 router.post('/api/delete_exam', async (req, res) => {
   const type = req.body.type;
   if(type === 'workbook')
   {
     const selectedRows = req.body.selectedRows;
     const selectedCategory = `workbook_${convertKorean(req.body.selectedCategory)}`;
-    console.log(selectedCategory, 'aa', selectedRows);
-
     const placeholders = selectedRows.map(() => '(?, ?)').join(', ');
-    const sql = `DELETE FROM ${selectedCategory} WHERE (classification_name, exam_id) IN (${placeholders});`;
     const compoundKeys = selectedRows.flatMap(({ examCatgory, examId }) => [examCatgory, examId]);
+
+    const sql = `DELETE FROM ${selectedCategory} WHERE (classification_name, exam_id) IN (${placeholders});`;
+    const aws_sql = `SELECT image, commentary_image FROM ${selectedCategory} WHERE (classification_name, exam_id) IN (${placeholders});`;
 
     try 
     {
-      const [result] = await db.promise().query(sql, compoundKeys);
-      res.status(200).json({ message: 'Rows deleted successfully' });
+      const [result] = await db.promise().query(aws_sql, compoundKeys);
+
+      for (const row of result) 
+      {
+        if (row.image) 
+        {
+          console.log('aa', row.image);
+          const imageKey = extractS3KeyFromUrl(row.image);
+          console.log(imageKey);
+          await deleteImageFromS3(imageKey);
+        }
+        if (row.commentary_image) 
+        {
+          console.log('ab', row.commentary_image);
+          const commentaryImageKey = extractS3KeyFromUrl(row.commentary_image);
+          console.log(commentaryImageKey);
+          await deleteImageFromS3(commentaryImageKey);
+        }
+      }
+
+      await db.promise().query(sql, compoundKeys);
+
+      res.status(200).json({ message: 'Rows and images deleted successfully' });
     } 
     catch (error) 
     {
@@ -810,15 +856,34 @@ router.post('/api/delete_exam', async (req, res) => {
   {
     const selectedRows = req.body.selectedRows;
     const selectedCategory = `pre_exam_${convertKorean(req.body.selectedCategory)}`;
-    console.log(selectedCategory, 'aa', selectedRows);
-
     const placeholders = selectedRows.map(() => '(?, ?)').join(', ');
-    const sql = `DELETE FROM ${selectedCategory} WHERE (classification_name, exam_id) IN (${placeholders});`;
     const compoundKeys = selectedRows.flatMap(({ examCatgory, examId }) => [examCatgory, examId]);
+    
+    const sql = `DELETE FROM ${selectedCategory} WHERE (classification_name, exam_id) IN (${placeholders});`;
+    const aws_sql = `SELECT image, commentary_image FROM ${selectedCategory} WHERE (classification_name, exam_id) IN (${placeholders});`;
 
     try 
     {
+      for (const row of result) 
+      {
+        if (row.image) 
+        {
+          console.log('aa', row.image);
+          const imageKey = extractS3KeyFromUrl(row.image);
+          console.log(imageKey);
+          await deleteImageFromS3(imageKey);
+        }
+        if (row.commentary_image) 
+        {
+          console.log('ab', row.commentary_image);
+          const commentaryImageKey = extractS3KeyFromUrl(row.commentary_image);
+          console.log(commentaryImageKey);
+          await deleteImageFromS3(commentaryImageKey);
+        }
+      }
+
       const [result] = await db.promise().query(sql, compoundKeys);
+
       res.status(200).json({ message: 'Rows deleted successfully' });
     } 
     catch (error) 
@@ -1290,10 +1355,12 @@ async function getNumber(classification, target_table) {
   });
 };
 
-router.post('/api/regist_workbook_exam', upload.single('image'), async (req, res) => {
+router.post('/api/regist_workbook_exam', upload.fields([{ name: 'image', maxCount: 1 }, { name: 'commentary_image', maxCount: 1 }, { name: 'voicefile', maxCount: 1 }]), async (req, res) => {
   const s3 = new AWS.S3();
   const formData = req.body;
-  const imageFile = req.file;
+  const commentary_image = req.files.commentary_image;
+  const image = req.files.image;
+  const voicefile = req.files.voicefile;
 
   const examMajor = formData.selectedExamMajor;
   const classification = formData.selectedClassification;
@@ -1306,48 +1373,100 @@ router.post('/api/regist_workbook_exam', upload.single('image'), async (req, res
   const choice4 = formData.choice4 || null;
   const choice5 = formData.choice5 || null;
   const answer = formData.answer || null;
+  const commentary = formData.commentary || null;
   const target_table = `workbook_${convertKorean(examMajor)}`
   const problem_number = await getNumber(classification, target_table);
 
-  let examImgFilePath = null;
-  if (imageFile) {
+  let examImgFilePath1 = null;
+  let examImgFilePath2 = null;
+  let examAudioFilePath = null;
+  
+  if (image) {
     const params = {
-      Bucket: 'bucket-3ioqrj',
+      Bucket: 'bucket-lmz8li',
       Key: `시험 이미지/${classification}_${problem_number + 1}번 문제`,
-      Body: imageFile.buffer,
+      Body: image[0].buffer,
       ACL: 'public-read',
     };
 
     try {
       const data = await s3.upload(params).promise();
-      examImgFilePath = data.Location;
+      examImgFilePath1 = data.Location;
     } 
     catch (err) {
       console.error('Error uploading file to S3:', err);
       return res.status(500).json({ error: '이미지 업로드에 실패하였습니다.' });
     }
   }
+  if (commentary_image) {
+    const params = {
+      Bucket: 'bucket-lmz8li',
+      Key: `시험 이미지/${classification}_${problem_number + 1}번 문제 해설`,
+      Body: commentary_image[0].buffer,
+      ACL: 'public-read',
+    };
+
+    try {
+      const data = await s3.upload(params).promise();
+      examImgFilePath2 = data.Location;
+    } 
+    catch (err) {
+      console.error('Error uploading file to S3:', err);
+      return res.status(500).json({ error: '이미지 업로드에 실패하였습니다.' });
+    }
+  } 
+  if (voicefile)
+  {
+    const params = {
+      Bucket: 'bucket-lmz8li',
+      Key: `시험 음원/${classification}_${problem_number + 1}번 문제 음원`,
+      Body: voicefile[0].buffer,
+      ACL: 'public-read',
+    };
+
+    try {
+      const data = await s3.upload(params).promise();
+      examAudioFilePath = data.Location;
+    } 
+    catch (err) {
+      console.error('Error uploading file to S3:', err);
+      return res.status(500).json({ error: '음성파일 업로드에 실패하였습니다.' });
+    }
+  }
 
   try
-    {
-      const regist_query = `INSERT INTO ${target_table} VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
-      const values = [classification, problem_number + 1, type, paragraph, examImgFilePath, question, choice1, choice2, choice3, choice4, choice5, answer];
-      await db.execute(regist_query, values);
+  {
+    const regist_query = `INSERT INTO ${target_table} VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+    const values = [
+      classification, 
+      problem_number + 1, 
+      type, 
+      paragraph, 
+      examImgFilePath1, 
+      question, 
+      choice1, choice2, choice3, choice4, choice5, 
+      answer, 
+      commentary, 
+      examImgFilePath2, 
+      examAudioFilePath
+    ];
+    await db.execute(regist_query, values);
 
-      res.status(200).json({ message: '시험문제를 등록하였습니다.' });
-    } 
-    catch (error) 
-    {
-      console.error('시험문제 등록 오류:', error);
-      throw error;
-    }
+    res.status(200).json({ message: '시험문제를 등록하였습니다.' });
+  } 
+  catch (error) 
+  {
+    console.error('시험문제 등록 오류:', error);
+    throw error;
+  }
   
 });
 
-router.post('/api/regist_pre_exam', upload.single('image'), async (req, res) => {
+router.post('/api/regist_pre_exam', upload.fields([{ name: 'image', maxCount: 1 }, { name: 'commentary_image', maxCount: 1 }]), async (req, res) => {
   const s3 = new AWS.S3();
   const formData = req.body;
-  const imageFile = req.file;
+  const commentary_image = req.files.commentary_image;
+  const image = req.files.image;
 
   const examMajor = formData.selectedExamMajor;
   const classification = formData.selectedClassification;
@@ -1361,22 +1480,41 @@ router.post('/api/regist_pre_exam', upload.single('image'), async (req, res) => 
   const choice4 = formData.choice4 || null;
   const choice5 = formData.choice5 || null;
   const answer = formData.answer || null;
+  const commentary = formData.commentary || null;
   const target_table = `pre_exam_${convertKorean(examMajor)}`
   const problem_number = await getNumber(classification, target_table);
 
   // 이미지 파일이 넘어오지 않은 경우 대비
-  let examImgFilePath = null;
-  if (imageFile) {
+  let examImgFilePath1 = null;
+  let examImgFilePath2 = null;
+  if (image) {
     const params = {
-      Bucket: 'bucket-3ioqrj',
+      Bucket: 'bucket-lmz8li',
       Key: `시험 이미지/${classification}_${problem_number + 1}번 문제`,
-      Body: imageFile.buffer,
+      Body: image[0].buffer,
       ACL: 'public-read',
     };
 
     try {
       const data = await s3.upload(params).promise();
-      examImgFilePath = data.Location;
+      examImgFilePath1 = data.Location;
+    } 
+    catch (err) {
+      console.error('Error uploading file to S3:', err);
+      return res.status(500).json({ error: '이미지 업로드에 실패하였습니다.' });
+    }
+  }
+  if (commentary_image) {
+    const params = {
+      Bucket: 'bucket-lmz8li',
+      Key: `시험 이미지/${classification}_${problem_number + 1}번 문제 해설`,
+      Body: commentary_image[0].buffer,
+      ACL: 'public-read',
+    };
+
+    try {
+      const data = await s3.upload(params).promise();
+      examImgFilePath2 = data.Location;
     } 
     catch (err) {
       console.error('Error uploading file to S3:', err);
@@ -1387,14 +1525,18 @@ router.post('/api/regist_pre_exam', upload.single('image'), async (req, res) => 
   // 데이터베이스에 파일 경로 저장
   try
   {
-    const regist_query = `INSERT INTO ${target_table} VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+    const regist_query = `INSERT INTO ${target_table} VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
     const values = [
       classification, 
       problem_number + 1, 
       examMajor, school, type, 
       paragraph, 
-      examImgFilePath,
-      question, choice1, choice2, choice3, choice4, choice5, answer
+      examImgFilePath1,
+      question, 
+      choice1, choice2, choice3, choice4, choice5, 
+      answer, 
+      commentary, 
+      examImgFilePath2
     ];
     await db.execute(regist_query, values);
     res.status(200).json({ message: '시험문제를 등록하였습니다.' });
@@ -1566,7 +1708,7 @@ function writeWordExamRecord(correct, wrong, wrongAnswers, user, major, correctA
 
   const fileName = `${wordTestInfo}.txt`;
   const s3 = new AWS.S3();
-  const bucketName = 'bucket-3ioqrj';
+  const bucketName = 'bucket-lmz8li';
   const fileContent = data.join('\n');
 
   const uploadParams = {
@@ -1699,7 +1841,7 @@ router.post('/api/submit_exam_answer', async (req, res) => {
   });
   
   const query = `
-    SELECT classification_name, exam_id, paragraph, question, choice1, choice2, choice3, choice4, choice5, answer, type FROM ${target_table} 
+    SELECT classification_name, exam_id, paragraph, question, choice1, choice2, choice3, choice4, choice5, answer, type, commentary, commentary_image FROM ${target_table} 
     WHERE (classification_name, exam_id) IN (?)`;
   const value = [combinedInfoArray];
 
@@ -1723,11 +1865,11 @@ router.post('/api/submit_exam_answer', async (req, res) => {
     }
   });
 });
+//updatedAnswer === 사용자가 선택한 답과 문제정보, updatedObjectiveQuestions === 실제 정답(객관식), subjectiveQuestions === 실제 정답(주관식)
 function MarkingAnswer({updatedObjectiveQuestions, subjectiveQuestions, updatedAnswer})
 {
   let wrong=0, correct = 0;
   let wrongAnswer = [];
-  console.log(updatedAnswer);
   for(const answer in updatedAnswer)
   {
     if(updatedAnswer[answer].exam_type === '주관식')
@@ -1750,6 +1892,8 @@ function MarkingAnswer({updatedObjectiveQuestions, subjectiveQuestions, updatedA
               question : subjectiveQuestions[question].question,
               wrongAnswer : updatedAnswer[answer].user_answer,
               correctAnswer : subjectiveQuestions[question].answer,
+              commentary : subjectiveQuestions[question].commentary, 
+              commentary_image : subjectiveQuestions[question].commentary_image,
             });
           }
         }
@@ -1780,6 +1924,8 @@ function MarkingAnswer({updatedObjectiveQuestions, subjectiveQuestions, updatedA
               choice5 : updatedObjectiveQuestions[question].choice5,
               wrongAnswer : updatedAnswer[answer].choiceNumber,
               correctAnswer : updatedObjectiveQuestions[question].answer,
+              commentary : updatedObjectiveQuestions[question].commentary,
+              commentary_image : updatedObjectiveQuestions[question].commentary_image,
             });
           }
         }
@@ -1814,11 +1960,13 @@ function writeExamRecord(correct, wrong, user, wrongAnswers, major, combinedInfo
     data.push([`선지4 : ${wrongAnswers[i].choice4}`]);
     data.push([`선지5 : ${wrongAnswers[i].choice5}\n`]);
     data.push([`선택한 답 : ${wrongAnswers[i].wrongAnswer}      정답 : ${wrongAnswers[i].correctAnswer}\n`])
+    data.push([`해설 : ${wrongAnswers[i].commentary}`])
+    data.push([`해설 이미지 : ${wrongAnswers[i].commentary_image}`])
   }
 
   const fileName = `${ExamRecord}.txt`;
   const s3 = new AWS.S3();
-  const bucketName = 'bucket-3ioqrj';
+  const bucketName = 'bucket-lmz8li';
   const fileContent = data.join('\n');
 
   const uploadParams = {
@@ -2002,7 +2150,7 @@ router.post('/api/delete_record', async (req, res) => {
   if (delete_data && delete_data.record_info) 
   {
     const params = {
-      Bucket: 'bucket-3ioqrj',
+      Bucket: 'bucket-lmz8li',
       Key: `${delete_data.record_info}`,
     };
   
@@ -2032,5 +2180,5 @@ router.post('/api/delete_record', async (req, res) => {
   }
 })
 
-
+//test
 module.exports = router;

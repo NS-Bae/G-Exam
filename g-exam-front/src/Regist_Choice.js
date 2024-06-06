@@ -24,11 +24,7 @@ function ChoiceForm1 () {
   const [isConfirmButtonClicked, setConfirmButtonClicked] = useState(false);
 
   const handleFirstConfirmButtonClick = () => {
-    setConfirmButtonClicked(true);/* 
-    if(selectedExamMajor === '' && selectedExamCategory === 'pre_exam')
-    {
-      alert("과목을 골라주세요");
-    } */
+    setConfirmButtonClicked(true);
   };
 
   const handleExamCategoryChange = (e) => {
