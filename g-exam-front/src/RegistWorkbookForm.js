@@ -199,6 +199,8 @@ function WorkbookChoiceForm()
     setAudio(null);
     setIsImageUploaded(false);
     setIsImageUploaded1(false);
+    setIsAudioUploaded(false);
+    setAudioURL(false);
 
     if (imageInputRef.current) {
       imageInputRef.current.value = '';

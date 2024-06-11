@@ -187,7 +187,9 @@ function StudentJoinForm({ formType }) {
             required
           />
         </div>
-        <button className='test_btn' type="submit">회원가입</button>
+        <div className='place'>
+          <button className='test_btn' type="submit">회원가입</button>
+        </div>
       </form>
     </AuthContent>
   );
@@ -321,7 +323,9 @@ function TeacherJoinForm({ formType }) {
             required
           />
         </div>
-        <button className='test_btn' type="submit">회원가입</button>
+        <div className='place'>
+          <button className='test_btn' type="submit">회원가입</button>
+        </div>
       </form>
     </AuthContent>
   );
