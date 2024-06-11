@@ -1073,7 +1073,7 @@ router.post('/api/add_classification', async (req, res) => {
     const table = "classification_list";
     try
     { 
-      const sql = `INSERT INTO ${table} VALUES (?, ?)`;
+      const sql = `INSERT INTO ${table} VALUES (?, ?, 0)`;
       const values = [classification, major];
   
       await db.execute(sql, values);
@@ -1090,7 +1090,7 @@ router.post('/api/add_classification', async (req, res) => {
     const table = "word_category";
     try
     {
-      const sql = `INSERT INTO ${table} VALUES (?, ?)`;
+      const sql = `INSERT INTO ${table} VALUES (?, ?, 0)`;
       const values = [classification, major];
   
       await db.execute(sql, values);
@@ -1111,7 +1111,7 @@ router.post('/api/add_classification', async (req, res) => {
     const formType = req.body.form_type;
     const classificationForm = `${formData.year}_${formData.school_details}_${formData.major}_${formData.grade}학년_${formData.semester}학기_${formData.period}고사`;
     let addTagClassification;    
-    const sql = `INSERT INTO ${table} VALUES (?, ?)`;
+    const sql = `INSERT INTO ${table} VALUES (?, ?, 0)`;
     let values;
 
     if(formData.tag === '')
@@ -1174,6 +1174,52 @@ router.post('/api/delete_classification', async (req, res) => {
     res.status(500).json({ error: 'Internal Server Error' });
   }
 });
+
+router.post('/api/update_tag_permission', (req, res) => {
+  const classification = req.body.classification;
+  const now_permission = req.body.now_permission;
+  const form_type = req.body.form_type;
+
+  let sql, param, target_table, target_row;
+
+  switch(form_type){
+    case 'pre_exam' :
+      target_table = 'pre_exam_classification_list';
+      target_row = 'classification_name';
+      break;
+    case 'exam' :
+      target_table = 'classification_list';
+      target_row = 'classification_name';
+      break;
+    case 'word' :
+      target_table = 'word_category';
+      target_row = 'word_category';
+      break;
+  }
+
+  if(now_permission === 1)
+  {
+    sql = `UPDATE ${target_table} SET permission = '0' WHERE (${target_row} = ?);`;
+    param = [classification];
+  }
+  else
+  {
+    sql = `UPDATE ${target_table} SET permission = '1' WHERE (${target_row} = ?);`;
+    param = [classification];
+  }
+
+  db.query(sql, param, (err) => {
+    if (err) 
+    {
+      console.log(err);
+      res.status(500).json({ error: '상태 변경에 실패했습니다' });
+    } 
+    else 
+    {
+      res.status(200).json({ message: '상태 변경에 성공했습니다'});
+    }
+  });
+})
 
 router.get('/api/get_majorlist', (req, res) => {
 

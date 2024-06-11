@@ -3,6 +3,7 @@ import React, { useEffect, useState, useRef } from 'react';
 import { Link, useNavigate } from "react-router-dom";
 import Modal from 'react-modal';
 import RegistPreExamClassificationModal from './Regist_PreExamClassification_Modal';
+import ToggleButton from './ToggleButton'; 
 
 function Main()
 {
@@ -267,7 +268,7 @@ function ExamForm({form_type})
                   <td>{index+1}</td>
                   <td>{item.classification_name}</td>
                   <td>{item.major_name}</td>
-                  <td>{item.workbook_count}</td>
+                  <td><ToggleButton item={item} form_type={form_type}/></td>
                 </tr>
               ))}
             </tbody>
@@ -320,6 +321,7 @@ function PreExamForm({form_type})
       })
       .then((data) => {
         setClassificationInfo(data.data);
+        console.log(data.data);
         setTotalCount(data.totalCount);
         setTotalPages(Math.ceil(data.totalCount / itemsPerPage));
       })
@@ -400,28 +402,6 @@ function PreExamForm({form_type})
   useEffect(() => {
     fetchData(1);
   }, [])
-  //과목 불러오기
-  /* useEffect(() => {
-    const fetchSubjectList = async () => {
-      try 
-      {
-        const response = await fetch('/api/get_majorlist');
-        if (!response.ok) 
-        {
-          throw new Error('네트워크 응답이 올바르지 않습니다.');
-        }
-        const data = await response.json();
-        setSubjectList(data.data);
-        console.log(data.data);
-      } 
-      catch (error) 
-      {
-        console.error('과목 리스트를 불러오는 중 오류 발생:', error);
-      }
-    };
-
-    fetchSubjectList(); // useEffect가 처음 실행될 때 과목 리스트를 가져옴
-  }, []); */
 
   const openModal = () => {
     Modal.setAppElement('#root');
@@ -471,7 +451,7 @@ function PreExamForm({form_type})
               <th>분류 번호</th>
               <th>분류명</th>
               <th>과목</th>
-              <th>문제 수</th>
+              <th>공개여부</th>
             </tr>
           </thead>
           <tbody>
@@ -487,7 +467,7 @@ function PreExamForm({form_type})
                 <td>{index+1}</td>
                 <td>{item.classification_name}</td>
                 <td>{item.major_name}</td>
-                <td>{item.workbook_count}</td>
+                <td><ToggleButton item={item} form_type={form_type}/></td>
               </tr>
             ))}
           </tbody>
@@ -705,7 +685,7 @@ function WordForm({form_type})
                 <td>{index + 1}</td>
                 <td>{item.word_category}</td>
                 <td>{item.major_name}</td>
-                <td>{item.word_count}</td>
+                <td><ToggleButton item={item} form_type={form_type}/></td>
               </tr>
             ))}
           </tbody>
