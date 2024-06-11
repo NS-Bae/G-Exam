@@ -78,42 +78,6 @@ function LoginForm(props) {
     </AuthContent>
   );
 }
-/* function AutoLoginCheck()
-{
-  const [isChecked, setIsChecked] = useState(false);
-
-  useEffect(() => {
-    localStorage.setItem('autologin', isChecked.toString());
-  }, [isChecked]);
-
-  const checkboxChange = () => {
-    setIsChecked(!isChecked);
-  };
-
-  useEffect(() => {
-    const storedAutoLogin = localStorage.getItem('autoLogin');
-    if (storedAutoLogin === 'true') {
-      setIsChecked(true);
-      // 여기에서 자동 로그인 처리를 수행하면 됩니다.
-      console.log('자동 로그인이 활성화되었습니다.');
-    }
-  }, []);
-  return (
-    <div>
-      <span>
-        <input
-          type="checkbox"
-          checked={isChecked}
-          onChange={checkboxChange}
-          style={{ textDecoration: 'none' }} 
-        />
-        자동 로그인
-      </span>
-    </div>
-  );
-}
- */
-
 function MyApp() {
   const navigate = useNavigate();
 
