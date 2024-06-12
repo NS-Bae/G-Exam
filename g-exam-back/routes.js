@@ -1242,81 +1242,44 @@ router.post('/api/get_classification', (req, res) => {
   const formType = req.body.form_type;
   const selectedMajor = req.body.selectedMajor;
   const detail_school = req.body.detail;
-  let target_table;
-  let target_row;
-  let sql;
+  let classification_target_table, question_target_table, target_row, sql;
 
   console.log(formType, selectedMajor);
 
-  if(formType === "exam")
-  {
-    target_table = `workbook_${convertKorean(selectedMajor)}`;
-    target_row = "classification_name";
-    
-    sql = `SELECT ${target_row}, COUNT(*) as count FROM ${target_table} GROUP BY ${target_row};`;
-    
-    db.query(sql, (err, result) => {
-      if (err) 
-      {
-        console.log(err);
-        res.status(500).json({ error: '' });
-      } 
-      else 
-      {
-        res.status(200).json({ data: result });
-      }
-    });
+  switch(formType){
+    case 'pre_exam' :
+      classification_target_table = 'pre_exam_classification_list';
+      question_target_table = `pre_exam_${convertKorean(selectedMajor)}`;
+      target_row = 'classification_name';
+      sql = `SELECT ${target_row}, COUNT(*) as count FROM ${question_target_table} WHERE ${target_row} IN (SELECT ${target_row} FROM ${classification_target_table} WHERE permission = 1) GROUP BY ${target_row};`
+      break;
+    case 'exam' :
+      classification_target_table = 'classification_list';
+      question_target_table = `workbook_${convertKorean(selectedMajor)}`;
+      target_row = 'classification_name';
+      sql = `SELECT ${target_row}, COUNT(*) as count FROM ${question_target_table} WHERE ${target_row} IN (SELECT ${target_row} FROM ${classification_target_table} WHERE permission = 1) GROUP BY ${target_row};`
+      break;
+    case 'word' :
+      classification_target_table = 'word_category';
+      question_target_table = `word_${convertKorean(selectedMajor)}`;
+      target_row = 'word_category';
+      sql = `SELECT ${target_row}, COUNT(*) as count FROM ${question_target_table} WHERE ${target_row} IN (SELECT ${target_row} FROM ${classification_target_table} WHERE permission = 1) GROUP BY ${target_row};`
+      break;
   }
-  else if(formType === "word")
-  {
-    target_table = `word_${convertKorean(selectedMajor)}`;
-    target_row = "word_category";
-    
-    sql = `SELECT ${target_row}, COUNT(*) as count FROM ${target_table} GROUP BY ${target_row};`;
-    
-    db.query(sql, (err, result) => {
-      if (err) 
-      {
-        console.log(err);
-        res.status(500).json({ error: err });
-      } 
-      else 
-      {
-        res.status(200).json({ data: result });
-      }
-    });
-  }
-  else if(formType === "pre_exam")
-  {
-    console.log(detail_school, 'ss');
-    target_table = `pre_exam_${convertKorean(selectedMajor)}`;
-    target_row = "classification_name";
 
-    if(detail_school !== undefined)
+  db.query(sql, (err, result) => {
+    if (err) 
     {
-      sql = `SELECT ${target_row}, COUNT(*) as count FROM ${target_table} WHERE classification_name LIKE '%${detail_school}%' GROUP BY ${target_row};`;
-    }
-    else
+      console.log(err);
+      res.status(500).json({ error: '' });
+    } 
+    else 
     {
-      sql = `SELECT ${target_row}, COUNT(*) as count FROM ${target_table} GROUP BY ${target_row};`;
+      res.status(200).json({ data: result });
     }
-    
-    db.query(sql, (err, result) => {
-      if (err) 
-      {
-        console.log(err);
-        res.status(500).json({ error: '' });
-      } 
-      else 
-      {
-        res.status(200).json({ data: result });
-      }
-    });
-  }
-  else
-  {
-    return null;
-  }
+  });
+
+/*   SELECT classification_name, COUNT(*) as count FROM `new_g-exam`.pre_exam_korean where classification_name in (select classification_name from pre_exam_classification_list where permission = 1 and major_name = '국어' ) Group by classification_name;*/
 });
 
 router.post('/api/classification', (req, res) => {
