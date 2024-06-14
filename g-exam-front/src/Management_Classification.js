@@ -252,7 +252,7 @@ function ExamForm({form_type})
                 <th>분류 번호</th>
                 <th>분류명</th>
                 <th>과목</th>
-                <th>문제 수</th>
+                <th>공개여부</th>
               </tr>
             </thead>
             <tbody>
@@ -669,7 +669,7 @@ function WordForm({form_type})
               <th>분류 번호</th>
               <th>분류명</th>
               <th>과목</th>
-              <th>문제 수</th>
+              <th>공개여부</th>
             </tr>
           </thead>
           <tbody>
