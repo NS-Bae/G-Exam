@@ -1445,20 +1445,40 @@ router.post('/api/regist_workbook_exam', upload.fields([{ name: 'image', maxCoun
 
   try
   {
-    const regist_query = `INSERT INTO ${target_table} VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
-    const values = [
-      classification, 
-      problem_number + 1, 
-      type, 
-      paragraph, 
-      examImgFilePath1, 
-      question, 
-      choice1, choice2, choice3, choice4, choice5, 
-      answer, 
-      commentary, 
-      examImgFilePath2, 
-      examAudioFilePath
-    ];
+    let regist_query, values;
+    if(target_table == 'workbook_english_listening' || target_table == 'workbook_refinement')
+    {
+      regist_query = `INSERT INTO ${target_table} VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+      values = [
+        classification, 
+        problem_number + 1, 
+        type, 
+        paragraph, 
+        examImgFilePath1, 
+        question, 
+        choice1, choice2, choice3, choice4, choice5, 
+        answer, 
+        commentary, 
+        examImgFilePath2, 
+        examAudioFilePath
+      ];
+    }
+    else
+    {
+      regist_query = `INSERT INTO ${target_table} VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+      values = [
+        classification, 
+        problem_number + 1, 
+        type, 
+        paragraph, 
+        examImgFilePath1, 
+        question, 
+        choice1, choice2, choice3, choice4, choice5, 
+        answer, 
+        commentary, 
+        examImgFilePath2
+      ];
+    }
     await db.execute(regist_query, values);
 
     res.status(200).json({ message: '시험문제를 등록하였습니다.' });
