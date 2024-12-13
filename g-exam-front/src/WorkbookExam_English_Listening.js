@@ -317,7 +317,7 @@ function ChoiceExamForm({
         {prevButtonIsDisable && <button className='letter_btn' value={'prev'} disabled={prevButtonIsDisable} onClick={onClickPaging}>
           이전
         </button>}
-        {nextButtonIsDisable && <button className='letter_btn' value={'next'} disabled={nextButtonIsDisable} onClick={onClickPaging}>
+        {!nextButtonIsDisable && <button className='letter_btn' value={'next'} disabled={nextButtonIsDisable} onClick={onClickPaging}>
           다음
         </button>}
       </div>
@@ -358,7 +358,7 @@ function EssayExamForm({
         {prevButtonIsDisable && <button className='letter_btn' value={'prev'} disabled={prevButtonIsDisable} onClick={onClickPaging}>
           이전
         </button>}
-        {nextButtonIsDisable && <button className='letter_btn' value={'next'} disabled={nextButtonIsDisable} onClick={onClickPaging}>
+        {!nextButtonIsDisable && <button className='letter_btn' value={'next'} disabled={nextButtonIsDisable} onClick={onClickPaging}>
           다음
         </button>}
       </div>
