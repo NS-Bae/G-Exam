@@ -269,7 +269,7 @@ function ParagraphPlace({result})
   const paragraph = result.paragraph;
   return (
     <div className='container'>
-      <p>{paragraph}</p>
+      <p className='container'>{paragraph}</p>
     </div>
   )
 }
