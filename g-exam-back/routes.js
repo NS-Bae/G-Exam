@@ -722,12 +722,12 @@ router.post('/api/search_exam', (req, res) => {
     
     if (search === 'select' || search === undefined || search === '') 
     {
-      sql = `SELECT classification_name, exam_id, type FROM ${major} LIMIT 10 OFFSET ${offset};`;
+      sql = `SELECT classification_name, exam_id, type FROM ${major} LIMIT 15 OFFSET ${offset};`;
       countSql = `SELECT COUNT(*) as totalCount FROM ${major};`;
     } 
     else 
     {
-      sql = `SELECT classification_name, exam_id, type FROM ${major} WHERE classification_name = '${search}' LIMIT 10 OFFSET ${offset};`;
+      sql = `SELECT classification_name, exam_id, type FROM ${major} WHERE classification_name = '${search}' LIMIT 15 OFFSET ${offset};`;
       countSql = `SELECT COUNT(*) as totalCount FROM ${major} WHERE classification_name = '${search}';`;
     }
     db.query(countSql, (countErr, countResult) => {
@@ -754,12 +754,12 @@ router.post('/api/search_exam', (req, res) => {
     
     if (search === 'select' || search === '') 
     {
-      sql = `SELECT classification_name, exam_id, type FROM ${major} LIMIT 10 OFFSET ${offset};`;
+      sql = `SELECT classification_name, exam_id, type FROM ${major} LIMIT 15 OFFSET ${offset};`;
       countSql = `SELECT COUNT(*) as totalCount FROM ${major};`;
     } 
     else 
     {
-      sql = `SELECT classification_name, exam_id, type FROM ${major} WHERE classification_name = '${search}' LIMIT 10 OFFSET ${offset};`;
+      sql = `SELECT classification_name, exam_id, type FROM ${major} WHERE classification_name = '${search}' LIMIT 15 OFFSET ${offset};`;
       countSql = `SELECT COUNT(*) as totalCount FROM ${major} WHERE classification_name = '${search}';`;
     }
     db.query(countSql, (countErr, countResult) => {
