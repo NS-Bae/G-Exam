@@ -697,14 +697,6 @@
     justify-content: center;
     margin-left: 5px;
   }
-  /* h4
-  {
-    font-size: 1rem;
-    font-weight: bold;
-    margin-top: 10px;
-    margin-bottom: 5px;
-    text-align: center;
-  } */
   .question_area textarea
   {
     font-size: 1rem;
@@ -797,7 +789,7 @@
     border: 0;
   }
   .exam_info_place
-  {
+  { 
     display: flex;
     width : 95%;
     justify-content: center;
@@ -846,6 +838,7 @@
     display: flex;
     width: auto;
     margin: 2.5%;
+    max-width: 100%;
   }
   button {
     padding: 10px 20px;
