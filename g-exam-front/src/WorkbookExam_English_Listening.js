@@ -314,12 +314,12 @@ function ChoiceExamForm({
         ))}
       </div>
       <div className='move_button_place'>
-        <button className='letter_btn' value={'prev'} disabled={prevButtonIsDisable} onClick={onClickPaging}>
+        {prevButtonIsDisable && <button className='letter_btn' value={'prev'} disabled={prevButtonIsDisable} onClick={onClickPaging}>
           이전
-        </button>
-        <button className='letter_btn' value={'next'} disabled={nextButtonIsDisable} onClick={onClickPaging}>
+        </button>}
+        {nextButtonIsDisable && <button className='letter_btn' value={'next'} disabled={nextButtonIsDisable} onClick={onClickPaging}>
           다음
-        </button>
+        </button>}
       </div>
     </>
   );  
@@ -355,12 +355,12 @@ function EssayExamForm({
         />
       </div>
       <div className='move_button_place'>
-        <button className='letter_btn' value={'prev'} disabled={prevButtonIsDisable} onClick={onClickPaging}>
+        {prevButtonIsDisable && <button className='letter_btn' value={'prev'} disabled={prevButtonIsDisable} onClick={onClickPaging}>
           이전
-        </button>
-        <button className='letter_btn' value={'next'} disabled={nextButtonIsDisable} onClick={onClickPaging}>
+        </button>}
+        {nextButtonIsDisable && <button className='letter_btn' value={'next'} disabled={nextButtonIsDisable} onClick={onClickPaging}>
           다음
-        </button>
+        </button>}
       </div>
     </>
   );

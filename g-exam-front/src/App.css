@@ -843,7 +843,7 @@
 
   .container
   {
-    width: 45%;
+    width: auto;
     margin: 2.5%;
   }
   button {
