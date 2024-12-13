@@ -246,21 +246,21 @@ function RenderQuestion({examDetails})
     </>
   );
 }
-function ImgPlace({result})
-{
-  const image = result.image;
-  return (
-    <>
-    {image && <img className='container_p' src={image} alt="Preview" />}
-    </>
-  )
-}
 function AudioPlace({result})
 {
   const audio = result.voicefile;
   return (
     <>
     {audio && <ReactAudioPlayer src={audio} autoPlay controls/>}
+    </>
+  )
+}
+function ImgPlace({result})
+{
+  const image = result.image;
+  return (
+    <>
+    {image && <img className='container_p' src={image} alt="Preview" />}
     </>
   )
 }

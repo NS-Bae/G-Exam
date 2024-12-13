@@ -246,15 +246,6 @@ function RenderQuestion({examDetails})
     </>
   );
 }
-function ImgPlace({result})
-{
-  const image = result.image;
-  return (
-    <>
-    {image && <img className='container' src={image} alt="Preview" />}
-    </>
-  )
-}
 function AudioPlace({result})
 {
   const audio = result.voicefile;
@@ -264,12 +255,21 @@ function AudioPlace({result})
     </>
   )
 }
+function ImgPlace({result})
+{
+  const image = result.image;
+  return (
+    <>
+    {image && <img className='container_p' src={image} alt="Preview" />}
+    </>
+  )
+}
 function ParagraphPlace({result})
 {
   const paragraph = result.paragraph;
   return (
-    <div className='container'>
-      <p>{paragraph}</p>
+    <div className='container_t'>
+      <p className='container_t'>{paragraph}</p>
     </div>
   )
 }
@@ -314,12 +314,12 @@ function ChoiceExamForm({
         ))}
       </div>
       <div className='move_button_place'>
-        <button className='letter_btn' value={'prev'} disabled={prevButtonIsDisable} onClick={onClickPaging}>
+        {!prevButtonIsDisable && <button className='letter_btn' value={'prev'} disabled={prevButtonIsDisable} onClick={onClickPaging}>
           이전
-        </button>
-        <button className='letter_btn' value={'next'} disabled={nextButtonIsDisable} onClick={onClickPaging}>
+        </button>}
+        {!nextButtonIsDisable && <button className='letter_btn' value={'next'} disabled={nextButtonIsDisable} onClick={onClickPaging}>
           다음
-        </button>
+        </button>}
       </div>
     </>
   );  
@@ -355,12 +355,12 @@ function EssayExamForm({
         />
       </div>
       <div className='move_button_place'>
-        <button className='letter_btn' value={'prev'} disabled={prevButtonIsDisable} onClick={onClickPaging}>
+        {!prevButtonIsDisable && <button className='letter_btn' value={'prev'} disabled={prevButtonIsDisable} onClick={onClickPaging}>
           이전
-        </button>
-        <button className='letter_btn' value={'next'} disabled={nextButtonIsDisable} onClick={onClickPaging}>
+        </button>}
+        {!nextButtonIsDisable && <button className='letter_btn' value={'next'} disabled={nextButtonIsDisable} onClick={onClickPaging}>
           다음
-        </button>
+        </button>}
       </div>
     </>
   );
