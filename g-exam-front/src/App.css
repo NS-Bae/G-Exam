@@ -844,6 +844,23 @@
     word-break: break-word;
     white-space: normal;
   }
+  .container_t
+  {
+    display: flex;
+    width: auto;
+    margin: 2.5%;
+    max-width: 100%;
+    word-wrap: break-word;
+    word-break: break-word;
+    white-space: normal;
+  }
+  .container_p
+  {
+    display: flex;
+    width: auto;
+    margin: 2.5%;
+    max-width: 50%;
+  }
   button {
     padding: 10px 20px;
     font-size: 16px;

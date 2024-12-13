@@ -251,7 +251,7 @@ function ImgPlace({result})
   const image = result.image;
   return (
     <>
-    {image && <img className='container' src={image} alt="Preview" />}
+    {image && <img className='container_p' src={image} alt="Preview" />}
     </>
   )
 }
@@ -268,8 +268,8 @@ function ParagraphPlace({result})
 {
   const paragraph = result.paragraph;
   return (
-    <div className='container'>
-      <p className='container'>{paragraph}</p>
+    <div className='container_t'>
+      <p className='container_t'>{paragraph}</p>
     </div>
   )
 }
