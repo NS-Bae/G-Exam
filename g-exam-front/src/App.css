@@ -843,6 +843,7 @@
 
   .container
   {
+    display: flex;
     width: auto;
     margin: 2.5%;
   }
