@@ -333,7 +333,7 @@ function EssayExamForm({
   selectedAnswer }) 
 {
   const key = `${result.classification_name}/${result.exam_id}`;
-  const [inputValue, setInputValue] = useState(null);
+  const [inputValue, setInputValue] = useState(selectedAnswer || '');
 
   const handleInputChange = (e) => {
     const value = e.target.value;
