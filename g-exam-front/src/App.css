@@ -795,6 +795,7 @@
     justify-content: center;
     flex-direction: row;
     align-items: center;
+    max-width: 96%;
   }
   .exam_info_place > p 
   {
