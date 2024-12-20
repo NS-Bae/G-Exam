@@ -158,18 +158,25 @@ function RenderQuestion({examDetails})
     }
   };  
   const handleFinishExam = (e) => {
-    fetch('/api/submit_exam_answer', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        answer: formData,
-        major: 'social',
-        examCategory: 'pre_exam',
-        user,
-      }),
-    })
+    if(user.user_type === '선생')
+    {
+      alert('시험을 종료하셨습니다');
+      navigate('/record');
+    }
+    else
+    {
+      fetch('/api/submit_exam_answer', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          answer: formData,
+          major: 'english_listening',
+          examCategory: 'workbook',
+          user,
+        }),
+      })
       .then((response) => {
         if (!response.ok) {
           throw new Error('네트워크의 응답이 좋지 않습니다.');
@@ -183,7 +190,9 @@ function RenderQuestion({examDetails})
       .catch((error) => {
         console.log('데이터 처리과정에서 문제가 발생하였습니다.', error);
       });
-  }
+    }
+  };
+
   return (
     <>
       {result && currentIndex < result.length && result[currentIndex].type === '객관식' && (

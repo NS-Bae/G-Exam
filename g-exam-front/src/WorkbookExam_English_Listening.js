@@ -192,7 +192,8 @@ function RenderQuestion({examDetails})
         console.log('데이터 처리과정에서 문제가 발생하였습니다.', error);
       });
     }
-  }
+  };
+  
   return (
     <>
       {result && currentIndex < result.length && result[currentIndex].type === '객관식' && (
