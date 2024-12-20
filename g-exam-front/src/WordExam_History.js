@@ -84,31 +84,39 @@ function RandomExam({user})
       });
   };
   const SubmitAnswer = () =>{
-    fetch('/api/submit_word_answer', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        answer: inputValues,
-        major: 'history',
-        user, 
-      }),
-    })
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error('네트워크의 응답이 좋지 않습니다.');
-        }
-        return response.json();
+    if(user.user_type === '선생')
+    {
+      alert('시험을 종료하셨습니다');
+      navigate('/record');
+    }
+    else
+    {
+      fetch('/api/submit_word_answer', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          answer: inputValues,
+          major: 'science',
+          user, 
+        }),
       })
-      .then((data) => {
-        alert(`정답 : ${data.correct}개, 오답 : ${data.wrong}개`);
-        navigate('/');
-      })
-      .catch((error) => {
-        console.log('데이터 처리과정에서 문제가 발생하였습니다.', error);
-      });
-  }
+        .then((response) => {
+          if (!response.ok) {
+            throw new Error('네트워크의 응답이 좋지 않습니다.');
+          }
+          return response.json();
+        })
+        .then((data) => {
+          alert(`정답 : ${data.correct}개, 오답 : ${data.wrong}개`);
+          navigate('/');
+        })
+        .catch((error) => {
+          console.log('데이터 처리과정에서 문제가 발생하였습니다.', error);
+        });
+    }
+  };
   useEffect(() => {
     fetchData();
   }, []);

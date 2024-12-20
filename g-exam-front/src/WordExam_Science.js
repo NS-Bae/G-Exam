@@ -116,7 +116,7 @@ function RandomExam({user})
           console.log('데이터 처리과정에서 문제가 발생하였습니다.', error);
         });
     }
-  }
+  };
   useEffect(() => {
     fetchData();
   }, []);
