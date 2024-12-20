@@ -1878,7 +1878,7 @@ router.post('/api/submit_exam_answer', async (req, res) => {
     } 
     else 
     {
-      console.log('qqq', result)
+      console.log('qqq', result, query, value);
       const objectiveQuestions = result.filter((item) => item.type === '객관식');
       const updatedObjectiveQuestions = objectiveQuestions.map((question) => {
         const answerNumber = parseInt(question.answer);
