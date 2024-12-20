@@ -1899,6 +1899,7 @@ function MarkingAnswer({updatedObjectiveQuestions, subjectiveQuestions, updatedA
   let wrong=0, correct = 0;
   let wrongAnswer = [];
   console.log(updatedAnswer);
+  console.log(updatedObjectiveQuestions);
   for(const answer in updatedAnswer)
   {
     if(updatedAnswer[answer].exam_type === '주관식')
@@ -1934,14 +1935,15 @@ function MarkingAnswer({updatedObjectiveQuestions, subjectiveQuestions, updatedA
       {
         if(updatedAnswer[answer].classification_name === updatedObjectiveQuestions[question].classification_name && updatedAnswer[answer].exam_id === updatedObjectiveQuestions[question].exam_id)
         {
+          console.log(wrong, correct);
           if(updatedAnswer[answer].choiceNumber === updatedObjectiveQuestions[question].answer)
           {
             correct++;
-            console.log(updatedAnswer[answer].choiceNumber);
+            console.log('a',updatedAnswer[answer].choiceNumber);
           }
           else
           {
-            console.log(updatedAnswer[answer].choiceNumber);
+            console.log('a',updatedAnswer[answer].choiceNumber);
             wrong++;
             wrongAnswer.push({
               classification : updatedObjectiveQuestions[question].classification_name,
