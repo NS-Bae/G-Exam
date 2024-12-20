@@ -1978,19 +1978,55 @@ function writeExamRecord(correct, wrong, user, wrongAnswers, major, combinedInfo
 
   data.push([`정답 : ${correct}개, 오답 : ${wrong}개, 점수 : ${record_score}점`])
 
-  for(const i in wrongAnswers)
-  {
-    data.push([`${wrongAnswers[i].classification} ${wrongAnswers[i].examId}번 문제`]);
-    data.push([`지문\n${wrongAnswers[i].paragraph}\n`]);
-    data.push([`문제 : ${wrongAnswers[i].question}\n`]);
-    data.push([`선지1 : ${wrongAnswers[i].choice1}`]);
-    data.push([`선지2 : ${wrongAnswers[i].choice2}`]);
-    data.push([`선지3 : ${wrongAnswers[i].choice3}`]);
-    data.push([`선지4 : ${wrongAnswers[i].choice4}`]);
-    data.push([`선지5 : ${wrongAnswers[i].choice5}\n`]);
-    data.push([`선택한 답 : ${wrongAnswers[i].wrongAnswer}      정답 : ${wrongAnswers[i].correctAnswer}\n`])
-    data.push([`해설 : ${wrongAnswers[i].commentary}`])
-    data.push([`해설 이미지 : ${wrongAnswers[i].commentary_image}`])
+  for (const i in wrongAnswers) {
+    const answer = wrongAnswers[i];
+    if (!answer) continue; // `null` 또는 `undefined`인 경우 건너뛰기
+
+    if (answer.classification && answer.examId) {
+      data.push(`${answer.classification} ${answer.examId}번 문제`);
+    }
+
+    if (answer.paragraph) {
+      data.push(`지문\n${answer.paragraph}\n`);
+    }
+
+    if (answer.question) {
+      data.push(`문제 : ${answer.question}\n`);
+    }
+
+    if (answer.choice1) {
+      data.push(`선지1 : ${answer.choice1}`);
+    }
+
+    if (answer.choice2) {
+      data.push(`선지2 : ${answer.choice2}`);
+    }
+
+    if (answer.choice3) {
+      data.push(`선지3 : ${answer.choice3}`);
+    }
+
+    if (answer.choice4) {
+      data.push(`선지4 : ${answer.choice4}`);
+    }
+
+    if (answer.choice5) {
+      data.push(`선지5 : ${answer.choice5}\n`);
+    }
+
+    if (answer.wrongAnswer && answer.correctAnswer) {
+      data.push(
+        `선택한 답 : ${answer.wrongAnswer}      정답 : ${answer.correctAnswer}\n`
+      );
+    }
+
+    if (answer.commentary) {
+      data.push(`해설 : ${answer.commentary}`);
+    }
+
+    if (answer.commentary_image) {
+      data.push(`해설 이미지 : ${answer.commentary_image}`);
+    }
   }
 
   const fileName = `${ExamRecord}.txt`;
