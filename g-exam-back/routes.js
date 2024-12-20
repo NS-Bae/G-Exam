@@ -1605,7 +1605,6 @@ router.post('/api/start_word_exam', async (req, res) => {
     } 
     else 
     {
-      console.log(query, values, result);
       res.status(200).json({ data: result });
     }
   });
@@ -1822,8 +1821,6 @@ router.post('/api/start_exam', async (req, res) => {
   }
   else return null;
 
-  console.log(query, values);
-
   db.query(query, values, (err, result) => {
     if (err) 
     {
@@ -1832,7 +1829,6 @@ router.post('/api/start_exam', async (req, res) => {
     } 
     else 
     {
-      console.log(result);
       res.status(200).json({ data: result });
     }
   });
