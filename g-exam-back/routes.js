@@ -1838,7 +1838,7 @@ router.post('/api/submit_exam_answer', async (req, res) => {
   const major = req.body.major;
   const user = req.body.user;
   const examCategory = req.body.examCategory;
-  const target_table = `${examCategory}_${major}`;
+  const target_table = `${examCategory}_${convertKorean(major)}`;
 
   const convertAnswer = Object.values(answer);
   const classificationArray = convertAnswer.map((item) => item.classification_name);
