@@ -47,8 +47,8 @@ const RecordModal = ({ modalIsOpen, closeModal, recordInfo1, recordInfo2, record
       contentLabel="오답노트"
       className="modal_design"
     >
-      <p>{recordInfo1}의 {recordInfo2}시험 결과</p>
-      <div>
+{/*       <p>{recordInfo1}의 {recordInfo2}시험 결과</p>
+ */}      <div>
         {lines.map((line, index) => (
           <React.Fragment key={index}>
           {line.startsWith('해설 이미지') ? (
