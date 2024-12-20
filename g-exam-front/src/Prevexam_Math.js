@@ -172,8 +172,8 @@ function RenderQuestion({examDetails})
         },
         body: JSON.stringify({
           answer: formData,
-          major: 'english_listening',
-          examCategory: 'workbook',
+          major: examDetails.subject,
+          examCategory: 'pre_exam',
           user,
         }),
       })
