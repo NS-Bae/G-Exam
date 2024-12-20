@@ -1846,7 +1846,9 @@ router.post('/api/submit_exam_answer', async (req, res) => {
   const userChoiceArray  = convertAnswer.map((item) => item.choiceNumber);
   const combinedInfoArray = classificationArray.map((item, index) => [item, examIdArray[index]]);
   const userChoiceNumberArray = userChoiceArray.reduce((acc, choice) => {
-    console.log('answer : ', parseInt(choice.match(/\d+/)[0]));
+    console.log('answer : ', userChoiceArray);
+    console.log('answer : ', choice);
+    
     if (choice !== '' ) 
     {
       const number = parseInt(choice.match(/\d+/)[0]);
