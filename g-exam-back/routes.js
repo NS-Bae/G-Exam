@@ -1898,6 +1898,7 @@ function MarkingAnswer({updatedObjectiveQuestions, subjectiveQuestions, updatedA
 {
   let wrong=0, correct = 0;
   let wrongAnswer = [];
+  console.log(updatedAnswer);
   for(const answer in updatedAnswer)
   {
     if(updatedAnswer[answer].exam_type === '주관식')
@@ -1936,6 +1937,7 @@ function MarkingAnswer({updatedObjectiveQuestions, subjectiveQuestions, updatedA
           if(updatedAnswer[answer].choiceNumber === updatedObjectiveQuestions[question].answer)
           {
             correct++;
+            console.log(updatedAnswer[answer].user_answer);
           }
           else
           {
