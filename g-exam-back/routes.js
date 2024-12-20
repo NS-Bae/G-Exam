@@ -1853,6 +1853,7 @@ router.post('/api/submit_exam_answer', async (req, res) => {
     if (choice !== '' ) 
     {
       const number = parseInt(choice.match(/\d+/)[0]);
+      console.log('answer : ', number);
       if (!isNaN(number)) 
       {
         acc.push(number);
