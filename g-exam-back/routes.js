@@ -1914,6 +1914,7 @@ function MarkingAnswer({updatedObjectiveQuestions, subjectiveQuestions, updatedA
           }
           else
           {
+            console.log(updatedAnswer[answer].user_answer);
             wrong++;
             wrongAnswer.push({
               classification : subjectiveQuestions[question].classification_name,
