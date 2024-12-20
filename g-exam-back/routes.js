@@ -1895,8 +1895,8 @@ function MarkingAnswer({updatedObjectiveQuestions, subjectiveQuestions, updatedA
 {
   let wrong=0, correct = 0;
   let wrongAnswer = [];
-  console.log(updatedAnswer);
-  console.log(updatedObjectiveQuestions);
+  console.log('aa', updatedAnswer);
+  console.log('bb', updatedObjectiveQuestions);
   for(const answer in updatedAnswer)
   {
     if(updatedAnswer[answer].exam_type === '주관식')
