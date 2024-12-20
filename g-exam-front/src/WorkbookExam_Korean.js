@@ -158,6 +158,7 @@ function RenderQuestion({examDetails})
     }
   };  
   const handleFinishExam = (e) => {
+    console.log(formData);
     if(user.user_type === '선생')
     {
       alert('시험을 종료하셨습니다');
