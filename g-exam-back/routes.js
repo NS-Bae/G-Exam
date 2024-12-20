@@ -1937,11 +1937,11 @@ function MarkingAnswer({updatedObjectiveQuestions, subjectiveQuestions, updatedA
           if(updatedAnswer[answer].choiceNumber === updatedObjectiveQuestions[question].answer)
           {
             correct++;
-            console.log(updatedAnswer[answer].user_answer);
+            console.log(updatedAnswer[answer].choiceNumber);
           }
           else
           {
-            console.log(updatedAnswer[answer].user_answer);
+            console.log(updatedAnswer[answer].choiceNumber);
             wrong++;
             wrongAnswer.push({
               classification : updatedObjectiveQuestions[question].classification_name,
