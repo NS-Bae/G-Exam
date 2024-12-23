@@ -8,6 +8,8 @@ services:
       dockerfile: Dockerfile
     ports:
       - "80:80"  # 프론트엔드 서비스가 사용할 포트
+    environment:
+      - TZ=Asia/Seoul
     # 필요한 설정 추가 가능
 
   backend:
@@ -17,4 +19,6 @@ services:
       dockerfile: Dockerfile
     ports:
       - "4000:4000"  # 백엔드 서비스가 사용할 포트
+    environment:
+      - TZ=Asia/Seoul
     # 필요한 설정 추가 가능
